@@ -181,8 +181,8 @@ export function TicketCardsView({ tickets }: TicketCardsViewProps) {
           )}
         </div>
 
-        {/* View Toggle */}
-        <div className="flex items-center gap-1 self-end sm:self-auto bg-muted/60 p-1 rounded-lg border border-border/60">
+        {/* View Toggle (Hidden on small mobile where card view is best) */}
+        <div className="hidden sm:flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border/60">
           <Button
             variant={viewMode === "cards" ? "default" : "ghost"}
             size="sm"

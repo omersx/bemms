@@ -302,8 +302,8 @@ export function TicketCommentSection({
       className={cn(
         "flex flex-col rounded-xl overflow-hidden bg-background border shadow-xs transition-all",
         sortedComments.length === 0
-          ? "h-[250px] sm:h-[360px] md:h-[460px]"
-          : "h-[360px] sm:h-[460px] md:h-[540px]"
+          ? "h-[160px] sm:h-[240px] md:h-[380px]"
+          : "h-[320px] sm:h-[420px] md:h-[520px]"
       )}
     >
       {/* Hidden File Pickers */}
@@ -324,29 +324,29 @@ export function TicketCommentSection({
       />
 
       {/* Chat Sub-header */}
-      <div className="px-4 py-2 bg-muted/40 border-b flex items-center justify-between text-xs text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="truncate">
+      <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-muted/40 border-b flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
+          <span className="truncate text-[11px] sm:text-xs">
             {assignedEngineerName
-              ? `Direct chat with ${assignedEngineerName}`
-              : "Direct chat with Biomedical Engineering"}
+              ? `Chat with ${assignedEngineerName}`
+              : "Chat with Biomedical Engineering"}
           </span>
         </div>
-        <span className="shrink-0">{sortedComments.length} messages</span>
+        <span className="shrink-0 text-[11px] font-medium">{sortedComments.length} msg</span>
       </div>
 
       {/* Chat History / Bubble Thread Feed */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 bg-slate-50/50 dark:bg-muted/10"
+        className="flex-1 overflow-y-auto p-2.5 sm:p-4 space-y-2.5 bg-slate-50/50 dark:bg-muted/10"
       >
         {sortedComments.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-1 p-3 text-center">
-            <MessageCircle className="w-6 h-6 opacity-25 text-primary" />
-            <p className="text-xs sm:text-sm font-medium text-foreground">No messages yet in this ticket</p>
-            <p className="text-[11px] sm:text-xs max-w-xs text-muted-foreground">
-              Direct communication between clinical staff and biomedical engineering.
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-1 p-2 text-center">
+            <MessageCircle className="w-5 h-5 opacity-30 text-primary" />
+            <p className="text-xs font-semibold text-foreground">No messages yet</p>
+            <p className="text-[11px] max-w-xs text-muted-foreground">
+              Direct chat between clinical staff and biomedical engineering.
             </p>
           </div>
         ) : (
@@ -370,13 +370,13 @@ export function TicketCommentSection({
       </div>
 
       {/* Quick clinical templates */}
-      <div className="px-3 py-1.5 bg-card border-t border-border/60 overflow-x-auto flex gap-1.5 scrollbar-none touch-pan-x">
+      <div className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-card border-t border-border/60 overflow-x-auto flex gap-1 sm:gap-1.5 scrollbar-none touch-pan-x">
         {QUICK_CHAT_TEMPLATES.map((tmpl) => (
           <button
             key={tmpl}
             type="button"
             onClick={() => setBody(tmpl)}
-            className="text-[11px] px-2.5 py-1 rounded-full border bg-muted/30 hover:bg-muted hover:text-foreground text-muted-foreground transition whitespace-nowrap shrink-0"
+            className="text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border bg-muted/40 hover:bg-muted hover:text-foreground text-muted-foreground transition whitespace-nowrap shrink-0 max-w-[220px] sm:max-w-none truncate"
           >
             {tmpl}
           </button>
@@ -384,19 +384,19 @@ export function TicketCommentSection({
       </div>
 
       {/* Chat Input Box */}
-      <div className="p-2.5 sm:p-3 bg-card border-t shadow-xs z-10 space-y-2">
+      <div className="p-2 sm:p-3 bg-card border-t shadow-xs z-10 space-y-1.5 sm:space-y-2">
         {canAddInternal && (
           <Tabs
             value={visibility}
             onValueChange={(v) => setVisibility(v as "public" | "internal")}
-            className="mb-1"
+            className="mb-0.5"
           >
-            <TabsList className="grid w-full grid-cols-2 max-w-[340px] h-7">
-              <TabsTrigger value="public" className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                <Globe className="w-3.5 h-3.5 mr-1.5" /> Public Message
+            <TabsList className="grid w-full grid-cols-2 max-w-[280px] h-6 sm:h-7">
+              <TabsTrigger value="public" className="text-[11px] sm:text-xs py-0.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <Globe className="w-3 h-3 mr-1" /> Public Message
               </TabsTrigger>
-              <TabsTrigger value="internal" className="text-xs data-[state=active]:bg-amber-500 data-[state=active]:text-white">
-                <Lock className="w-3.5 h-3.5 mr-1.5" /> Internal Note
+              <TabsTrigger value="internal" className="text-[11px] sm:text-xs py-0.5 data-[state=active]:bg-amber-500 data-[state=active]:text-white">
+                <Lock className="w-3 h-3 mr-1" /> Internal Note
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -456,7 +456,7 @@ export function TicketCommentSection({
                 ? "Type an internal note for biomedical team..."
                 : "Type a message to biomedical engineering..."
             }
-            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[50px] max-h-[120px] text-xs sm:text-sm p-2.5 sm:p-3"
+            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[44px] sm:min-h-[50px] max-h-[120px] text-xs sm:text-sm p-2 sm:p-2.5"
           />
 
           {/* Action Toolbar */}
