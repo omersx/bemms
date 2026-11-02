@@ -5,7 +5,9 @@ import {
   serviceTickets, serviceTicketComments, serviceTicketEvents, devices,
   recordVersions, electronicSignatures, signatureEvents, deviceStatusHistory,
   userAccessScopes, hospitals, departments, users,
+  engineerRounds, roundDepartmentVisits,
 } from '@/lib/db/schema';
+import { revalidatePath } from 'next/cache';
 import { requireAuth, requireRole } from '@/lib/auth/rbac';
 import { createAuditLog } from '@/lib/audit';
 import {
@@ -14,7 +16,7 @@ import {
   reopenTicketSchema, createTicketCommentSchema, acceptTicketSchema,
   updateTicketDeviceStatusSchema, RESOLUTION_DEVICE_STATUSES,
 } from '@/lib/validators/tickets';
-import { eq, and, or, desc, ilike, notInArray, inArray } from 'drizzle-orm';
+import { eq, and, or, desc, ilike, notInArray, inArray, sql } from 'drizzle-orm';
 import { verifySignatureAuth, createSignatureEvent } from './signature-auth';
 import { getAttestationText } from '@/lib/utils/attestations';
 import { buildCanonicalSnapshot, computeSHA256 } from '@/lib/utils/crypto';
@@ -190,6 +192,21 @@ export async function createTicket(input: unknown) {
         actorUserId: session.id,
       });
 
+      // If reported from a daily round visit, update round issue count
+      if (validated.data.roundVisitId) {
+        const visit = await tx.query.roundDepartmentVisits.findFirst({
+          where: eq(roundDepartmentVisits.id, validated.data.roundVisitId),
+        });
+        if (visit) {
+          await tx.update(engineerRounds)
+            .set({
+              totalIssuesReported: sql`${engineerRounds.totalIssuesReported} + 1`,
+              updatedAt: new Date(),
+            })
+            .where(eq(engineerRounds.id, visit.roundId));
+        }
+      }
+
       await createAuditLog(tx, {
         action: 'CREATE', entityType: 'service_ticket', entityId: ticket.id,
         actorId: session.id, details: { ticketNumber, deviceId: validated.data.deviceId, source: validated.data.source },
@@ -197,6 +214,12 @@ export async function createTicket(input: unknown) {
 
       return { success: true, data: ticket };
     });
+
+    if (validated.data.roundVisitId) {
+      revalidatePath('/rounds');
+      revalidatePath('/rounds/history');
+      revalidatePath('/dashboard');
+    }
 
     // Notify all scoped engineers (fire-and-forget, outside transaction)
     if (result.success && result.data) {

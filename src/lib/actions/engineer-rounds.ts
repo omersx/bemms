@@ -15,6 +15,11 @@ import {
 import { systemSettingsSchema } from '@/lib/validators/system-settings';
 import { eq, and, desc, asc, sql, count, between, inArray, gte, lte } from 'drizzle-orm';
 import { verifySignatureAuth } from './signature-auth';
+import { revalidatePath } from 'next/cache';
+import {
+  notifySupervisorsOnRoundStart,
+  notifySupervisorsOnRoundComplete,
+} from '@/lib/notifications/dispatcher';
 
 // ── Helper: Check if Engineer's Round feature is enabled ────────────────────────
 
@@ -442,6 +447,22 @@ export async function startRound(input: unknown) {
       return { roundId, signatureId: signature.id };
     });
 
+    revalidatePath('/rounds');
+    revalidatePath(`/rounds/${result.roundId}`);
+    revalidatePath('/rounds/history');
+    revalidatePath('/dashboard');
+
+    notifySupervisorsOnRoundStart({
+      roundId: result.roundId,
+      engineerUserId: session.id,
+      engineerName: session.fullName || 'Biomedical Engineer',
+      hospitalId,
+      hospitalName: profile.hospital?.name,
+      organizationId: session.organizationId!,
+      totalDepartments: deptList.length,
+      shiftType,
+    }).catch((err) => console.error('[Round] Supervisor start notification failed:', err));
+
     return { success: true, data: result };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -523,6 +544,10 @@ export async function completeDepartmentVisit(input: unknown) {
       return { visitId, completedAt: now };
     });
 
+    revalidatePath('/rounds');
+    revalidatePath(`/rounds/${visit.round.id}`);
+    revalidatePath('/dashboard');
+
     return { success: true, data: result };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -570,6 +595,9 @@ export async function addVisitNote(input: unknown) {
         updatedAt: new Date(),
       })
       .where(eq(engineerRounds.id, visit.round.id));
+
+    revalidatePath('/rounds');
+    revalidatePath(`/rounds/${visit.round.id}`);
 
     return { success: true, data: note };
   } catch (error: any) {
@@ -678,6 +706,22 @@ export async function completeRound(input: unknown) {
         totalIssuesReported: totalTickets,
       };
     });
+
+    revalidatePath('/rounds');
+    revalidatePath(`/rounds/${roundId}`);
+    revalidatePath('/rounds/history');
+    revalidatePath('/dashboard');
+
+    notifySupervisorsOnRoundComplete({
+      roundId,
+      engineerUserId: session.id,
+      engineerName: session.fullName || 'Biomedical Engineer',
+      hospitalId: round.hospitalId,
+      organizationId: round.organizationId,
+      completedDepartments: result.completedDepartments,
+      totalDepartments: result.totalDepartments,
+      totalIssuesReported: result.totalIssuesReported,
+    }).catch((err) => console.error('[Round] Supervisor complete notification failed:', err));
 
     return { success: true, data: result };
   } catch (error: any) {

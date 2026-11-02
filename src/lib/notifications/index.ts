@@ -4,4 +4,6 @@ export {
   notifyEngineersOnNewTicket,
   notifyReporterOnAccept,
   notifyReporterOnStatusChange,
+  notifySupervisorsOnRoundStart,
+  notifySupervisorsOnRoundComplete,
 } from './dispatcher';

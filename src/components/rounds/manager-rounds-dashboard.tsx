@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { RoundAutoRefresh } from './round-auto-refresh';
 
 interface ComplianceSummary {
   totalEngineers: number;
@@ -93,6 +94,7 @@ export function ManagerRoundsDashboard({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              <RoundAutoRefresh showControls={true} />
               <Link href="/rounds/history">
                 <Button variant="outline" size="sm" className="gap-1.5 text-xs">
                   <History className="h-3.5 w-3.5" />

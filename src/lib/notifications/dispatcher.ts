@@ -542,3 +542,116 @@ export async function notifyEngineerOnAssign(params: {
     console.error('[Dispatcher] Error notifying engineer on assign:', error);
   }
 }
+
+// ── Notify Supervisors on Round Start ──────────────────────────────────────────
+
+export async function notifySupervisorsOnRoundStart(params: {
+  roundId: string;
+  engineerUserId: string;
+  engineerName: string;
+  hospitalId: string;
+  hospitalName?: string;
+  organizationId: string;
+  totalDepartments: number;
+  shiftType: string;
+}): Promise<void> {
+  try {
+    const supervisors = await findScopedEngineers(params.organizationId, params.hospitalId);
+    // Exclude the engineer who started the round
+    const recipients = supervisors.filter((s) => s.id !== params.engineerUserId);
+
+    if (recipients.length === 0) return;
+
+    const notifTitle = `🩺 Daily Round Started: ${params.engineerName}`;
+    const hosp = params.hospitalName ? ` at ${params.hospitalName}` : '';
+    const notifBody = `${params.engineerName} started today's round${hosp} (${params.totalDepartments} departments scheduled).`;
+    const actionUrl = `/rounds/${params.roundId}`;
+
+    await Promise.allSettled(
+      recipients.map(async (supervisor) => {
+        await createInAppNotification({
+          organizationId: params.organizationId,
+          recipientUserId: supervisor.id,
+          notificationType: 'system_alert',
+          title: notifTitle,
+          body: notifBody,
+          relatedEntityType: 'engineer_round',
+          relatedEntityId: params.roundId,
+          actionUrl,
+        });
+
+        const prefs = supervisor.notificationPreferences;
+        if (!prefs || prefs.pushEnabled !== false) {
+          await sendPushToUser(supervisor.id, {
+            title: notifTitle,
+            body: notifBody,
+            tag: `round-start-${params.roundId}`,
+            url: actionUrl,
+            vibrate: [100, 50, 100],
+            data: { roundId: params.roundId, type: 'round_started' },
+          });
+        }
+      })
+    );
+  } catch (error) {
+    console.error('[Dispatcher] Error notifying supervisors on round start:', error);
+  }
+}
+
+// ── Notify Supervisors on Round Complete ───────────────────────────────────────
+
+export async function notifySupervisorsOnRoundComplete(params: {
+  roundId: string;
+  engineerUserId: string;
+  engineerName: string;
+  hospitalId: string;
+  hospitalName?: string;
+  organizationId: string;
+  completedDepartments: number;
+  totalDepartments: number;
+  totalIssuesReported: number;
+}): Promise<void> {
+  try {
+    const supervisors = await findScopedEngineers(params.organizationId, params.hospitalId);
+    const recipients = supervisors.filter((s) => s.id !== params.engineerUserId);
+
+    if (recipients.length === 0) return;
+
+    const notifTitle = `✅ Daily Round Completed: ${params.engineerName}`;
+    const issuesText = params.totalIssuesReported > 0
+      ? ` · ⚠️ ${params.totalIssuesReported} issue${params.totalIssuesReported !== 1 ? 's' : ''} reported`
+      : ' · No issues';
+    const notifBody = `${params.engineerName} completed daily round (${params.completedDepartments}/${params.totalDepartments} departments${issuesText}).`;
+    const actionUrl = `/rounds/${params.roundId}`;
+
+    await Promise.allSettled(
+      recipients.map(async (supervisor) => {
+        await createInAppNotification({
+          organizationId: params.organizationId,
+          recipientUserId: supervisor.id,
+          notificationType: 'system_alert',
+          title: notifTitle,
+          body: notifBody,
+          relatedEntityType: 'engineer_round',
+          relatedEntityId: params.roundId,
+          actionUrl,
+        });
+
+        const prefs = supervisor.notificationPreferences;
+        if (!prefs || prefs.pushEnabled !== false) {
+          await sendPushToUser(supervisor.id, {
+            title: notifTitle,
+            body: notifBody,
+            tag: `round-complete-${params.roundId}`,
+            url: actionUrl,
+            vibrate: [100, 50, 100],
+            data: { roundId: params.roundId, type: 'round_completed' },
+          });
+        }
+      })
+    );
+  } catch (error) {
+    console.error('[Dispatcher] Error notifying supervisors on round complete:', error);
+  }
+}
+

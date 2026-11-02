@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { RoundAutoRefresh } from '@/components/rounds/round-auto-refresh';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,12 +65,15 @@ export default async function RoundDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <PageHeader title="Round Detail">
-        <Link href="/rounds/history">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <RoundAutoRefresh roundId={round.id} showControls={true} />
+          <Link href="/rounds/history">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </Link>
+        </div>
       </PageHeader>
 
       {/* Round Info Card */}

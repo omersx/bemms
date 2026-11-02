@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { StartRoundCard } from '@/components/rounds/start-round-card';
 import { RoundDepartmentList } from '@/components/rounds/round-department-list';
 import { ManagerRoundsDashboard } from '@/components/rounds/manager-rounds-dashboard';
+import { RoundAutoRefresh } from '@/components/rounds/round-auto-refresh';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { History, AlertCircle, Coffee, Users, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -58,12 +59,15 @@ export default async function RoundsPage() {
         title="Engineer's Round"
         description="Daily department inspection round"
       >
-        <Link href="/rounds/history">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <History className="h-4 w-4" />
-            History
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          {!isManager && <RoundAutoRefresh showControls={true} />}
+          <Link href="/rounds/history">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <History className="h-4 w-4" />
+              History
+            </Button>
+          </Link>
+        </div>
       </PageHeader>
 
       {/* CASE 1: Manager / Admin who does NOT have their own engineer profile */}
