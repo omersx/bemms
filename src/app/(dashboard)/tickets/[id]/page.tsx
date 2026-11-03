@@ -318,6 +318,9 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
       currentUserId={session?.user?.id}
       assignedEngineerUserId={ticket.assignedEngineerUserId}
       assignedEngineerName={(ticket as any).assignedEngineer?.fullName}
+      reporterName={(ticket as any).reportedByUser?.fullName || ticket.requesterContactName}
+      reporterRole={(ticket as any).reportedByUser?.jobTitle || (ticket as any).department?.name || "Clinical Staff"}
+      isBiomed={isBiomed}
     />
   )
 

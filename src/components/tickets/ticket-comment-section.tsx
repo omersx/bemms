@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { addTicketComment } from "@/lib/actions/tickets";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Send,
@@ -53,7 +52,7 @@ interface ParsedAttachment {
 
 const QUICK_CHAT_TEMPLATES = [
   "When is this expected to be ready for patient care?",
-  "Device is currently in Room / Bed for inspection.",
+  "Device is in Room / Bed ready for inspection.",
   "Please call our nurse station extension when arriving.",
   "Thank you, device is verified and working properly.",
 ];
@@ -92,6 +91,9 @@ export function TicketCommentSection({
   currentUserId,
   assignedEngineerUserId,
   assignedEngineerName,
+  reporterName,
+  reporterRole,
+  isBiomed = false,
 }: {
   ticketId: string;
   comments: Comment[];
@@ -99,6 +101,9 @@ export function TicketCommentSection({
   currentUserId?: string;
   assignedEngineerUserId?: string | null;
   assignedEngineerName?: string | null;
+  reporterName?: string | null;
+  reporterRole?: string | null;
+  isBiomed?: boolean;
 }) {
   const router = useRouter();
   const [body, setBody] = useState("");
@@ -140,7 +145,6 @@ export function TicketCommentSection({
   const addFiles = (files: FileList | File[]) => {
     const newItems: PendingAttachment[] = [];
     Array.from(files).forEach((file) => {
-      // 20MB limit
       if (file.size > 20 * 1024 * 1024) {
         toast.error(`File "${file.name}" exceeds 20MB limit`);
         return;
@@ -280,7 +284,6 @@ export function TicketCommentSection({
             : "Message sent"
         );
       } else {
-        // Rollback on failure
         setOptimisticComments((prev) => prev.filter((c) => c.id !== tempComment.id));
         setBody(text);
         setPendingFiles(filesToUpload);
@@ -297,18 +300,34 @@ export function TicketCommentSection({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Send on Enter (without Shift) on desktop devices
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
   };
 
+  // Determine counterpart contact for header
+  const contactName = isBiomed
+    ? reporterName || "Department Clinical Staff"
+    : assignedEngineerName || "Biomedical Engineering";
+
+  const contactRole = isBiomed
+    ? reporterRole || "Clinical Staff"
+    : "Biomedical Engineer";
+
+  const contactInitials = contactName
+    .split(" ")
+    .map((n) => n[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "C";
+
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl overflow-hidden bg-card border shadow-xs transition-all",
-        "h-[480px] sm:h-[520px] md:h-[580px] min-h-[440px]"
+        "flex flex-col rounded-xl overflow-hidden bg-card border border-border shadow-xs transition-all",
+        "h-[calc(100dvh-290px)] min-h-[420px] max-h-[740px] md:h-[620px] md:max-h-none"
       )}
     >
       {/* Hidden File Pickers */}
@@ -328,51 +347,58 @@ export function TicketCommentSection({
         onChange={handleFileChange}
       />
 
-      {/* Unified Chat Header */}
-      <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-muted/40 border-b flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2.5 min-w-0">
+      {/* ── 1. Compact Chat Header ── */}
+      <div className="px-3 py-2 sm:px-4 sm:py-2.5 bg-muted/40 border-b border-border/60 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          {/* Avatar with Online Status Indicator */}
           <div className="relative shrink-0">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <MessageCircle className="w-4 h-4" />
-            </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-background animate-pulse" />
+            <Avatar className="h-7 w-7 sm:h-8 sm:w-8 border border-border/80">
+              <AvatarFallback className="text-[11px] font-bold bg-primary/10 text-primary">
+                {contactInitials}
+              </AvatarFallback>
+            </Avatar>
+            <span
+              className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-card ring-1 ring-background"
+              title="Online"
+            />
           </div>
+
+          {/* Contact Name & Status */}
           <div className="min-w-0">
             <h3 className="text-xs sm:text-sm font-semibold text-foreground truncate leading-tight">
-              {assignedEngineerName
-                ? `Direct Chat with ${assignedEngineerName}`
-                : "Biomedical Engineering Chat"}
+              {contactName}
             </h3>
-            <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
-              Live communication channel for this ticket
+            <p className="text-[10px] sm:text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate flex items-center gap-1 leading-tight mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse shrink-0" />
+              <span>Active · {contactRole}</span>
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded-full bg-background border text-muted-foreground shadow-2xs">
+
+        {/* Counter Badge */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-background border border-border/60 text-muted-foreground shadow-2xs">
             {sortedComments.length} {sortedComments.length === 1 ? "msg" : "msgs"}
           </span>
         </div>
       </div>
 
-      {/* Chat History Feed with Guaranteed Minimum Height */}
+      {/* ── 2. Flexible Conversation Area (Independent Scroll) ── */}
       <div
         ref={scrollRef}
-        className="flex-1 min-h-[190px] overflow-y-auto p-3 sm:p-4 space-y-3 bg-slate-50/50 dark:bg-muted/10"
+        className="flex-1 min-h-[140px] overflow-y-auto overscroll-contain p-2.5 sm:p-4 space-y-2.5 bg-slate-50/40 dark:bg-muted/10"
       >
         {sortedComments.length === 0 ? (
-          <div className="h-full min-h-[180px] flex flex-col items-center justify-center text-center p-4 space-y-2.5">
-            <div className="w-11 h-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs">
-              <MessageCircle className="w-5 h-5" />
+          <div className="h-full min-h-[140px] flex flex-col items-center justify-center text-center p-3 sm:p-4 space-y-1.5 my-auto">
+            <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+              <MessageCircle className="w-4 h-4" />
             </div>
-            <div className="space-y-1 max-w-xs">
-              <p className="text-xs sm:text-sm font-semibold text-foreground">
-                No messages yet in this ticket
-              </p>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Use this chat for instant updates, asking questions, or coordinating with biomedical engineers.
-              </p>
-            </div>
+            <p className="text-xs font-semibold text-foreground">
+              No messages yet in this ticket
+            </p>
+            <p className="text-[11px] text-muted-foreground max-w-[260px] leading-relaxed">
+              Send a message or select a suggestion below to coordinate with {contactName}.
+            </p>
           </div>
         ) : (
           sortedComments.map((c) => (
@@ -394,92 +420,98 @@ export function TicketCommentSection({
         )}
       </div>
 
-      {/* Quick Clinical Templates Bar */}
-      <div className="px-2.5 sm:px-3 py-1.5 bg-muted/20 border-t border-border/50 overflow-x-auto flex items-center gap-1.5 scrollbar-none touch-pan-x shrink-0">
-        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0 hidden sm:flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-amber-500" />
-          Quick:
-        </span>
+      {/* ── 3. Quick Reply Suggestions (Horizontally Scrollable, Above Composer) ── */}
+      <div className="px-2.5 sm:px-3 py-1.5 bg-background border-t border-border/40 overflow-x-auto flex items-center gap-1.5 no-scrollbar scrollbar-none touch-pan-x shrink-0">
+        <Sparkles className="w-3 h-3 text-amber-500 shrink-0 ml-0.5" />
         {QUICK_CHAT_TEMPLATES.map((tmpl) => (
           <button
             key={tmpl}
             type="button"
             onClick={() => applyTemplate(tmpl)}
-            className="text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full border border-border/60 bg-background/90 hover:bg-muted hover:text-foreground text-muted-foreground transition-all whitespace-nowrap shrink-0 max-w-[240px] sm:max-w-none truncate shadow-2xs active:scale-95 hover:border-primary/40"
+            className="text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full border border-border/60 bg-muted/40 hover:bg-muted hover:text-foreground text-muted-foreground transition-all whitespace-nowrap shrink-0 max-w-[220px] sm:max-w-none truncate active:scale-95 hover:border-primary/40 select-none shadow-2xs"
           >
             {tmpl}
           </button>
         ))}
       </div>
 
-      {/* Chat Input Box */}
-      <div className="p-2.5 sm:p-3 bg-card border-t shadow-xs shrink-0 space-y-2">
+      {/* ── 4. Message Composer (Sticky at Bottom) ── */}
+      <div className="p-2 sm:p-2.5 bg-card border-t border-border/60 shrink-0 sticky bottom-0 z-10 space-y-1.5">
+        {/* Compact Segmented Control (Public Reply / Internal Note) */}
         {canAddInternal && (
           <div className="flex items-center justify-between gap-2">
-            <Tabs
-              value={visibility}
-              onValueChange={(v) => setVisibility(v as "public" | "internal")}
-              className="w-full sm:w-auto"
-            >
-              <TabsList className="grid w-full grid-cols-2 sm:w-[260px] h-7 p-0.5 bg-muted/60">
-                <TabsTrigger
-                  value="public"
-                  className="text-[11px] sm:text-xs py-1 gap-1 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs font-medium"
-                >
-                  <Globe className="w-3 h-3" /> Public Reply
-                </TabsTrigger>
-                <TabsTrigger
-                  value="internal"
-                  className="text-[11px] sm:text-xs py-1 gap-1 data-[state=active]:bg-amber-600 data-[state=active]:text-white data-[state=active]:shadow-2xs font-medium"
-                >
-                  <Lock className="w-3 h-3" /> Internal Note
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="inline-flex p-0.5 rounded-lg bg-muted/60 border border-border/40 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setVisibility("public")}
+                className={cn(
+                  "flex items-center gap-1 px-2.5 py-0.5 rounded-md font-medium transition-all",
+                  visibility === "public"
+                    ? "bg-background text-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Globe className="w-3 h-3" />
+                <span>Public Reply</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setVisibility("internal")}
+                className={cn(
+                  "flex items-center gap-1 px-2.5 py-0.5 rounded-md font-medium transition-all",
+                  visibility === "internal"
+                    ? "bg-amber-600 text-white shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Lock className="w-3 h-3" />
+                <span>Internal Note</span>
+              </button>
+            </div>
 
-            <span className="text-[10px] text-muted-foreground hidden lg:inline">
-              {visibility === "internal" ? "🔒 Biomedical team only" : "🌐 Visible to clinical ward"}
+            <span className="text-[10px] text-muted-foreground truncate hidden xs:inline">
+              {visibility === "internal" ? "🔒 Biomed only" : "🌐 Visible to ward"}
             </span>
           </div>
         )}
 
         {/* Pending Attachments Tray */}
         {pendingFiles.length > 0 && (
-          <div className="flex flex-wrap gap-2 p-2 bg-muted/40 rounded-lg border border-dashed border-border animate-in fade-in">
+          <div className="flex flex-wrap gap-1.5 p-1.5 bg-muted/30 rounded-lg border border-dashed border-border text-xs">
             {pendingFiles.map((p) => (
               <div
                 key={p.id}
-                className="relative flex items-center gap-2 bg-background border rounded-lg p-1.5 pr-2.5 text-xs shadow-xs group"
+                className="relative flex items-center gap-1.5 bg-background border rounded-md p-1 pr-2 text-xs shadow-2xs group"
               >
                 {p.isImage && p.previewUrl ? (
                   <img
                     src={p.previewUrl}
                     alt={p.file.name}
-                    className="w-8 h-8 rounded object-cover border"
+                    className="w-7 h-7 rounded object-cover border"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
-                    <FileText className="w-4 h-4" />
+                  <div className="w-7 h-7 rounded bg-primary/10 flex items-center justify-center text-primary">
+                    <FileText className="w-3.5 h-3.5" />
                   </div>
                 )}
-                <div className="max-w-[140px] truncate">
-                  <p className="font-medium truncate text-[11px]">{p.file.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{formatFileSize(p.file.size)}</p>
+                <div className="max-w-[120px] truncate">
+                  <p className="font-medium truncate text-[10px]">{p.file.name}</p>
+                  <p className="text-[9px] text-muted-foreground">{formatFileSize(p.file.size)}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => removePendingFile(p.id)}
-                  className="ml-1 text-muted-foreground hover:text-destructive p-0.5 rounded-full hover:bg-muted"
+                  className="ml-0.5 text-muted-foreground hover:text-destructive p-0.5 rounded-full hover:bg-muted"
                   title="Remove file"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             ))}
           </div>
         )}
 
-        {/* Text Input Container with Toolbar */}
+        {/* Expandable Input Box with Action Bar */}
         <div
           className={cn(
             "rounded-xl border transition-all focus-within:ring-2 focus-within:border-transparent",
@@ -499,24 +531,25 @@ export function TicketCommentSection({
                 ? "Type an internal engineering note (hidden from ward staff)..."
                 : "Type a message to clinical ward staff..."
             }
-            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[48px] max-h-[140px] text-xs sm:text-sm p-2.5 sm:p-3 leading-relaxed placeholder:text-muted-foreground/60"
+            rows={1}
+            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[38px] max-h-[120px] text-xs sm:text-sm p-2 sm:p-2.5 leading-relaxed placeholder:text-muted-foreground/60"
           />
 
           {/* Action Toolbar */}
-          <div className="flex items-center justify-between p-2 pt-1 border-t border-border/40 bg-background/40 rounded-b-xl">
-            {/* Attachment Icons / File Picker buttons */}
-            <div className="flex items-center gap-1">
+          <div className="flex items-center justify-between p-1.5 px-2 border-t border-border/30 bg-background/30 rounded-b-xl">
+            {/* Attachment Icons */}
+            <div className="flex items-center gap-0.5">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={loading}
-                className="h-7 sm:h-8 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
-                title="Attach file (PDF, DOCX, TXT, Excel)"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
+                title="Attach file (PDF, manual, report)"
               >
                 <Paperclip className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline text-[11px]">Attach</span>
+                <span className="hidden sm:inline text-[11px]">File</span>
               </Button>
 
               <Button
@@ -525,7 +558,7 @@ export function TicketCommentSection({
                 size="sm"
                 onClick={() => imageInputRef.current?.click()}
                 disabled={loading}
-                className="h-7 sm:h-8 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
                 title="Attach photo or screenshot"
               >
                 <ImageIcon className="w-3.5 h-3.5" />
@@ -533,10 +566,10 @@ export function TicketCommentSection({
               </Button>
             </div>
 
-            {/* Right side: Helper + Send button */}
-            <div className="flex items-center gap-2">
+            {/* Send Button */}
+            <div className="flex items-center gap-1.5">
               <span className="text-[10px] text-muted-foreground hidden md:inline">
-                <kbd className="font-mono bg-muted px-1 py-0.5 rounded text-[9px] border">Enter</kbd> send, <kbd className="font-mono bg-muted px-1 py-0.5 rounded text-[9px] border">Shift+Enter</kbd> newline
+                <kbd className="font-mono bg-muted px-1 py-0.5 rounded text-[9px] border">Enter</kbd> send
               </span>
 
               <Button
@@ -544,7 +577,7 @@ export function TicketCommentSection({
                 onClick={handleSubmit}
                 disabled={(!body.trim() && pendingFiles.length === 0) || loading}
                 className={cn(
-                  "h-8 text-xs gap-1.5 px-3.5 font-semibold rounded-lg shadow-xs transition-all",
+                  "h-7 sm:h-8 text-xs gap-1.5 px-3 font-semibold rounded-lg shadow-2xs transition-all",
                   visibility === "internal"
                     ? "bg-amber-600 hover:bg-amber-700 text-white"
                     : "bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -552,12 +585,12 @@ export function TicketCommentSection({
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Sending...</span>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Sending</span>
                   </>
                 ) : (
                   <>
-                    <Send className="w-3.5 h-3.5" />
+                    <Send className="w-3 h-3" />
                     <span>Send</span>
                   </>
                 )}
@@ -593,15 +626,15 @@ function ChatBubble({
   return (
     <div
       className={cn(
-        "flex gap-2 sm:gap-2.5 max-w-[88%] sm:max-w-[78%]",
+        "flex gap-2 sm:gap-2.5 max-w-[90%] sm:max-w-[80%]",
         isCurrentUser ? "ml-auto flex-row-reverse" : "mr-auto"
       )}
     >
       {/* Avatar */}
-      <Avatar className="h-7 w-7 shrink-0 mt-1">
+      <Avatar className="h-6 w-6 sm:h-7 sm:w-7 shrink-0 mt-0.5 border border-border/60">
         <AvatarFallback
           className={cn(
-            "text-[10px] font-bold",
+            "text-[9px] sm:text-[10px] font-bold",
             isInternal
               ? "bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-200"
               : isAssignedEngineer
@@ -629,11 +662,11 @@ function ChatBubble({
           </span>
 
           {isAssignedEngineer && !isCurrentUser ? (
-            <span className="bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded font-medium text-[10px] flex items-center gap-1">
+            <span className="bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-1 py-0.2 rounded font-medium text-[9px] sm:text-[10px] flex items-center gap-0.5">
               <Wrench className="w-2.5 h-2.5" /> Engineer
             </span>
           ) : !isCurrentUser && (comment.author as any)?.jobTitle ? (
-            <span className="bg-muted text-muted-foreground px-1.5 py-0.2 rounded font-medium text-[10px] flex items-center gap-1">
+            <span className="bg-muted text-muted-foreground px-1 py-0.2 rounded font-medium text-[9px] sm:text-[10px] flex items-center gap-0.5">
               <Stethoscope className="w-2.5 h-2.5 text-primary" />
               {(comment.author as any).jobTitle}
             </span>
@@ -641,11 +674,11 @@ function ChatBubble({
 
           {isInternal && (
             <span className="bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1 py-0.2 rounded font-medium text-[9px] flex items-center gap-0.5">
-              <Lock className="w-2.5 h-2.5" /> Internal
+              <Lock className="w-2 h-2" /> Internal
             </span>
           )}
 
-          <span className="text-[10px] text-muted-foreground ml-1">
+          <span className="text-[10px] text-muted-foreground ml-0.5">
             {formattedTime}
           </span>
         </div>
@@ -653,14 +686,14 @@ function ChatBubble({
         {/* Bubble Text & Attachments */}
         <div
           className={cn(
-            "p-2.5 sm:p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs space-y-2 break-words",
+            "p-2.5 sm:p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-2xs space-y-2 break-words",
             isCurrentUser
               ? "bg-primary text-primary-foreground rounded-tr-xs"
               : isInternal
               ? "bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-950 dark:text-amber-100 rounded-tl-xs"
               : isAssignedEngineer
               ? "bg-card border-2 border-blue-200/80 dark:border-blue-900/60 text-foreground rounded-tl-xs"
-              : "bg-card border text-foreground rounded-tl-xs"
+              : "bg-card border border-border text-foreground rounded-tl-xs"
           )}
         >
           {text && (
@@ -671,7 +704,7 @@ function ChatBubble({
 
           {/* Render Attached Files */}
           {attachments.length > 0 && (
-            <div className="space-y-2 pt-0.5">
+            <div className="space-y-1.5 pt-0.5">
               {attachments.map((att, idx) => {
                 const isImage =
                   att.type?.startsWith("image/") ||
@@ -691,11 +724,11 @@ function ChatBubble({
                       <img
                         src={att.url}
                         alt={att.name}
-                        className="max-h-56 max-w-full rounded-lg object-contain bg-black/5 dark:bg-white/5"
+                        className="max-h-52 max-w-full rounded-lg object-contain bg-black/5 dark:bg-white/5"
                         loading="lazy"
                       />
-                      <div className="p-1 px-2 text-[10px] flex items-center justify-between opacity-80 group-hover:opacity-100 bg-black/30 text-white">
-                        <span className="truncate max-w-[180px]">{att.name}</span>
+                      <div className="p-1 px-2 text-[10px] flex items-center justify-between opacity-80 group-hover:opacity-100 bg-black/40 text-white">
+                        <span className="truncate max-w-[160px]">{att.name}</span>
                         <span>{formatFileSize(att.size)}</span>
                       </div>
                     </a>
@@ -710,7 +743,7 @@ function ChatBubble({
                     target="_blank"
                     rel="noopener noreferrer"
                     className={cn(
-                      "flex items-center gap-2 p-2 px-2.5 rounded-lg border text-xs transition",
+                      "flex items-center gap-2 p-2 rounded-lg border text-xs transition",
                       isCurrentUser
                         ? "bg-white/10 hover:bg-white/20 border-white/20 text-primary-foreground"
                         : "bg-muted/60 hover:bg-muted border-border text-foreground"
@@ -721,7 +754,7 @@ function ChatBubble({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate text-[11px]">{att.name}</p>
-                      <p className="text-[10px] opacity-75">{formatFileSize(att.size)}</p>
+                      <p className="text-[9px] opacity-75">{formatFileSize(att.size)}</p>
                     </div>
                     <Download className="w-3.5 h-3.5 opacity-70 shrink-0" />
                   </a>

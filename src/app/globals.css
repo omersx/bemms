@@ -102,6 +102,18 @@
   }
 }
 
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
+    display: none !important;
+  }
+  .no-scrollbar,
+  .scrollbar-none {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+}
+
 /* ── QR Scanner Custom Theme & Animations ───────────────────────────────── */
 @keyframes qr-scan-laser {
   0% {
