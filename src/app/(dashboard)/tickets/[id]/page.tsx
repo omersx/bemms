@@ -311,24 +311,14 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
 
   // 2. Chat Content
   const chatContent = (
-    <Card className="overflow-hidden border shadow-xs">
-      <CardHeader className="p-3 sm:p-4 pb-2.5 border-b">
-        <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-          <MessageCircle className="w-4 h-4 text-primary" />
-          Chat with Biomedical Engineering
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <TicketCommentSection
-          ticketId={ticketId}
-          comments={comments as any}
-          canAddInternal={isBiomed}
-          currentUserId={session?.user?.id}
-          assignedEngineerUserId={ticket.assignedEngineerUserId}
-          assignedEngineerName={(ticket as any).assignedEngineer?.fullName}
-        />
-      </CardContent>
-    </Card>
+    <TicketCommentSection
+      ticketId={ticketId}
+      comments={comments as any}
+      canAddInternal={isBiomed}
+      currentUserId={session?.user?.id}
+      assignedEngineerUserId={ticket.assignedEngineerUserId}
+      assignedEngineerName={(ticket as any).assignedEngineer?.fullName}
+    />
   )
 
   // 3. Timeline Content

@@ -21,7 +21,7 @@ import {
   FileText,
   Download,
   X,
-  File as FileIcon,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -53,7 +53,7 @@ interface ParsedAttachment {
 
 const QUICK_CHAT_TEMPLATES = [
   "When is this expected to be ready for patient care?",
-  "The device is currently in Room / Bed for inspection.",
+  "Device is currently in Room / Bed for inspection.",
   "Please call our nurse station extension when arriving.",
   "Thank you, device is verified and working properly.",
 ];
@@ -106,6 +106,7 @@ export function TicketCommentSection({
   const [loading, setLoading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<PendingAttachment[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -188,12 +189,18 @@ export function TicketCommentSection({
     }
   };
 
+  const applyTemplate = (tmpl: string) => {
+    setBody(tmpl);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
   const handleSubmit = async () => {
     const text = body.trim();
     if ((!text && pendingFiles.length === 0) || loading) return;
     setLoading(true);
 
-    // Save copy of pending files to process
     const filesToUpload = [...pendingFiles];
     const currentVis = canAddInternal ? visibility : "public";
 
@@ -290,7 +297,7 @@ export function TicketCommentSection({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Send on Enter (without Shift)
+    // Send on Enter (without Shift) on desktop devices
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
@@ -300,10 +307,8 @@ export function TicketCommentSection({
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl overflow-hidden bg-background border shadow-xs transition-all",
-        sortedComments.length === 0
-          ? "h-[160px] sm:h-[240px] md:h-[380px]"
-          : "h-[320px] sm:h-[420px] md:h-[520px]"
+        "flex flex-col rounded-xl overflow-hidden bg-card border shadow-xs transition-all",
+        "h-[480px] sm:h-[520px] md:h-[580px] min-h-[440px]"
       )}
     >
       {/* Hidden File Pickers */}
@@ -323,31 +328,51 @@ export function TicketCommentSection({
         onChange={handleFileChange}
       />
 
-      {/* Chat Sub-header */}
-      <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-muted/40 border-b flex items-center justify-between text-xs text-muted-foreground">
-        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
-          <span className="truncate text-[11px] sm:text-xs">
-            {assignedEngineerName
-              ? `Chat with ${assignedEngineerName}`
-              : "Chat with Biomedical Engineering"}
+      {/* Unified Chat Header */}
+      <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-muted/40 border-b flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="relative shrink-0">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <MessageCircle className="w-4 h-4" />
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-background animate-pulse" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-xs sm:text-sm font-semibold text-foreground truncate leading-tight">
+              {assignedEngineerName
+                ? `Direct Chat with ${assignedEngineerName}`
+                : "Biomedical Engineering Chat"}
+            </h3>
+            <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
+              Live communication channel for this ticket
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded-full bg-background border text-muted-foreground shadow-2xs">
+            {sortedComments.length} {sortedComments.length === 1 ? "msg" : "msgs"}
           </span>
         </div>
-        <span className="shrink-0 text-[11px] font-medium">{sortedComments.length} msg</span>
       </div>
 
-      {/* Chat History / Bubble Thread Feed */}
+      {/* Chat History Feed with Guaranteed Minimum Height */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-2.5 sm:p-4 space-y-2.5 bg-slate-50/50 dark:bg-muted/10"
+        className="flex-1 min-h-[190px] overflow-y-auto p-3 sm:p-4 space-y-3 bg-slate-50/50 dark:bg-muted/10"
       >
         {sortedComments.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-1 p-2 text-center">
-            <MessageCircle className="w-5 h-5 opacity-30 text-primary" />
-            <p className="text-xs font-semibold text-foreground">No messages yet</p>
-            <p className="text-[11px] max-w-xs text-muted-foreground">
-              Direct chat between clinical staff and biomedical engineering.
-            </p>
+          <div className="h-full min-h-[180px] flex flex-col items-center justify-center text-center p-4 space-y-2.5">
+            <div className="w-11 h-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs">
+              <MessageCircle className="w-5 h-5" />
+            </div>
+            <div className="space-y-1 max-w-xs">
+              <p className="text-xs sm:text-sm font-semibold text-foreground">
+                No messages yet in this ticket
+              </p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Use this chat for instant updates, asking questions, or coordinating with biomedical engineers.
+              </p>
+            </div>
           </div>
         ) : (
           sortedComments.map((c) => (
@@ -369,14 +394,18 @@ export function TicketCommentSection({
         )}
       </div>
 
-      {/* Quick clinical templates */}
-      <div className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-card border-t border-border/60 overflow-x-auto flex gap-1 sm:gap-1.5 scrollbar-none touch-pan-x">
+      {/* Quick Clinical Templates Bar */}
+      <div className="px-2.5 sm:px-3 py-1.5 bg-muted/20 border-t border-border/50 overflow-x-auto flex items-center gap-1.5 scrollbar-none touch-pan-x shrink-0">
+        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0 hidden sm:flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-amber-500" />
+          Quick:
+        </span>
         {QUICK_CHAT_TEMPLATES.map((tmpl) => (
           <button
             key={tmpl}
             type="button"
-            onClick={() => setBody(tmpl)}
-            className="text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border bg-muted/40 hover:bg-muted hover:text-foreground text-muted-foreground transition whitespace-nowrap shrink-0 max-w-[220px] sm:max-w-none truncate"
+            onClick={() => applyTemplate(tmpl)}
+            className="text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full border border-border/60 bg-background/90 hover:bg-muted hover:text-foreground text-muted-foreground transition-all whitespace-nowrap shrink-0 max-w-[240px] sm:max-w-none truncate shadow-2xs active:scale-95 hover:border-primary/40"
           >
             {tmpl}
           </button>
@@ -384,22 +413,34 @@ export function TicketCommentSection({
       </div>
 
       {/* Chat Input Box */}
-      <div className="p-2 sm:p-3 bg-card border-t shadow-xs z-10 space-y-1.5 sm:space-y-2">
+      <div className="p-2.5 sm:p-3 bg-card border-t shadow-xs shrink-0 space-y-2">
         {canAddInternal && (
-          <Tabs
-            value={visibility}
-            onValueChange={(v) => setVisibility(v as "public" | "internal")}
-            className="mb-0.5"
-          >
-            <TabsList className="grid w-full grid-cols-2 max-w-[280px] h-6 sm:h-7">
-              <TabsTrigger value="public" className="text-[11px] sm:text-xs py-0.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                <Globe className="w-3 h-3 mr-1" /> Public Message
-              </TabsTrigger>
-              <TabsTrigger value="internal" className="text-[11px] sm:text-xs py-0.5 data-[state=active]:bg-amber-500 data-[state=active]:text-white">
-                <Lock className="w-3 h-3 mr-1" /> Internal Note
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center justify-between gap-2">
+            <Tabs
+              value={visibility}
+              onValueChange={(v) => setVisibility(v as "public" | "internal")}
+              className="w-full sm:w-auto"
+            >
+              <TabsList className="grid w-full grid-cols-2 sm:w-[260px] h-7 p-0.5 bg-muted/60">
+                <TabsTrigger
+                  value="public"
+                  className="text-[11px] sm:text-xs py-1 gap-1 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs font-medium"
+                >
+                  <Globe className="w-3 h-3" /> Public Reply
+                </TabsTrigger>
+                <TabsTrigger
+                  value="internal"
+                  className="text-[11px] sm:text-xs py-1 gap-1 data-[state=active]:bg-amber-600 data-[state=active]:text-white data-[state=active]:shadow-2xs font-medium"
+                >
+                  <Lock className="w-3 h-3" /> Internal Note
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <span className="text-[10px] text-muted-foreground hidden lg:inline">
+              {visibility === "internal" ? "🔒 Biomedical team only" : "🌐 Visible to clinical ward"}
+            </span>
+          </div>
         )}
 
         {/* Pending Attachments Tray */}
@@ -438,29 +479,31 @@ export function TicketCommentSection({
           </div>
         )}
 
+        {/* Text Input Container with Toolbar */}
         <div
           className={cn(
-            "rounded-xl border transition-all focus-within:ring-2",
+            "rounded-xl border transition-all focus-within:ring-2 focus-within:border-transparent",
             visibility === "internal"
-              ? "bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 ring-amber-400"
-              : "bg-background border-input ring-primary/20"
+              ? "bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800 focus-within:ring-amber-500/30"
+              : "bg-muted/20 dark:bg-zinc-900/60 border-input focus-within:ring-primary/20"
           )}
         >
           <Textarea
+            ref={textareaRef}
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
             placeholder={
               visibility === "internal"
-                ? "Type an internal note for biomedical team..."
-                : "Type a message to biomedical engineering..."
+                ? "Type an internal engineering note (hidden from ward staff)..."
+                : "Type a message to clinical ward staff..."
             }
-            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[44px] sm:min-h-[50px] max-h-[120px] text-xs sm:text-sm p-2 sm:p-2.5"
+            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[48px] max-h-[140px] text-xs sm:text-sm p-2.5 sm:p-3 leading-relaxed placeholder:text-muted-foreground/60"
           />
 
           {/* Action Toolbar */}
-          <div className="flex items-center justify-between p-2 pt-0 border-t border-border/40">
+          <div className="flex items-center justify-between p-2 pt-1 border-t border-border/40 bg-background/40 rounded-b-xl">
             {/* Attachment Icons / File Picker buttons */}
             <div className="flex items-center gap-1">
               <Button
@@ -469,8 +512,8 @@ export function TicketCommentSection({
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={loading}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
-                title="Attach document or file (PDF, DOCX, TXT, Excel)"
+                className="h-7 sm:h-8 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
+                title="Attach file (PDF, DOCX, TXT, Excel)"
               >
                 <Paperclip className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline text-[11px]">Attach</span>
@@ -482,7 +525,7 @@ export function TicketCommentSection({
                 size="sm"
                 onClick={() => imageInputRef.current?.click()}
                 disabled={loading}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
+                className="h-7 sm:h-8 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
                 title="Attach photo or screenshot"
               >
                 <ImageIcon className="w-3.5 h-3.5" />
@@ -493,7 +536,7 @@ export function TicketCommentSection({
             {/* Right side: Helper + Send button */}
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-muted-foreground hidden md:inline">
-                <kbd className="font-mono bg-muted px-1 rounded text-[9px]">Enter</kbd> send, <kbd className="font-mono bg-muted px-1 rounded text-[9px]">Shift+Enter</kbd> newline
+                <kbd className="font-mono bg-muted px-1 py-0.5 rounded text-[9px] border">Enter</kbd> send, <kbd className="font-mono bg-muted px-1 py-0.5 rounded text-[9px] border">Shift+Enter</kbd> newline
               </span>
 
               <Button
@@ -501,19 +544,21 @@ export function TicketCommentSection({
                 onClick={handleSubmit}
                 disabled={(!body.trim() && pendingFiles.length === 0) || loading}
                 className={cn(
-                  "h-8 sm:h-7 text-xs gap-1.5 px-3 sm:px-3 font-semibold",
-                  visibility === "internal" ? "bg-amber-600 hover:bg-amber-700 text-white" : ""
+                  "h-8 text-xs gap-1.5 px-3.5 font-semibold rounded-lg shadow-xs transition-all",
+                  visibility === "internal"
+                    ? "bg-amber-600 hover:bg-amber-700 text-white"
+                    : "bg-primary hover:bg-primary/90 text-primary-foreground"
                 )}
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Sending...
+                    <span>Sending...</span>
                   </>
                 ) : (
                   <>
                     <Send className="w-3.5 h-3.5" />
-                    Send
+                    <span>Send</span>
                   </>
                 )}
               </Button>
@@ -548,7 +593,7 @@ function ChatBubble({
   return (
     <div
       className={cn(
-        "flex gap-2.5 max-w-[85%] sm:max-w-[75%]",
+        "flex gap-2 sm:gap-2.5 max-w-[88%] sm:max-w-[78%]",
         isCurrentUser ? "ml-auto flex-row-reverse" : "mr-auto"
       )}
     >
@@ -608,7 +653,7 @@ function ChatBubble({
         {/* Bubble Text & Attachments */}
         <div
           className={cn(
-            "p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs space-y-2 break-words",
+            "p-2.5 sm:p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs space-y-2 break-words",
             isCurrentUser
               ? "bg-primary text-primary-foreground rounded-tr-xs"
               : isInternal
