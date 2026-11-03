@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { playNotificationSound } from '@/lib/utils/sound';
 
 interface TicketAutoRefreshProps {
   ticketId: string;
@@ -78,6 +79,7 @@ export function TicketAutoRefresh({
       );
 
       if (isForThisTicket) {
+        playNotificationSound().catch(() => {});
         triggerRefresh();
       }
     };
@@ -119,6 +121,7 @@ export function TicketAutoRefresh({
             data.assignedEngineerUserId !== current.assignedEngineerUserId);
 
         if (hasChanged) {
+          const isNewComment = typeof data.commentCount === 'number' && data.commentCount > current.commentCount;
           lastKnownRef.current = {
             updatedAt: data.updatedAt || current.updatedAt,
             statusCode: data.statusCode || current.statusCode,
@@ -128,6 +131,9 @@ export function TicketAutoRefresh({
                 ? data.assignedEngineerUserId
                 : current.assignedEngineerUserId,
           };
+          if (isNewComment) {
+            playNotificationSound().catch(() => {});
+          }
           triggerRefresh();
         }
       } catch {

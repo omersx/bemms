@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { addTicketComment } from "@/lib/actions/tickets";
+import { playNotificationSound } from "@/lib/utils/sound";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -254,6 +255,10 @@ export function TicketCommentSection({
   const handleSubmit = async () => {
     const text = body.trim();
     if ((!text && pendingFiles.length === 0) || loading) return;
+
+    // Play message notification sound immediately on user interaction
+    playNotificationSound().catch(() => {});
+
     setLoading(true);
 
     const filesToUpload = [...pendingFiles];

@@ -191,6 +191,18 @@ export async function playNotificationSound(): Promise<void> {
   // Mobile haptic vibration
   triggerVibration([150, 75, 150]);
 
+  try {
+    const audio = new Audio('/sounds/notification.wav');
+    audio.volume = 1.0;
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      await playPromise;
+      return;
+    }
+  } catch {
+    // Fallback to Web Audio synthesis if HTML5 audio fails
+  }
+
   await playAudioFileWithFallback(notificationAudio, async () => {
     const ctx = await ensureAudioContext();
     if (ctx && ctx.state === 'running') {
