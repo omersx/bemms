@@ -84,6 +84,45 @@ function parseCommentBody(rawBody: string): { text: string; attachments: ParsedA
   return { text, attachments };
 }
 
+export interface ContactAvailability {
+  isOnline: boolean;
+  statusText: string;
+  variant?: "online" | "on_call" | "in_maintenance" | "offline" | "unassigned";
+}
+
+const STATUS_CONFIG = {
+  online: {
+    dotClass: "bg-emerald-500",
+    textClass: "text-emerald-600 dark:text-emerald-400",
+    pulse: true,
+    title: "Online / Available",
+  },
+  on_call: {
+    dotClass: "bg-amber-500",
+    textClass: "text-amber-600 dark:text-amber-400",
+    pulse: true,
+    title: "On Call",
+  },
+  in_maintenance: {
+    dotClass: "bg-blue-500",
+    textClass: "text-blue-600 dark:text-blue-400",
+    pulse: false,
+    title: "In Maintenance",
+  },
+  offline: {
+    dotClass: "bg-slate-400 dark:bg-slate-500",
+    textClass: "text-muted-foreground",
+    pulse: false,
+    title: "Offline / Off Duty",
+  },
+  unassigned: {
+    dotClass: "bg-amber-400",
+    textClass: "text-amber-600 dark:text-amber-400",
+    pulse: true,
+    title: "Awaiting Assignment",
+  },
+} as const;
+
 export function TicketCommentSection({
   ticketId,
   comments,
@@ -94,6 +133,7 @@ export function TicketCommentSection({
   reporterName,
   reporterRole,
   isBiomed = false,
+  contactAvailability,
 }: {
   ticketId: string;
   comments: Comment[];
@@ -104,6 +144,7 @@ export function TicketCommentSection({
   reporterName?: string | null;
   reporterRole?: string | null;
   isBiomed?: boolean;
+  contactAvailability?: ContactAvailability;
 }) {
   const router = useRouter();
   const [body, setBody] = useState("");
@@ -140,6 +181,16 @@ export function TicketCommentSection({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [comments, optimisticComments]);
+
+  // Auto-resize textarea dynamically to fit message text (from 38px up to 120px)
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      const scrollH = textareaRef.current.scrollHeight;
+      const targetH = Math.max(38, Math.min(scrollH, 120));
+      textareaRef.current.style.height = `${targetH}px`;
+    }
+  }, [body]);
 
   // Handle file selection from input
   const addFiles = (files: FileList | File[]) => {
@@ -300,7 +351,14 @@ export function TicketCommentSection({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    // On touch/mobile devices, Enter adds a newline so users do not accidentally send
+    const isTouch =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(pointer: coarse)").matches ||
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0);
+
+    if (e.key === "Enter" && !e.shiftKey && !isTouch) {
       e.preventDefault();
       handleSubmit();
     }
@@ -315,18 +373,28 @@ export function TicketCommentSection({
     ? reporterRole || "Clinical Staff"
     : "Biomedical Engineer";
 
-  const contactInitials = contactName
-    .split(" ")
-    .map((n) => n[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase() || "C";
+  const contactInitials =
+    contactName
+      .split(" ")
+      .map((n) => n[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "C";
+
+  const currentAvailability = contactAvailability || {
+    isOnline: true,
+    statusText: `Active · ${contactRole}`,
+    variant: "online" as const,
+  };
+
+  const statusCfg =
+    STATUS_CONFIG[currentAvailability.variant || "online"] || STATUS_CONFIG.online;
 
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl overflow-hidden bg-card border border-border shadow-xs transition-all",
+        "flex flex-col rounded-xl overflow-hidden bg-card border border-border shadow-xs transition-all w-full max-w-full",
         "h-[calc(100dvh-290px)] min-h-[420px] max-h-[740px] md:h-[620px] md:max-h-none"
       )}
     >
@@ -358,8 +426,11 @@ export function TicketCommentSection({
               </AvatarFallback>
             </Avatar>
             <span
-              className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-card ring-1 ring-background"
-              title="Online"
+              className={cn(
+                "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-card ring-1 ring-background",
+                statusCfg.dotClass
+              )}
+              title={statusCfg.title}
             />
           </div>
 
@@ -368,9 +439,20 @@ export function TicketCommentSection({
             <h3 className="text-xs sm:text-sm font-semibold text-foreground truncate leading-tight">
               {contactName}
             </h3>
-            <p className="text-[10px] sm:text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate flex items-center gap-1 leading-tight mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse shrink-0" />
-              <span>Active · {contactRole}</span>
+            <p
+              className={cn(
+                "text-[10px] sm:text-[11px] font-medium truncate flex items-center gap-1 leading-tight mt-0.5",
+                statusCfg.textClass
+              )}
+            >
+              <span
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full inline-block shrink-0",
+                  statusCfg.dotClass,
+                  statusCfg.pulse && "animate-pulse"
+                )}
+              />
+              <span>{currentAvailability.statusText}</span>
             </p>
           </div>
         </div>
@@ -389,16 +471,19 @@ export function TicketCommentSection({
         className="flex-1 min-h-[140px] overflow-y-auto overscroll-contain p-2.5 sm:p-4 space-y-2.5 bg-slate-50/40 dark:bg-muted/10"
       >
         {sortedComments.length === 0 ? (
-          <div className="h-full min-h-[140px] flex flex-col items-center justify-center text-center p-3 sm:p-4 space-y-1.5 my-auto">
-            <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-              <MessageCircle className="w-4 h-4" />
+          <div className="h-full min-h-[140px] flex flex-col items-center justify-center text-center p-3 sm:p-4 space-y-2 my-auto">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs">
+              <MessageCircle className="w-5 h-5" />
             </div>
-            <p className="text-xs font-semibold text-foreground">
-              No messages yet in this ticket
-            </p>
-            <p className="text-[11px] text-muted-foreground max-w-[260px] leading-relaxed">
-              Send a message or select a suggestion below to coordinate with {contactName}.
-            </p>
+            <div className="space-y-1">
+              <p className="text-xs sm:text-sm font-semibold text-foreground tracking-tight">
+                No messages yet in this ticket
+              </p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
+                Send a message or select a suggestion below to coordinate with{" "}
+                <span className="text-foreground/90 font-medium">{contactName}</span>.
+              </p>
+            </div>
           </div>
         ) : (
           sortedComments.map((c) => (
@@ -421,18 +506,21 @@ export function TicketCommentSection({
       </div>
 
       {/* ── 3. Quick Reply Suggestions (Horizontally Scrollable, Above Composer) ── */}
-      <div className="px-2.5 sm:px-3 py-1.5 bg-background border-t border-border/40 overflow-x-auto flex items-center gap-1.5 no-scrollbar scrollbar-none touch-pan-x shrink-0">
-        <Sparkles className="w-3 h-3 text-amber-500 shrink-0 ml-0.5" />
+      <div className="px-3 py-2 bg-background/80 backdrop-blur-xs border-t border-border/40 overflow-x-auto flex items-center gap-2 no-scrollbar scrollbar-none touch-pan-x overscroll-x-contain shrink-0">
+        <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 ml-0.5" />
         {QUICK_CHAT_TEMPLATES.map((tmpl) => (
           <button
             key={tmpl}
             type="button"
             onClick={() => applyTemplate(tmpl)}
-            className="text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full border border-border/60 bg-muted/40 hover:bg-muted hover:text-foreground text-muted-foreground transition-all whitespace-nowrap shrink-0 max-w-[220px] sm:max-w-none truncate active:scale-95 hover:border-primary/40 select-none shadow-2xs"
+            aria-label={`Insert quick reply: ${tmpl}`}
+            className="text-[11px] font-medium px-3 py-1.5 rounded-full border border-border/70 bg-muted/40 hover:bg-muted hover:text-foreground text-muted-foreground hover:border-primary/40 active:scale-95 transition-all whitespace-nowrap shrink-0 select-none shadow-2xs"
           >
             {tmpl}
           </button>
         ))}
+        {/* End padding spacer to ensure last chip doesn't clip on full scroll */}
+        <div className="w-2 shrink-0" aria-hidden="true" />
       </div>
 
       {/* ── 4. Message Composer (Sticky at Bottom) ── */}
@@ -501,6 +589,7 @@ export function TicketCommentSection({
                 <button
                   type="button"
                   onClick={() => removePendingFile(p.id)}
+                  aria-label={`Remove attachment ${p.file.name}`}
                   className="ml-0.5 text-muted-foreground hover:text-destructive p-0.5 rounded-full hover:bg-muted"
                   title="Remove file"
                 >
@@ -526,13 +615,14 @@ export function TicketCommentSection({
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
+            aria-label="Message text"
             placeholder={
               visibility === "internal"
                 ? "Type an internal engineering note (hidden from ward staff)..."
                 : "Type a message to clinical ward staff..."
             }
             rows={1}
-            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[38px] max-h-[120px] text-xs sm:text-sm p-2 sm:p-2.5 leading-relaxed placeholder:text-muted-foreground/60"
+            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[38px] max-h-[120px] text-xs sm:text-sm p-2 sm:p-2.5 leading-relaxed placeholder:text-muted-foreground/60 overflow-y-auto"
           />
 
           {/* Action Toolbar */}
@@ -545,6 +635,7 @@ export function TicketCommentSection({
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={loading}
+                aria-label="Attach file"
                 className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
                 title="Attach file (PDF, manual, report)"
               >
@@ -558,6 +649,7 @@ export function TicketCommentSection({
                 size="sm"
                 onClick={() => imageInputRef.current?.click()}
                 disabled={loading}
+                aria-label="Attach photo"
                 className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 rounded-md"
                 title="Attach photo or screenshot"
               >
@@ -576,6 +668,7 @@ export function TicketCommentSection({
                 size="sm"
                 onClick={handleSubmit}
                 disabled={(!body.trim() && pendingFiles.length === 0) || loading}
+                aria-label="Send message"
                 className={cn(
                   "h-7 sm:h-8 text-xs gap-1.5 px-3 font-semibold rounded-lg shadow-2xs transition-all",
                   visibility === "internal"

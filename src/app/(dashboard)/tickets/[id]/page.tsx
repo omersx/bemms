@@ -309,6 +309,90 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
     </div>
   )
 
+  // ── Determine Chat Counterpart & Availability Status ────────────────────────
+  let counterpartName = "Biomedical Engineering"
+  let counterpartRole = "Biomedical Engineer"
+  let contactAvailability: {
+    isOnline: boolean
+    statusText: string
+    variant: "online" | "on_call" | "in_maintenance" | "offline" | "unassigned"
+  } = {
+    isOnline: true,
+    statusText: "Active",
+    variant: "online",
+  }
+
+  if (isStaffOnly) {
+    // Clinical staff viewing the ticket -> chatting with assigned engineer
+    if (!ticket.assignedEngineerUserId) {
+      counterpartName = "Biomedical Engineering"
+      counterpartRole = "Triage & Dispatch Desk"
+      contactAvailability = {
+        isOnline: false,
+        statusText: "Unassigned · Queue pending",
+        variant: "unassigned",
+      }
+    } else {
+      counterpartName = (ticket as any).assignedEngineer?.fullName || "Biomedical Engineer"
+      counterpartRole = engineerProfile?.jobTitle || "Biomedical Engineer"
+      const duty = engineerProfile?.dutyStatus || "on_duty"
+      if (duty === "on_duty") {
+        contactAvailability = {
+          isOnline: true,
+          statusText: "On Duty · Available",
+          variant: "online",
+        }
+      } else if (duty === "on_call") {
+        contactAvailability = {
+          isOnline: true,
+          statusText: "On Call · Dispatch",
+          variant: "on_call",
+        }
+      } else if (duty === "in_maintenance") {
+        contactAvailability = {
+          isOnline: true,
+          statusText: "In Maintenance · Active Task",
+          variant: "in_maintenance",
+        }
+      } else if (duty === "off_duty") {
+        contactAvailability = {
+          isOnline: false,
+          statusText: "Off Duty · Unavailable",
+          variant: "offline",
+        }
+      }
+    }
+  } else {
+    // Biomedical Engineer or Administrator viewing ticket -> chatting with reporter
+    const reporter = (ticket as any).reportedByUser
+    counterpartName = reporter?.fullName || ticket.requesterContactName || "Department Clinical Staff"
+
+    // Derive accurate counterpart role
+    if (reporter?.jobTitle) {
+      counterpartRole = reporter.jobTitle
+    } else if (reporter?.fullName?.toLowerCase().includes("admin")) {
+      counterpartRole = "System Administrator"
+    } else if ((ticket as any).department?.name) {
+      counterpartRole = `${(ticket as any).department.name} Staff`
+    } else {
+      counterpartRole = "Clinical Staff"
+    }
+
+    if (reporter?.accountStatus === "suspended" || reporter?.accountStatus === "deactivated") {
+      contactAvailability = {
+        isOnline: false,
+        statusText: `Inactive · ${counterpartRole}`,
+        variant: "offline",
+      }
+    } else {
+      contactAvailability = {
+        isOnline: true,
+        statusText: `Active · ${counterpartRole}`,
+        variant: "online",
+      }
+    }
+  }
+
   // 2. Chat Content
   const chatContent = (
     <TicketCommentSection
@@ -318,9 +402,10 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
       currentUserId={session?.user?.id}
       assignedEngineerUserId={ticket.assignedEngineerUserId}
       assignedEngineerName={(ticket as any).assignedEngineer?.fullName}
-      reporterName={(ticket as any).reportedByUser?.fullName || ticket.requesterContactName}
-      reporterRole={(ticket as any).reportedByUser?.jobTitle || (ticket as any).department?.name || "Clinical Staff"}
+      reporterName={counterpartName}
+      reporterRole={counterpartRole}
       isBiomed={isBiomed}
+      contactAvailability={contactAvailability}
     />
   )
 
