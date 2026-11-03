@@ -445,7 +445,8 @@ export async function notifyOnNewComment(params: {
       ? params.assignedEngineerUserId
       : params.reporterUserId;
 
-    if (!recipientUserId) return; // No one to notify
+    // Never notify yourself
+    if (!recipientUserId || recipientUserId === params.commentAuthorUserId) return;
 
     const notifTitle = `💬 New message on ticket ${params.ticketNumber}`;
     const preview = params.commentPreview.length > 80

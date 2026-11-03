@@ -27,7 +27,7 @@ export function TicketAutoRefresh({
   initialStatusCode,
   initialCommentCount = 0,
   initialAssignedEngineerUserId,
-  pollIntervalMs = 3500,
+  pollIntervalMs = 10000,
 }: TicketAutoRefreshProps) {
   const router = useRouter();
 
@@ -52,10 +52,10 @@ export function TicketAutoRefresh({
     isRefreshingRef.current = false;
   }, [initialUpdatedAt, initialStatusCode, initialCommentCount, initialAssignedEngineerUserId]);
 
-  // Safe throttled refresh
+  // Safe throttled refresh: at least 5 seconds between refreshes
   const triggerRefresh = () => {
     const now = Date.now();
-    if (now - lastRefreshTimestampRef.current < 1500) {
+    if (now - lastRefreshTimestampRef.current < 5000 || isRefreshingRef.current) {
       return;
     }
     lastRefreshTimestampRef.current = now;
@@ -88,51 +88,7 @@ export function TicketAutoRefresh({
     };
   }, [ticketId]);
 
-  // 2. Resilient SSE direct listener
-  useEffect(() => {
-    let eventSource: EventSource | null = null;
-    let reconnectTimeout: NodeJS.Timeout;
-
-    const connectSSE = () => {
-      try {
-        eventSource = new EventSource('/api/notifications/sse');
-
-        eventSource.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.type === 'new_notifications' && Array.isArray(data.notifications)) {
-              const matched = data.notifications.some(
-                (n: any) =>
-                  (n.relatedEntityType === 'service_ticket' && n.relatedEntityId === ticketId) ||
-                  (n.actionUrl && n.actionUrl.includes(`/tickets/${ticketId}`))
-              );
-              if (matched) {
-                triggerRefresh();
-              }
-            }
-          } catch {
-            // Ignore parse errors
-          }
-        };
-
-        eventSource.onerror = () => {
-          eventSource?.close();
-          reconnectTimeout = setTimeout(connectSSE, 20000);
-        };
-      } catch {
-        // Ignore SSE connection errors
-      }
-    };
-
-    connectSSE();
-
-    return () => {
-      eventSource?.close();
-      clearTimeout(reconnectTimeout);
-    };
-  }, [ticketId]);
-
-  // 3. Fast live-sync polling (checks updatedAt, statusCode, commentCount)
+  // 2. Background live-sync polling (checks updatedAt, statusCode, commentCount)
   useEffect(() => {
     let isCancelled = false;
 
@@ -151,10 +107,14 @@ export function TicketAutoRefresh({
         const data = await res.json();
         const current = lastKnownRef.current;
 
+        const currentUpdated = current.updatedAt ? new Date(current.updatedAt).getTime() : 0;
+        const newUpdated = data.updatedAt ? new Date(data.updatedAt).getTime() : 0;
+        const timeDiff = Math.abs(newUpdated - currentUpdated);
+
         const hasChanged =
-          (data.updatedAt && current.updatedAt && data.updatedAt !== current.updatedAt) ||
+          (newUpdated > 0 && currentUpdated > 0 && timeDiff > 2000) ||
           (data.statusCode && current.statusCode && data.statusCode !== current.statusCode) ||
-          (typeof data.commentCount === 'number' && data.commentCount !== current.commentCount) ||
+          (typeof data.commentCount === 'number' && data.commentCount > current.commentCount) ||
           (data.assignedEngineerUserId !== undefined &&
             data.assignedEngineerUserId !== current.assignedEngineerUserId);
 

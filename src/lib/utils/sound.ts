@@ -41,10 +41,14 @@ function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
 
   if (!audioContext) {
-    const AudioCtx =
-      window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioCtx) return null;
-    audioContext = new AudioCtx();
+    try {
+      const AudioCtx =
+        window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return null;
+      audioContext = new AudioCtx();
+    } catch {
+      return null;
+    }
   }
 
   return audioContext;
@@ -58,10 +62,18 @@ async function ensureAudioContext(): Promise<AudioContext | null> {
   if (!ctx) return null;
 
   if (ctx.state === 'suspended') {
-    try {
-      await ctx.resume();
-    } catch {
-      // Browser autoplay policy might block if no user gesture yet
+    // Only attempt resume if browser permits user activation
+    const hasUserGesture =
+      typeof navigator !== 'undefined' &&
+      'userActivation' in navigator &&
+      Boolean((navigator as any).userActivation?.hasBeenActive);
+
+    if (hasUserGesture) {
+      try {
+        await ctx.resume();
+      } catch {
+        // Autoplay blocked, safely ignore
+      }
     }
   }
 
@@ -91,14 +103,14 @@ export async function unlockAudio(): Promise<void> {
 
   initAudioElements();
 
-  // 1. Unlock AudioContext
-  const ctx = getAudioContext();
-  if (ctx && ctx.state === 'suspended') {
-    try {
-      await ctx.resume();
-    } catch {
-      // Ignore
+  // 1. Unlock AudioContext within trusted user gesture
+  try {
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === 'suspended') {
+      await ctx.resume().catch(() => {});
     }
+  } catch {
+    // Ignore
   }
 
   // 2. Play silent HTML5 audio sample to unlock audio pipeline
@@ -114,7 +126,7 @@ export async function unlockAudio(): Promise<void> {
         isAudioUnlocked = true;
       }
     } catch {
-      // May fail if interaction wasn't trusted, will retry on next interaction
+      // May fail if interaction was not trusted
     }
   }
 }
@@ -134,11 +146,14 @@ async function playAudioFileWithFallback(
       await audio.play();
       return;
     } catch {
-      // HTML5 audio playback failed (e.g. autoplay restriction or missing file), proceed to Web Audio fallback
+      // HTML5 audio playback failed (e.g. autoplay restriction), proceed to Web Audio fallback if active
     }
   }
 
-  await fallbackFn();
+  // Only run Web Audio API synthesis if audio context is already running
+  if (audioContext && audioContext.state === 'running') {
+    await fallbackFn();
+  }
 }
 
 // ── 1. Notification Sound (Chime) ─────────────────────────────────────────────────
