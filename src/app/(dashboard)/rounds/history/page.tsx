@@ -1,15 +1,21 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import {
-  getRoundHistory, getRoundCalendarData, getTeamRoundCompliance, isEngineerRoundEnabled,
+  getRoundHistory,
+  getRoundCalendarData,
+  getTeamRoundCompliance,
+  isEngineerRoundEnabled,
 } from '@/lib/actions/engineer-rounds';
 import { hasRole } from '@/lib/auth/rbac';
 import { PageHeader } from '@/components/shared/page-header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RoundHistoryClient } from '@/components/rounds/round-history-client';
+import { RoundHistoryClient, EngineerOption } from '@/components/rounds/round-history-client';
 import { ArrowLeft, AlertCircle, Download } from 'lucide-react';
 import Link from 'next/link';
+import { db } from '@/lib/db';
+import { engineerProfiles } from '@/lib/db/schema';
+import { eq, asc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +28,7 @@ export default async function RoundHistoryPage() {
 
   if (!enabled) {
     return (
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="space-y-6 max-w-7xl mx-auto">
         <PageHeader title="Round History" />
         <Card>
           <CardContent className="pt-6 text-center">
@@ -39,31 +45,70 @@ export default async function RoundHistoryPage() {
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
 
+  // Check if current user has an engineer profile
+  const userProfile = await db.query.engineerProfiles.findFirst({
+    where: eq(engineerProfiles.userId, user.id),
+  });
+
+  let engineersList: EngineerOption[] = [];
+  let selectedEngineerId = user.id;
+
+  if (isManager) {
+    const allProfiles = await db.query.engineerProfiles.findMany({
+      where: user.organizationId
+        ? eq(engineerProfiles.organizationId, user.organizationId)
+        : undefined,
+      with: {
+        user: { columns: { id: true, fullName: true } },
+        hospital: { columns: { id: true, name: true } },
+      },
+      orderBy: [asc(engineerProfiles.createdAt)],
+    });
+
+    engineersList = allProfiles.map((p) => ({
+      id: p.userId,
+      name: p.user?.fullName || 'Biomedical Engineer',
+      hospitalName: p.hospital?.name || '',
+    }));
+
+    // If current manager does not have an engineer profile, default to first available engineer
+    if (!userProfile && engineersList.length > 0) {
+      selectedEngineerId = engineersList[0].id;
+    }
+  }
+
   // Fetch initial data
   const [historyResult, calendarResult, complianceResult] = await Promise.all([
-    getRoundHistory({ pageSize: 20 }),
-    getRoundCalendarData({ engineerId: user.id, month: currentMonth, year: currentYear }),
+    getRoundHistory({ pageSize: 30 }),
+    getRoundCalendarData({
+      engineerId: selectedEngineerId,
+      month: currentMonth,
+      year: currentYear,
+    }),
     isManager ? getTeamRoundCompliance() : Promise.resolve(null),
   ]);
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <PageHeader title="Round History" description="View past rounds and compliance">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <PageHeader
+        title="Round History & Compliance"
+        description="View past biomedical inspection rounds, calendar activity, and team compliance."
+      >
         <div className="flex items-center gap-2">
           <a
             href="/api/admin/data/export?entities=rounds&format=xlsx"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
               <Download className="h-4 w-4" />
               Export
             </Button>
           </a>
           <Link href="/rounds">
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
               <ArrowLeft className="h-4 w-4" />
-              Today
+              Today&apos;s Round
             </Button>
           </Link>
         </div>
@@ -76,6 +121,8 @@ export default async function RoundHistoryPage() {
         isManager={isManager}
         currentUserId={user.id}
         pagination={historyResult.success ? (historyResult as any).pagination : null}
+        engineersList={engineersList}
+        selectedEngineerId={selectedEngineerId}
       />
     </div>
   );

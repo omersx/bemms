@@ -7,9 +7,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Clock,
+  User,
+  Building2,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-interface CalendarDay {
+export interface CalendarDay {
   date: string;
   day: number;
   dayName: string;
@@ -24,7 +36,7 @@ interface CalendarDay {
   } | null;
 }
 
-interface RoundCalendarProps {
+export interface RoundCalendarProps {
   month: number;
   year: number;
   calendarDays: CalendarDay[];
@@ -34,26 +46,27 @@ interface RoundCalendarProps {
     missed: number;
     complianceRate: number;
   };
-  engineerName?: string;
+  engineerName?: string | null;
+  hospitalName?: string | null;
   onMonthChange?: (month: number, year: number) => void;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  completed: 'bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-500',
-  partial: 'bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-500',
-  missed: 'bg-red-400 dark:bg-red-600 hover:bg-red-500 dark:hover:bg-red-500',
-  in_progress: 'bg-blue-400 dark:bg-blue-600 hover:bg-blue-500 dark:hover:bg-blue-500 animate-pulse',
-  scheduled: 'bg-muted hover:bg-muted-foreground/20',
-  off_day: 'bg-transparent',
+const STATUS_BORDER_AND_BG: Record<string, string> = {
+  completed: 'bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-950 dark:text-emerald-100',
+  partial: 'bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/20 text-amber-950 dark:text-amber-100',
+  missed: 'bg-rose-500/10 border-rose-500/30 hover:bg-rose-500/20 text-rose-950 dark:text-rose-100',
+  in_progress: 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 animate-pulse text-blue-950 dark:text-blue-100',
+  scheduled: 'bg-card border-border/50 hover:border-primary/40 hover:bg-accent/30 text-card-foreground',
+  off_day: 'bg-muted/10 border-border/20 text-muted-foreground/35 hover:bg-muted/20',
 };
 
 const STATUS_LABELS: Record<string, string> = {
   completed: 'Completed',
-  partial: 'Partial',
-  missed: 'Missed',
+  partial: 'Partially Completed',
+  missed: 'Missed Round',
   in_progress: 'In Progress',
-  scheduled: 'Scheduled',
-  off_day: 'Off Day',
+  scheduled: 'Scheduled Working Day',
+  off_day: 'Scheduled Off Day',
 };
 
 const MONTH_NAMES = [
@@ -67,13 +80,13 @@ export function RoundCalendar({
   calendarDays,
   summary,
   engineerName,
+  hospitalName,
   onMonthChange,
 }: RoundCalendarProps) {
   const router = useRouter();
 
   // Build calendar grid (weeks × 7)
   const firstDay = new Date(year, month - 1, 1).getDay(); // 0=Sun
-  const totalDays = calendarDays.length;
   const weeks: (CalendarDay | null)[][] = [];
 
   let currentWeek: (CalendarDay | null)[] = [];
@@ -108,64 +121,115 @@ export function RoundCalendar({
     onMonthChange?.(newMonth, newYear);
   };
 
+  const todayStr = new Date().toISOString().split('T')[0];
+
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={handlePrev}
-          className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ←
-        </button>
-        <div className="text-center">
-          <h3 className="font-semibold text-lg">
-            {MONTH_NAMES[month - 1]} {year}
-          </h3>
-          {engineerName && (
-            <p className="text-sm text-muted-foreground">{engineerName}</p>
-          )}
+      {/* Month Navigation & Engineer Identity */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={handlePrev}
+            className="h-8 w-8 shrink-0"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          <div>
+            <h3 className="font-semibold text-base sm:text-lg tracking-tight">
+              {MONTH_NAMES[month - 1]} {year}
+            </h3>
+            {engineerName && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                <User className="h-3 w-3 text-primary" />
+                <span className="font-medium text-foreground">{engineerName}</span>
+                {hospitalName && (
+                  <>
+                    <span>·</span>
+                    <Building2 className="h-3 w-3" />
+                    <span>{hospitalName}</span>
+                  </>
+                )}
+              </p>
+            )}
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={handleNext}
+            className="h-8 w-8 shrink-0"
+            aria-label="Next month"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-        <button
-          onClick={handleNext}
-          className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-        >
-          →
-        </button>
+
+        {/* Quick Month Compliance Pill */}
+        <div className="flex items-center gap-2">
+          <Badge
+            variant="outline"
+            className={cn(
+              'px-2.5 py-1 text-xs font-semibold',
+              summary.complianceRate >= 80
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                : summary.complianceRate >= 50
+                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
+            )}
+          >
+            {summary.complianceRate}% Monthly Compliance
+          </Badge>
+          <span className="text-xs text-muted-foreground hidden md:inline">
+            ({summary.completed}/{summary.totalWorkingDays} days)
+          </span>
+        </div>
       </div>
 
       {/* Calendar Grid */}
-      <div className="rounded-lg border bg-card p-4">
-        {/* Day labels */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-            <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">
+      <div className="rounded-xl border bg-card/60 backdrop-blur-sm p-2 sm:p-4 shadow-sm">
+        {/* Day-of-week header */}
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-2">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+            <div
+              key={d}
+              className="text-center text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground py-1.5"
+            >
               {d}
             </div>
           ))}
         </div>
 
-        {/* Weeks */}
-        <TooltipProvider delayDuration={200}>
-          <div className="grid grid-cols-7 gap-1">
+        {/* Calendar Day Tiles */}
+        <TooltipProvider delayDuration={150}>
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
             {weeks.flat().map((day, idx) => {
               if (!day) {
-                return <div key={`empty-${idx}`} className="aspect-square" />;
+                return (
+                  <div
+                    key={`empty-${idx}`}
+                    className="h-16 sm:h-20 lg:h-22 rounded-lg bg-muted/5 border border-dashed border-border/20"
+                  />
+                );
               }
 
-              const isToday = day.date === new Date().toISOString().split('T')[0];
+              const isToday = day.date === todayStr;
 
               return (
                 <Tooltip key={day.date}>
                   <TooltipTrigger asChild>
                     <button
+                      type="button"
                       className={cn(
-                        'aspect-square rounded-sm transition-all duration-150 relative flex items-center justify-center text-xs font-medium',
-                        STATUS_COLORS[day.status],
-                        day.status === 'off_day' ? 'text-muted-foreground/40' : 'text-white',
-                        day.status === 'scheduled' && 'text-muted-foreground',
-                        isToday && 'ring-2 ring-primary ring-offset-1 ring-offset-background',
-                        day.round ? 'cursor-pointer' : 'cursor-default',
+                        'h-16 sm:h-20 lg:h-22 w-full p-1.5 sm:p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-150 relative group',
+                        STATUS_BORDER_AND_BG[day.status],
+                        isToday && 'ring-2 ring-primary ring-offset-2 ring-offset-background font-semibold',
+                        day.round ? 'cursor-pointer hover:shadow-sm' : 'cursor-default'
                       )}
                       onClick={() => {
                         if (day.round) {
@@ -173,22 +237,137 @@ export function RoundCalendar({
                         }
                       }}
                     >
-                      {day.day}
+                      {/* Top Row: Date Number and Status Chip */}
+                      <div className="flex items-center justify-between w-full">
+                        {isToday ? (
+                          <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold shadow-sm">
+                            {day.day}
+                          </span>
+                        ) : (
+                          <span
+                            className={cn(
+                              'text-xs font-semibold',
+                              day.status === 'off_day'
+                                ? 'text-muted-foreground/35'
+                                : 'text-foreground'
+                            )}
+                          >
+                            {day.day}
+                          </span>
+                        )}
+
+                        {/* Desktop Status Badges */}
+                        {day.status === 'completed' && (
+                          <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                            <CheckCircle2 className="h-3 w-3" />
+                            <span className="hidden md:inline">Done</span>
+                          </span>
+                        )}
+                        {day.status === 'partial' && (
+                          <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded">
+                            <AlertTriangle className="h-3 w-3" />
+                            <span className="hidden md:inline">Partial</span>
+                          </span>
+                        )}
+                        {day.status === 'in_progress' && (
+                          <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.5 rounded animate-pulse">
+                            <Clock className="h-3 w-3" />
+                            <span className="hidden md:inline">Live</span>
+                          </span>
+                        )}
+                        {day.status === 'missed' && (
+                          <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 rounded">
+                            <XCircle className="h-3 w-3" />
+                            <span className="hidden md:inline">Missed</span>
+                          </span>
+                        )}
+                        {day.status === 'off_day' && (
+                          <span className="hidden sm:inline text-[10px] text-muted-foreground/35 font-medium">
+                            Off
+                          </span>
+                        )}
+                        {day.status === 'scheduled' && !day.round && (
+                          <span className="hidden sm:inline text-[10px] text-muted-foreground/60 font-medium">
+                            Duty
+                          </span>
+                        )}
+
+                        {/* Mobile Status Dot */}
+                        <span className="sm:hidden">
+                          {day.status === 'completed' && (
+                            <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
+                          )}
+                          {day.status === 'partial' && (
+                            <span className="h-2 w-2 rounded-full bg-amber-500 inline-block" />
+                          )}
+                          {day.status === 'in_progress' && (
+                            <span className="h-2 w-2 rounded-full bg-blue-500 inline-block animate-pulse" />
+                          )}
+                          {day.status === 'missed' && (
+                            <span className="h-2 w-2 rounded-full bg-rose-500 inline-block" />
+                          )}
+                        </span>
+                      </div>
+
+                      {/* Bottom Row / Body Details */}
+                      {day.round ? (
+                        <div className="mt-auto pt-1 w-full flex items-center justify-between text-[11px] leading-tight text-muted-foreground">
+                          <span className="font-medium text-foreground truncate">
+                            {day.round.completedDepartments}/{day.round.totalDepartments} depts
+                          </span>
+                          {day.round.totalIssuesReported > 0 && (
+                            <span className="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-0.5 shrink-0 text-[10px]">
+                              <AlertTriangle className="h-3 w-3" />
+                              {day.round.totalIssuesReported}
+                            </span>
+                          )}
+                        </div>
+                      ) : day.isWorkingDay && day.status === 'scheduled' ? (
+                        <div className="mt-auto text-[10px] text-muted-foreground/60 hidden sm:block">
+                          Scheduled
+                        </div>
+                      ) : null}
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="text-xs">
-                    <div className="space-y-0.5">
-                      <p className="font-medium">{day.date} — {STATUS_LABELS[day.status]}</p>
+
+                  {/* Rich Tooltip */}
+                  <TooltipContent side="top" className="text-xs p-2.5 max-w-xs shadow-md">
+                    <div className="space-y-1">
+                      <p className="font-semibold text-sm">
+                        {new Date(day.date + 'T00:00:00').toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </p>
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        <span className="font-medium text-muted-foreground">Status:</span>
+                        <span className="font-semibold capitalize text-foreground">
+                          {STATUS_LABELS[day.status]}
+                        </span>
+                      </div>
                       {day.round && (
-                        <>
-                          <p>{day.round.completedDepartments}/{day.round.totalDepartments} departments</p>
+                        <div className="pt-1.5 border-t border-border/40 space-y-0.5 text-muted-foreground">
+                          <p>
+                            <span className="font-medium text-foreground">
+                              {day.round.completedDepartments} of {day.round.totalDepartments}
+                            </span>{' '}
+                            departments completed
+                          </p>
                           {day.round.totalIssuesReported > 0 && (
-                            <p>{day.round.totalIssuesReported} issues reported</p>
+                            <p className="text-amber-500 font-medium flex items-center gap-1">
+                              <AlertTriangle className="h-3 w-3" />
+                              {day.round.totalIssuesReported} issue(s) reported
+                            </p>
                           )}
                           {day.round.totalNotes > 0 && (
-                            <p>{day.round.totalNotes} notes</p>
+                            <p>{day.round.totalNotes} visit note(s) logged</p>
                           )}
-                        </>
+                          <p className="text-[10px] text-primary pt-1 font-medium">
+                            Click day cell to open round inspection details →
+                          </p>
+                        </div>
                       )}
                     </div>
                   </TooltipContent>
@@ -199,33 +378,28 @@ export function RoundCalendar({
         </TooltipProvider>
       </div>
 
-      {/* Legend & Summary */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* Legend & Summary Info */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-sm bg-green-500" /> Completed
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" /> Completed
           </span>
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-sm bg-yellow-400" /> Partial
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-amber-500" /> Partial
           </span>
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-sm bg-red-400" /> Missed
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-blue-500" /> In Progress
           </span>
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-sm bg-muted border" /> Off Day
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-rose-500" /> Missed
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-muted border" /> Off Day
           </span>
         </div>
-        <div className="text-sm font-medium">
-          <span className={cn(
-            summary.complianceRate >= 80 ? 'text-green-600 dark:text-green-400' :
-            summary.complianceRate >= 50 ? 'text-yellow-600 dark:text-yellow-400' :
-            'text-red-600 dark:text-red-400'
-          )}>
-            {summary.complianceRate}% compliance
-          </span>
-          <span className="text-muted-foreground ml-1">
-            ({summary.completed}/{summary.totalWorkingDays} working days)
-          </span>
+
+        <div className="text-xs text-muted-foreground">
+          Showing <span className="font-semibold text-foreground">{summary.totalWorkingDays}</span> scheduled working days for this month
         </div>
       </div>
     </div>

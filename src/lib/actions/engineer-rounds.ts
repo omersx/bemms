@@ -50,6 +50,7 @@ async function getEngineerProfile(userId: string) {
     where: eq(engineerProfiles.userId, userId),
     with: {
       hospital: true,
+      user: { columns: { id: true, fullName: true, email: true } },
     },
   });
 }
@@ -897,6 +898,30 @@ export async function getRoundCalendarData(input: unknown) {
   }
 
   try {
+    // Get engineer's profile
+    let profile = await getEngineerProfile(engineerId);
+    let targetEngineerId = engineerId;
+
+    // If manager requested a non-existent profile (e.g. admin's own ID), fall back to first active profile in org
+    if (!profile && isManager) {
+      const fallback = await db.query.engineerProfiles.findFirst({
+        where: session.organizationId
+          ? eq(engineerProfiles.organizationId, session.organizationId)
+          : undefined,
+        with: {
+          hospital: true,
+          user: { columns: { id: true, fullName: true, email: true } },
+        },
+        orderBy: [asc(engineerProfiles.createdAt)],
+      });
+      if (fallback) {
+        profile = fallback;
+        targetEngineerId = fallback.userId;
+      }
+    }
+
+    const workingDays = (profile?.workingDays as string[]) || (profile ? [] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu']);
+
     // Calculate date range for the month
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
     const lastDay = new Date(year, month, 0).getDate();
@@ -905,7 +930,7 @@ export async function getRoundCalendarData(input: unknown) {
     // Get all rounds for this month
     const rounds = await db.query.engineerRounds.findMany({
       where: and(
-        eq(engineerRounds.engineerId, engineerId),
+        eq(engineerRounds.engineerId, targetEngineerId),
         gte(engineerRounds.roundDate, startDate),
         lte(engineerRounds.roundDate, endDate),
       ),
@@ -922,10 +947,6 @@ export async function getRoundCalendarData(input: unknown) {
       },
       orderBy: [asc(engineerRounds.roundDate)],
     });
-
-    // Get engineer's working days
-    const profile = await getEngineerProfile(engineerId);
-    const workingDays = (profile?.workingDays as string[]) || [];
 
     // Build calendar data
     const calendarDays = [];
@@ -980,7 +1001,9 @@ export async function getRoundCalendarData(input: unknown) {
       data: {
         month,
         year,
-        engineerId,
+        engineerId: targetEngineerId,
+        engineerName: profile?.user?.fullName || null,
+        hospitalName: profile?.hospital?.name || null,
         workingDays,
         calendarDays,
         summary: {
