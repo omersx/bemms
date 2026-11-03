@@ -356,14 +356,7 @@ export function TicketCommentSection({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // On touch/mobile devices, Enter adds a newline so users do not accidentally send
-    const isTouch =
-      typeof window !== "undefined" &&
-      (window.matchMedia("(pointer: coarse)").matches ||
-        "ontouchstart" in window ||
-        navigator.maxTouchPoints > 0);
-
-    if (e.key === "Enter" && !e.shiftKey && !isTouch) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
