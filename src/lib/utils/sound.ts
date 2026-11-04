@@ -191,24 +191,26 @@ export async function playNotificationSound(): Promise<void> {
   // Mobile haptic vibration
   triggerVibration([150, 75, 150]);
 
+  // Primary: Web Audio API synthesis (0ms latency, zero network range requests, immune to cache errors)
   try {
-    const audio = new Audio('/sounds/notification.wav');
-    audio.volume = 1.0;
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      await playPromise;
-      return;
-    }
-  } catch {
-    // Fallback to Web Audio synthesis if HTML5 audio fails
-  }
-
-  await playAudioFileWithFallback(notificationAudio, async () => {
     const ctx = await ensureAudioContext();
     if (ctx && ctx.state === 'running') {
       await synthesizeNotificationChime(ctx);
+      return;
     }
-  });
+  } catch {
+    // Fallback to HTML5 audio if Web Audio is unavailable
+  }
+
+  // Secondary fallback: HTML5 audio element
+  try {
+    if (notificationAudio) {
+      notificationAudio.currentTime = 0;
+      await notificationAudio.play();
+    }
+  } catch {
+    // Ignore
+  }
 }
 
 // ── 2. Urgent Notification Sound (Alarm) ──────────────────────────────────────────

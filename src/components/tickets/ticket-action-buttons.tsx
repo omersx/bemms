@@ -18,6 +18,13 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -217,19 +224,19 @@ function ResolveDialog({ ticketId, hasDevice, ticketNumber }: { ticketId: string
             <div className="space-y-3">
               <div>
                 <Label htmlFor="finalDeviceStatus">Device Status After Fix</Label>
-                <select
-                  id="finalDeviceStatus"
-                  value={deviceStatus}
-                  onChange={(e) => setDeviceStatus(e.target.value)}
-                  className="w-full mt-1.5 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="operational">✅ Operational (Safe for Clinical Use)</option>
-                  <option value="operational_with_limitations">⚠️ Operational with Limitations</option>
-                  <option value="awaiting_release">⏳ Awaiting Release (QA Verification)</option>
-                  <option value="standby">💤 Standby (Reserve Equipment)</option>
-                  <option value="out_of_service">🚫 Out of Service (Unrepairable / Condemned)</option>
-                  <option value="decommissioned">🗑️ Decommissioned (Permanently Retired)</option>
-                </select>
+                <Select value={deviceStatus} onValueChange={setDeviceStatus}>
+                  <SelectTrigger id="finalDeviceStatus" className="w-full mt-1.5 text-xs sm:text-sm">
+                    <SelectValue placeholder="Select final device status..." />
+                  </SelectTrigger>
+                  <SelectContent className="max-w-[calc(100vw-3rem)]">
+                    <SelectItem value="operational">✅ Operational (Safe for Clinical Use)</SelectItem>
+                    <SelectItem value="operational_with_limitations">⚠️ Operational with Limitations</SelectItem>
+                    <SelectItem value="awaiting_release">⏳ Awaiting Release (QA Verification)</SelectItem>
+                    <SelectItem value="standby">💤 Standby (Reserve Equipment)</SelectItem>
+                    <SelectItem value="out_of_service">🚫 Out of Service (Unrepairable / Condemned)</SelectItem>
+                    <SelectItem value="decommissioned">🗑️ Decommissioned (Permanently Retired)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Limitations Note — shown only when operational_with_limitations */}
@@ -653,19 +660,19 @@ function UpdateDeviceStatusDialog({
         <div className="space-y-4 py-2">
           <div>
             <Label htmlFor="activeDeviceStatus">Current Equipment Status</Label>
-            <select
-              id="activeDeviceStatus"
-              value={deviceStatus}
-              onChange={(e) => setDeviceStatus(e.target.value)}
-              className="w-full mt-1.5 rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="under_repair">🛠️ Under Repair (Active Work)</option>
-              <option value="waiting_for_parts">📦 Waiting for Spare Parts / Vendor</option>
-              <option value="under_maintenance">🔧 Under Maintenance (Routine Service)</option>
-              <option value="operational_with_limitations">⚠️ Operational with Limitations (Partial Function)</option>
-              <option value="out_of_service">🚫 Out of Service (Unsafe / Quarantined)</option>
-              <option value="standby">💤 Standby (Temporarily Idle)</option>
-            </select>
+            <Select value={deviceStatus} onValueChange={setDeviceStatus}>
+              <SelectTrigger id="activeDeviceStatus" className="w-full mt-1.5 text-xs sm:text-sm">
+                <SelectValue placeholder="Select equipment status..." />
+              </SelectTrigger>
+              <SelectContent className="max-w-[calc(100vw-3rem)]">
+                <SelectItem value="under_repair">🛠️ Under Repair (Active Work)</SelectItem>
+                <SelectItem value="waiting_for_parts">📦 Waiting for Spare Parts / Vendor</SelectItem>
+                <SelectItem value="under_maintenance">🔧 Under Maintenance (Routine Service)</SelectItem>
+                <SelectItem value="operational_with_limitations">⚠️ Operational with Limitations (Partial Function)</SelectItem>
+                <SelectItem value="out_of_service">🚫 Out of Service (Unsafe / Quarantined)</SelectItem>
+                <SelectItem value="standby">💤 Standby (Temporarily Idle)</SelectItem>
+              </SelectContent>
+            </Select>
             <p className="text-xs text-muted-foreground mt-1">
               Reflects real-time equipment availability to hospital clinical staff.
             </p>

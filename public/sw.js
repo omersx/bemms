@@ -1,13 +1,10 @@
 // BEMMS Service Worker
 // Handles: caching, push notifications, offline shell
 
-const CACHE_NAME = 'bemms-v4';
+const CACHE_NAME = 'bemms-v5';
 const STATIC_ASSETS = [
   '/login',
   '/dashboard',
-  '/sounds/notification.wav',
-  '/sounds/urgent.wav',
-  '/sounds/beep.wav',
 ];
 
 // Install — pre-cache shell
@@ -46,6 +43,16 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
   if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return;
 
+  // Never intercept Range requests or media files (prevents net::ERR_CACHE_OPERATION_NOT_SUPPORTED)
+  if (
+    request.headers.has('range') ||
+    url.pathname.startsWith('/sounds/') ||
+    url.pathname.endsWith('.wav') ||
+    url.pathname.endsWith('.mp3')
+  ) {
+    return;
+  }
+
   // API/data requests — network only
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/data/')) return;
 
@@ -53,9 +60,6 @@ self.addEventListener('fetch', (event) => {
   if (
     url.pathname.startsWith('/_next/static/') ||
     url.pathname.startsWith('/icons/') ||
-    url.pathname.startsWith('/sounds/') ||
-    url.pathname.endsWith('.wav') ||
-    url.pathname.endsWith('.mp3') ||
     url.pathname.endsWith('.png') ||
     url.pathname.endsWith('.ico')
   ) {
