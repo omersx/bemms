@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Sliders, Route, Loader2, Save } from 'lucide-react';
+import { Sliders, Route, Loader2, Save, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { updateOrganizationSettings } from '@/lib/actions/system-settings';
 import type { FeaturesSettings } from '@/lib/validators/system-settings';
@@ -18,7 +18,7 @@ interface FeaturesFormProps {
 
 export function FeaturesForm({ initialData, organizationId }: FeaturesFormProps) {
   const [formData, setFormData] = useState<FeaturesSettings>(
-    initialData || { engineerRoundEnabled: false }
+    initialData || { engineerRoundEnabled: false, copilotEnabled: false }
   );
   const [changeReason, setChangeReason] = useState('');
   const [saving, setSaving] = useState(false);
@@ -87,6 +87,36 @@ export function FeaturesForm({ initialData, organizationId }: FeaturesFormProps)
                 checked={formData.engineerRoundEnabled}
                 onCheckedChange={(checked) =>
                   setFormData((prev) => ({ ...prev, engineerRoundEnabled: checked }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="rounded-lg border p-4 transition-colors hover:bg-muted/30">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex gap-3">
+                <div className="mt-1 rounded-md bg-primary/10 p-2 text-primary">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="copilotEnabled" className="text-base font-semibold cursor-pointer">
+                    Engineering Copilot (AI)
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enable the AI Engineering Copilot that helps biomedical engineers find historical maintenance
+                    data, similar past cases, and evidence-based insights from finalized BEMMS records.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    When disabled, the Copilot panel and AI features will be hidden across all pages.
+                  </p>
+                </div>
+              </div>
+
+              <Switch
+                id="copilotEnabled"
+                checked={formData.copilotEnabled}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, copilotEnabled: checked }))
                 }
               />
             </div>

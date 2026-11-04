@@ -34,6 +34,7 @@ const defaultSettings: SystemSettings = {
   },
   features: {
     engineerRoundEnabled: false,
+    copilotEnabled: false,
   },
 };
 

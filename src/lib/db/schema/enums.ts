@@ -146,3 +146,17 @@ export const roundStatusEnum = pgEnum('round_status', [
 export const roundVisitStatusEnum = pgEnum('round_visit_status', [
   'pending', 'completed', 'skipped'
 ]);
+
+// ── AI Agent Harness enums ────────────────────────────────────────────────────
+export const agentSessionStatusEnum = pgEnum('agent_session_status', [
+  'active', 'archived'
+]);
+export const agentSessionContextTypeEnum = pgEnum('agent_session_context_type', [
+  'device', 'ticket', 'maintenance_task', 'department', 'general'
+]);
+export const agentMessageRoleEnum = pgEnum('agent_message_role', [
+  'user', 'assistant', 'system', 'tool'
+]);
+export const agentAuditEventTypeEnum = pgEnum('agent_audit_event_type', [
+  'knowledge_search', 'model_call', 'tool_call', 'session_created', 'session_archived', 'error'
+]);

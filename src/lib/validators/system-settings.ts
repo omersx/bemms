@@ -22,6 +22,7 @@ export const retentionSettingsSchema = z.object({
 
 export const featuresSettingsSchema = z.object({
   engineerRoundEnabled: z.boolean().default(false),
+  copilotEnabled: z.boolean().default(false),
 });
 
 export const systemSettingsSchema = z.object({
@@ -44,6 +45,7 @@ export const systemSettingsSchema = z.object({
   }),
   features: featuresSettingsSchema.default({
     engineerRoundEnabled: false,
+    copilotEnabled: false,
   }),
 });
 
