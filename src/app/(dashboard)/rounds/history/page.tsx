@@ -71,10 +71,8 @@ export default async function RoundHistoryPage() {
       hospitalName: p.hospital?.name || '',
     }));
 
-    // If current manager does not have an engineer profile, default to first available engineer
-    if (!userProfile && engineersList.length > 0) {
-      selectedEngineerId = engineersList[0].id;
-    }
+    // For managers/admins, default to 'all' to show team overview across all engineers
+    selectedEngineerId = 'all';
   }
 
   // Fetch initial data

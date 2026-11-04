@@ -64,7 +64,7 @@ export const roundHistoryFilterSchema = z.object({
 // ── Calendar Data ───────────────────────────────────────────────────────────────
 
 export const roundCalendarQuerySchema = z.object({
-  engineerId: z.string().uuid(),
+  engineerId: z.union([z.string().uuid(), z.literal('all')]),
   month: z.coerce.number().int().min(1).max(12),
   year: z.coerce.number().int().min(2020).max(2100),
 });

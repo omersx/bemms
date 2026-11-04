@@ -893,11 +893,178 @@ export async function getRoundCalendarData(input: unknown) {
 
   // Access check
   const isManager = hasRole(session.roles, 'BIOMED_MGR', 'HOSP_ADMIN', 'ORG_ADMIN', 'SYS_ADMIN');
-  if (engineerId !== session.id && !isManager) {
+  if (engineerId !== session.id && engineerId !== 'all' && !isManager) {
+    return { success: false, error: 'Access denied' };
+  }
+  if (engineerId === 'all' && !isManager) {
     return { success: false, error: 'Access denied' };
   }
 
   try {
+    // ── CASE 1: All Engineers View (Organization/Team Overview) ─────────────────
+    if (engineerId === 'all') {
+      const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+      const lastDay = new Date(year, month, 0).getDate();
+      const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+      // Get all engineer profiles in org
+      const profiles = await db.query.engineerProfiles.findMany({
+        where: session.organizationId
+          ? eq(engineerProfiles.organizationId, session.organizationId)
+          : undefined,
+        with: {
+          hospital: { columns: { id: true, name: true } },
+          user: { columns: { id: true, fullName: true, email: true } },
+        },
+        orderBy: [asc(engineerProfiles.createdAt)],
+      });
+
+      // Get all rounds in org for this month
+      const rounds = await db.query.engineerRounds.findMany({
+        where: and(
+          session.organizationId
+            ? eq(engineerRounds.organizationId, session.organizationId)
+            : undefined,
+          gte(engineerRounds.roundDate, startDate),
+          lte(engineerRounds.roundDate, endDate),
+        ),
+        columns: {
+          id: true,
+          engineerId: true,
+          roundDate: true,
+          status: true,
+          totalDepartments: true,
+          completedDepartments: true,
+          totalIssuesReported: true,
+          totalNotes: true,
+          startedAt: true,
+          completedAt: true,
+        },
+        with: {
+          engineer: { columns: { id: true, fullName: true } },
+          hospital: { columns: { id: true, name: true } },
+        },
+        orderBy: [asc(engineerRounds.roundDate)],
+      });
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const calendarDays = [];
+      let totalScheduledShifts = 0;
+      let totalCompletedRounds = 0;
+      let totalMissedRounds = 0;
+
+      for (let day = 1; day <= lastDay; day++) {
+        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dateObj = new Date(year, month - 1, day);
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const dayName = dayNames[dateObj.getDay()];
+
+        // Engineers scheduled for this day
+        const scheduledEngineers = profiles.filter((p) => {
+          const workingDays = (p.workingDays as string[]) || [];
+          return workingDays.includes(dayName);
+        });
+
+        const dayRounds = rounds.filter((r) => r.roundDate === dateStr);
+        const isPast = dateObj < today;
+
+        totalScheduledShifts += scheduledEngineers.length;
+
+        let dayCompleted = 0;
+        let dayInProgress = 0;
+        let dayMissed = 0;
+
+        scheduledEngineers.forEach((p) => {
+          const r = dayRounds.find((round) => round.engineerId === p.userId);
+          if (r && r.status === 'completed') {
+            dayCompleted++;
+          } else if (r && r.status === 'in_progress') {
+            dayInProgress++;
+          } else if (isPast) {
+            dayMissed++;
+          }
+        });
+
+        totalCompletedRounds += dayCompleted;
+        totalMissedRounds += dayMissed;
+
+        let status: 'completed' | 'partial' | 'missed' | 'in_progress' | 'scheduled' | 'off_day';
+        if (scheduledEngineers.length === 0) {
+          status = 'off_day';
+        } else if (dayCompleted === scheduledEngineers.length && dayCompleted > 0) {
+          status = 'completed';
+        } else if (dayInProgress > 0) {
+          status = 'in_progress';
+        } else if (dayCompleted > 0) {
+          status = 'partial';
+        } else if (isPast) {
+          status = 'missed';
+        } else {
+          status = 'scheduled';
+        }
+
+        const totalDepts = dayRounds.reduce((acc, r) => acc + (r.totalDepartments || 0), 0);
+        const completedDepts = dayRounds.reduce((acc, r) => acc + (r.completedDepartments || 0), 0);
+        const totalIssues = dayRounds.reduce((acc, r) => acc + (r.totalIssuesReported || 0), 0);
+        const totalNotesCount = dayRounds.reduce((acc, r) => acc + (r.totalNotes || 0), 0);
+
+        calendarDays.push({
+          date: dateStr,
+          day,
+          dayName,
+          isWorkingDay: scheduledEngineers.length > 0,
+          status,
+          round: dayRounds.length > 0 || scheduledEngineers.length > 0 ? {
+            id: dayRounds[0]?.id || '',
+            totalDepartments: totalDepts,
+            completedDepartments: completedDepts,
+            totalIssuesReported: totalIssues,
+            totalNotes: totalNotesCount,
+            scheduledCount: scheduledEngineers.length,
+            completedCount: dayCompleted,
+            inProgressCount: dayInProgress,
+            missedCount: dayMissed,
+            teamBreakdown: scheduledEngineers.map((p) => {
+              const r = dayRounds.find((round) => round.engineerId === p.userId);
+              return {
+                id: p.userId,
+                name: p.user?.fullName || 'Engineer',
+                hospital: p.hospital?.name || '',
+                status: r ? r.status : (isPast ? 'missed' : 'scheduled'),
+                roundId: r?.id,
+              };
+            }),
+          } : null,
+        });
+      }
+
+      const complianceRate = totalScheduledShifts > 0
+        ? Math.round((totalCompletedRounds / totalScheduledShifts) * 100)
+        : 100;
+
+      return {
+        success: true,
+        data: {
+          month,
+          year,
+          engineerId: 'all',
+          engineerName: 'All Engineers (Team Overview)',
+          hospitalName: `${profiles.length} Biomedical Engineers`,
+          workingDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+          calendarDays,
+          summary: {
+            totalWorkingDays: totalScheduledShifts,
+            completed: totalCompletedRounds,
+            missed: totalMissedRounds,
+            complianceRate,
+          },
+        },
+      };
+    }
+
+    // ── CASE 2: Individual Engineer View ─────────────────────────────────────────
     // Get engineer's profile
     let profile = await getEngineerProfile(engineerId);
     let targetEngineerId = engineerId;

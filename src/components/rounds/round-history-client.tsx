@@ -25,13 +25,11 @@ import {
   FileText,
   Calendar as CalendarIcon,
   Search,
-  Filter,
-  User,
   Building2,
   Users,
   ChevronRight,
   TrendingUp,
-  ShieldCheck,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -64,7 +62,7 @@ export function RoundHistoryClient({
   selectedEngineerId: initialSelectedEngineerId,
 }: RoundHistoryClientProps) {
   const [selectedEngineerId, setSelectedEngineerId] = useState<string>(
-    initialSelectedEngineerId || currentUserId
+    initialSelectedEngineerId || (isManager ? 'all' : currentUserId)
   );
   const [calendarData, setCalendarData] = useState(initialCalendar);
   const [isPending, startTransition] = useTransition();
@@ -72,9 +70,11 @@ export function RoundHistoryClient({
   // Filters for recent rounds list
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Selected engineer object
   const currentEngineer = useMemo(() => {
+    if (selectedEngineerId === 'all') return null;
     return engineersList.find((e) => e.id === selectedEngineerId);
   }, [engineersList, selectedEngineerId]);
 
@@ -107,11 +107,24 @@ export function RoundHistoryClient({
     });
   };
 
+  // Handle clicking a specific day on the calendar
+  const handleDayClick = (dateStr: string) => {
+    setSelectedDate((prev) => (prev === dateStr ? null : dateStr));
+  };
+
   // Filtered rounds history
   const filteredHistory = useMemo(() => {
     return initialHistory.filter((round: any) => {
+      // Engineer filter (when a specific engineer is chosen)
+      if (selectedEngineerId !== 'all' && round.engineerId && round.engineerId !== selectedEngineerId) {
+        return false;
+      }
       // Status filter
       if (statusFilter !== 'all' && round.status !== statusFilter) {
+        return false;
+      }
+      // Date filter
+      if (selectedDate && round.roundDate !== selectedDate) {
         return false;
       }
       // Search query (engineer name or hospital name)
@@ -123,7 +136,7 @@ export function RoundHistoryClient({
       }
       return true;
     });
-  }, [initialHistory, statusFilter, searchQuery]);
+  }, [initialHistory, selectedEngineerId, statusFilter, selectedDate, searchQuery]);
 
   const statusIcons: Record<string, any> = {
     completed: <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />,
@@ -140,24 +153,29 @@ export function RoundHistoryClient({
     complianceRate: 0,
   };
 
+  const isAllEngineers = selectedEngineerId === 'all';
+
   return (
     <div className="space-y-6">
       {/* Supervisor Control: Engineer Selection */}
-      {isManager && engineersList.length > 0 && (
+      {isManager && (
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="py-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Users className="h-4 w-4 text-primary shrink-0" />
                 <span className="text-sm font-semibold">Viewing Engineer:</span>
                 <Select
                   value={selectedEngineerId}
                   onValueChange={handleEngineerChange}
                 >
-                  <SelectTrigger className="w-[220px] sm:w-[260px] h-9 text-xs font-medium bg-background">
-                    <SelectValue placeholder="Select an engineer" />
+                  <SelectTrigger className="w-[240px] sm:w-[280px] h-9 text-xs font-medium bg-background">
+                    <SelectValue placeholder="Select engineer or all" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all" className="text-xs font-semibold text-primary">
+                      👥 All Engineers (Team Overview)
+                    </SelectItem>
                     {engineersList.map((eng) => (
                       <SelectItem key={eng.id} value={eng.id} className="text-xs">
                         {eng.name} {eng.hospitalName ? `(${eng.hospitalName})` : ''}
@@ -167,12 +185,17 @@ export function RoundHistoryClient({
                 </Select>
               </div>
 
-              {currentEngineer && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Building2 className="h-3.5 w-3.5 text-primary" />
-                  <span>Assigned Hospital: <strong className="text-foreground">{currentEngineer.hospitalName || 'General Facility'}</strong></span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Building2 className="h-3.5 w-3.5 text-primary" />
+                <span>
+                  Assigned Hospital:{' '}
+                  <strong className="text-foreground">
+                    {isAllEngineers
+                      ? `All Facilities (${engineersList.length} Active Engineers)`
+                      : currentEngineer?.hospitalName || 'General Facility'}
+                  </strong>
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -183,7 +206,9 @@ export function RoundHistoryClient({
         <Card>
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Monthly Compliance</p>
+              <p className="text-xs font-medium text-muted-foreground">
+                {isAllEngineers ? 'Team Compliance' : 'Monthly Compliance'}
+              </p>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
@@ -214,7 +239,9 @@ export function RoundHistoryClient({
               <span className="text-2xl sm:text-3xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
                 {summary.completed}
               </span>
-              <span className="text-xs text-muted-foreground">of {summary.totalWorkingDays} days</span>
+              <span className="text-xs text-muted-foreground">
+                of {summary.totalWorkingDays} {isAllEngineers ? 'shifts' : 'days'}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -229,7 +256,9 @@ export function RoundHistoryClient({
               <span className="text-2xl sm:text-3xl font-bold tracking-tight text-rose-600 dark:text-rose-400">
                 {summary.missed}
               </span>
-              <span className="text-xs text-muted-foreground">days</span>
+              <span className="text-xs text-muted-foreground">
+                {isAllEngineers ? 'missed shifts' : 'days'}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -237,14 +266,18 @@ export function RoundHistoryClient({
         <Card>
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Scheduled Duty Days</p>
+              <p className="text-xs font-medium text-muted-foreground">
+                {isAllEngineers ? 'Total Scheduled Shifts' : 'Scheduled Duty Days'}
+              </p>
               <CalendarIcon className="h-4 w-4 text-primary" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                 {summary.totalWorkingDays}
               </span>
-              <span className="text-xs text-muted-foreground">working days</span>
+              <span className="text-xs text-muted-foreground">
+                {isAllEngineers ? 'engineer shifts' : 'working days'}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -269,6 +302,18 @@ export function RoundHistoryClient({
               </TabsTrigger>
             )}
           </TabsList>
+
+          {selectedDate && (
+            <div className="flex items-center gap-2 text-xs">
+              <Badge variant="secondary" className="gap-1 text-xs">
+                <span>Filtering date: {selectedDate}</span>
+                <X
+                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                  onClick={() => setSelectedDate(null)}
+                />
+              </Badge>
+            </div>
+          )}
         </div>
 
         {/* Tab 1: Monthly Calendar */}
@@ -277,7 +322,9 @@ export function RoundHistoryClient({
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base sm:text-lg flex items-center justify-between">
-                  <span>Inspection Calendar</span>
+                  <span>
+                    {isAllEngineers ? 'Team Inspection Calendar' : 'Engineer Inspection Calendar'}
+                  </span>
                   {isPending && (
                     <span className="text-xs text-muted-foreground font-normal flex items-center gap-1.5">
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
@@ -286,7 +333,9 @@ export function RoundHistoryClient({
                   )}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Inspect completed daily rounds, missed days, and working schedules for this biomedical engineer.
+                  {isAllEngineers
+                    ? 'Facility-wide overview of daily department inspection rounds conducted by all biomedical engineers.'
+                    : 'Inspect completed daily rounds, missed days, and working schedules for this biomedical engineer.'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="relative">
@@ -300,9 +349,10 @@ export function RoundHistoryClient({
                   year={calendarData.year}
                   calendarDays={calendarData.calendarDays}
                   summary={calendarData.summary}
-                  engineerName={calendarData.engineerName || currentEngineer?.name}
-                  hospitalName={calendarData.hospitalName || currentEngineer?.hospitalName}
+                  engineerName={calendarData.engineerName || (isAllEngineers ? 'All Engineers (Team Overview)' : currentEngineer?.name)}
+                  hospitalName={calendarData.hospitalName || (isAllEngineers ? `${engineersList.length} Active Engineers` : currentEngineer?.hospitalName)}
                   onMonthChange={handleMonthChange}
+                  onDayClick={handleDayClick}
                 />
               </CardContent>
             </Card>
@@ -321,7 +371,14 @@ export function RoundHistoryClient({
             <CardHeader className="pb-3">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="text-base sm:text-lg">Recent Rounds</CardTitle>
+                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                    <span>Recent Rounds</span>
+                    {!isAllEngineers && currentEngineer && (
+                      <Badge variant="outline" className="text-xs font-normal">
+                        Filtered: {currentEngineer.name}
+                      </Badge>
+                    )}
+                  </CardTitle>
                   <CardDescription className="text-xs">
                     Chronological audit trail of executed inspection rounds with findings and notes.
                   </CardDescription>
@@ -364,7 +421,7 @@ export function RoundHistoryClient({
                   <FileText className="h-10 w-10 text-muted-foreground/40 mx-auto" />
                   <p className="text-sm font-medium text-foreground">No inspection rounds found</p>
                   <p className="text-xs text-muted-foreground">
-                    Try adjusting your status filter or search keywords.
+                    Try adjusting your status filter, keyword search, or engineer selection.
                   </p>
                 </div>
               ) : (

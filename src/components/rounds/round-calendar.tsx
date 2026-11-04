@@ -18,6 +18,7 @@ import {
   Clock,
   User,
   Building2,
+  Users,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -33,6 +34,17 @@ export interface CalendarDay {
     completedDepartments: number;
     totalIssuesReported: number;
     totalNotes: number;
+    scheduledCount?: number;
+    completedCount?: number;
+    inProgressCount?: number;
+    missedCount?: number;
+    teamBreakdown?: {
+      id: string;
+      name: string;
+      hospital: string;
+      status: string;
+      roundId?: string;
+    }[];
   } | null;
 }
 
@@ -49,6 +61,7 @@ export interface RoundCalendarProps {
   engineerName?: string | null;
   hospitalName?: string | null;
   onMonthChange?: (month: number, year: number) => void;
+  onDayClick?: (date: string) => void;
 }
 
 const STATUS_BORDER_AND_BG: Record<string, string> = {
@@ -82,6 +95,7 @@ export function RoundCalendar({
   engineerName,
   hospitalName,
   onMonthChange,
+  onDayClick,
 }: RoundCalendarProps) {
   const router = useRouter();
 
@@ -122,10 +136,11 @@ export function RoundCalendar({
   };
 
   const todayStr = new Date().toISOString().split('T')[0];
+  const isTeamView = engineerName?.toLowerCase().includes('all engineers');
 
   return (
     <div className="space-y-4">
-      {/* Month Navigation & Engineer Identity */}
+      {/* Month Navigation & Identity */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b">
         <div className="flex items-center gap-2">
           <Button
@@ -145,7 +160,11 @@ export function RoundCalendar({
             </h3>
             {engineerName && (
               <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                <User className="h-3 w-3 text-primary" />
+                {isTeamView ? (
+                  <Users className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <User className="h-3.5 w-3.5 text-primary" />
+                )}
                 <span className="font-medium text-foreground">{engineerName}</span>
                 {hospitalName && (
                   <>
@@ -183,10 +202,10 @@ export function RoundCalendar({
                 : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
             )}
           >
-            {summary.complianceRate}% Monthly Compliance
+            {summary.complianceRate}% {isTeamView ? 'Team Compliance' : 'Monthly Compliance'}
           </Badge>
           <span className="text-xs text-muted-foreground hidden md:inline">
-            ({summary.completed}/{summary.totalWorkingDays} days)
+            ({summary.completed}/{summary.totalWorkingDays} {isTeamView ? 'shifts' : 'days'})
           </span>
         </div>
       </div>
@@ -219,6 +238,7 @@ export function RoundCalendar({
               }
 
               const isToday = day.date === todayStr;
+              const hasTeamBreakdown = day.round?.scheduledCount !== undefined;
 
               return (
                 <Tooltip key={day.date}>
@@ -229,10 +249,12 @@ export function RoundCalendar({
                         'h-16 sm:h-20 lg:h-22 w-full p-1.5 sm:p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-150 relative group',
                         STATUS_BORDER_AND_BG[day.status],
                         isToday && 'ring-2 ring-primary ring-offset-2 ring-offset-background font-semibold',
-                        day.round ? 'cursor-pointer hover:shadow-sm' : 'cursor-default'
+                        (day.round || onDayClick) ? 'cursor-pointer hover:shadow-sm' : 'cursor-default'
                       )}
                       onClick={() => {
-                        if (day.round) {
+                        if (onDayClick) {
+                          onDayClick(day.date);
+                        } else if (day.round?.id) {
                           router.push(`/rounds/${day.round.id}`);
                         }
                       }}
@@ -256,29 +278,37 @@ export function RoundCalendar({
                           </span>
                         )}
 
-                        {/* Desktop Status Badges */}
+                        {/* Status Badges */}
                         {day.status === 'completed' && (
                           <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
                             <CheckCircle2 className="h-3 w-3" />
-                            <span className="hidden md:inline">Done</span>
+                            <span className="hidden md:inline">
+                              {hasTeamBreakdown ? `${day.round?.completedCount}/${day.round?.scheduledCount} Done` : 'Done'}
+                            </span>
                           </span>
                         )}
                         {day.status === 'partial' && (
                           <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded">
                             <AlertTriangle className="h-3 w-3" />
-                            <span className="hidden md:inline">Partial</span>
+                            <span className="hidden md:inline">
+                              {hasTeamBreakdown ? `${day.round?.completedCount}/${day.round?.scheduledCount} Done` : 'Partial'}
+                            </span>
                           </span>
                         )}
                         {day.status === 'in_progress' && (
                           <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.5 rounded animate-pulse">
                             <Clock className="h-3 w-3" />
-                            <span className="hidden md:inline">Live</span>
+                            <span className="hidden md:inline">
+                              {hasTeamBreakdown ? `${day.round?.inProgressCount} Live` : 'Live'}
+                            </span>
                           </span>
                         )}
                         {day.status === 'missed' && (
                           <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 rounded">
                             <XCircle className="h-3 w-3" />
-                            <span className="hidden md:inline">Missed</span>
+                            <span className="hidden md:inline">
+                              {hasTeamBreakdown ? `0/${day.round?.scheduledCount} Missed` : 'Missed'}
+                            </span>
                           </span>
                         )}
                         {day.status === 'off_day' && (
@@ -310,10 +340,12 @@ export function RoundCalendar({
                       </div>
 
                       {/* Bottom Row / Body Details */}
-                      {day.round ? (
+                      {day.round && (day.round.totalDepartments > 0 || day.round.scheduledCount) ? (
                         <div className="mt-auto pt-1 w-full flex items-center justify-between text-[11px] leading-tight text-muted-foreground">
                           <span className="font-medium text-foreground truncate">
-                            {day.round.completedDepartments}/{day.round.totalDepartments} depts
+                            {day.round.totalDepartments > 0
+                              ? `${day.round.completedDepartments}/${day.round.totalDepartments} depts`
+                              : `${day.round.scheduledCount} on duty`}
                           </span>
                           {day.round.totalIssuesReported > 0 && (
                             <span className="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-0.5 shrink-0 text-[10px]">
@@ -331,8 +363,8 @@ export function RoundCalendar({
                   </TooltipTrigger>
 
                   {/* Rich Tooltip */}
-                  <TooltipContent side="top" className="text-xs p-2.5 max-w-xs shadow-md">
-                    <div className="space-y-1">
+                  <TooltipContent side="top" className="text-xs p-3 max-w-sm shadow-lg">
+                    <div className="space-y-1.5">
                       <p className="font-semibold text-sm">
                         {new Date(day.date + 'T00:00:00').toLocaleDateString('en-US', {
                           weekday: 'long',
@@ -347,8 +379,50 @@ export function RoundCalendar({
                           {STATUS_LABELS[day.status]}
                         </span>
                       </div>
-                      {day.round && (
-                        <div className="pt-1.5 border-t border-border/40 space-y-0.5 text-muted-foreground">
+
+                      {/* Team Breakdown in All Engineers View */}
+                      {day.round?.teamBreakdown && day.round.teamBreakdown.length > 0 && (
+                        <div className="pt-2 border-t border-border/40 space-y-1.5">
+                          <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
+                            <span>Biomedical Team on Duty</span>
+                            <span className="text-muted-foreground font-normal">
+                              {day.round.completedCount} of {day.round.scheduledCount} done
+                            </span>
+                          </div>
+                          <div className="space-y-1 max-h-36 overflow-y-auto">
+                            {day.round.teamBreakdown.map((eng) => (
+                              <div
+                                key={eng.id}
+                                className="flex items-center justify-between gap-2 text-[11px] bg-muted/30 px-2 py-1 rounded"
+                              >
+                                <div className="truncate">
+                                  <span className="font-medium text-foreground">{eng.name}</span>
+                                  {eng.hospital && (
+                                    <span className="text-[10px] text-muted-foreground ml-1">
+                                      ({eng.hospital})
+                                    </span>
+                                  )}
+                                </div>
+                                <span
+                                  className={cn(
+                                    'text-[10px] font-semibold capitalize shrink-0',
+                                    eng.status === 'completed' && 'text-emerald-500',
+                                    eng.status === 'in_progress' && 'text-blue-500',
+                                    eng.status === 'missed' && 'text-rose-500',
+                                    eng.status === 'scheduled' && 'text-muted-foreground'
+                                  )}
+                                >
+                                  {eng.status?.replace('_', ' ')}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Department inspection metrics */}
+                      {day.round && day.round.totalDepartments > 0 && (
+                        <div className="pt-1.5 border-t border-border/40 space-y-0.5 text-muted-foreground text-[11px]">
                           <p>
                             <span className="font-medium text-foreground">
                               {day.round.completedDepartments} of {day.round.totalDepartments}
@@ -364,9 +438,6 @@ export function RoundCalendar({
                           {day.round.totalNotes > 0 && (
                             <p>{day.round.totalNotes} visit note(s) logged</p>
                           )}
-                          <p className="text-[10px] text-primary pt-1 font-medium">
-                            Click day cell to open round inspection details →
-                          </p>
                         </div>
                       )}
                     </div>
@@ -399,7 +470,7 @@ export function RoundCalendar({
         </div>
 
         <div className="text-xs text-muted-foreground">
-          Showing <span className="font-semibold text-foreground">{summary.totalWorkingDays}</span> scheduled working days for this month
+          Showing <span className="font-semibold text-foreground">{summary.totalWorkingDays}</span> {isTeamView ? 'total scheduled engineer shifts' : 'scheduled working days'} for this month
         </div>
       </div>
     </div>
