@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { changeDeviceStatus } from "@/lib/actions/devices"
 import { DeviceStatusBadge } from "./device-badges"
+import { useTranslations } from "next-intl"
 
 interface ChangeStatusDialogProps {
   open: boolean;
@@ -30,6 +31,8 @@ export function ChangeStatusDialog({
   onSuccess
 }: ChangeStatusDialogProps) {
   const router = useRouter()
+  const t = useTranslations('devices')
+  const tCommon = useTranslations('common')
   const [loading, setLoading] = useState(false)
   
   const [status, setStatus] = useState("")
@@ -40,7 +43,7 @@ export function ChangeStatusDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!status || !reason) {
-      toast.error("Please fill in all required fields")
+      toast.error(tCommon('validation.required'))
       return
     }
 
@@ -52,13 +55,13 @@ export function ChangeStatusDialog({
         notes,
         limitationsNote: status === 'operational_with_limitations' ? limitationsNote : undefined,
       })
-      toast.success("Device status updated successfully")
+      toast.success(t('toast.statusChanged'))
       onSuccess()
       onOpenChange(false)
       router.refresh()
     } catch (error) {
       console.error(error)
-      toast.error("Failed to update status")
+      toast.error(t('toast.updateFailed'))
     } finally {
       setLoading(false)
     }
@@ -69,38 +72,38 @@ export function ChangeStatusDialog({
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Change Device Status</DialogTitle>
+            <DialogTitle>{t('changeStatus.title')}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium">Current Status:</span>
+              <span className="text-sm font-medium">{tCommon('labels.status')}:</span>
               <DeviceStatusBadge status={currentStatus} />
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="status">New Status *</Label>
+              <Label htmlFor="status">{t('changeStatus.newStatus')} *</Label>
               <Select value={status} onValueChange={setStatus} required>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select new status" />
+                  <SelectValue placeholder={t('form.selectStatus')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="operational">Operational</SelectItem>
-                  <SelectItem value="operational_with_limitations">Operational with Limitations</SelectItem>
-                  <SelectItem value="under_maintenance">Under Maintenance</SelectItem>
-                  <SelectItem value="under_repair">Under Repair</SelectItem>
-                  <SelectItem value="waiting_for_parts">Waiting for Parts</SelectItem>
-                  <SelectItem value="awaiting_release">Awaiting Release</SelectItem>
-                  <SelectItem value="out_of_service">Out of Service</SelectItem>
-                  <SelectItem value="standby">Standby</SelectItem>
+                  <SelectItem value="operational">{t('status.operational')}</SelectItem>
+                  <SelectItem value="operational_with_limitations">{t('status.operational')} (مقيّد)</SelectItem>
+                  <SelectItem value="under_maintenance">{t('status.underMaintenance')}</SelectItem>
+                  <SelectItem value="under_repair">{t('status.underMaintenance')}</SelectItem>
+                  <SelectItem value="waiting_for_parts">{tCommon('status.waitingForParts')}</SelectItem>
+                  <SelectItem value="awaiting_release">{t('status.pendingInstallation')}</SelectItem>
+                  <SelectItem value="out_of_service">{t('status.outOfService')}</SelectItem>
+                  <SelectItem value="standby">{t('status.inStorage')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="reason">Reason for Change *</Label>
+              <Label htmlFor="reason">{t('changeStatus.reason')} *</Label>
               <Input
                 id="reason"
-                placeholder="Brief reason for status change"
+                placeholder={t('changeStatus.reason')}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 required
@@ -121,21 +124,21 @@ export function ChangeStatusDialog({
             )}
 
             <div className="grid gap-2">
-              <Label htmlFor="notes">Additional Notes (Optional)</Label>
+              <Label htmlFor="notes">{t('form.notes')}</Label>
               <Textarea
                 id="notes"
-                placeholder="Any other relevant details"
+                placeholder={t('form.notes')}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {tCommon('buttons.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Updating..." : "Update Status"}
+              {loading ? t('form.updating') : t('changeStatus.confirm')}
             </Button>
           </DialogFooter>
         </form>
@@ -143,4 +146,3 @@ export function ChangeStatusDialog({
     </Dialog>
   )
 }
-

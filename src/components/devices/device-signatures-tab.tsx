@@ -315,7 +315,7 @@ function ActivitySignatureCard({ group }: { group: SourceGroup }) {
                   </div>
 
                   {idx < group.signatures.length - 1 && (
-                    <ArrowRight className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+                    <ArrowRight className="h-3 w-3 text-muted-foreground/50 shrink-0 rtl:rotate-180" />
                   )}
                 </div>
               )
@@ -595,7 +595,7 @@ export function DeviceSignaturesTab({
                 <Link href="/maintenance/tasks">
                   <Wrench className="w-4 h-4 text-primary" />
                   <span>Go to Work Orders</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground rtl:rotate-180" />
                 </Link>
               </Button>
             </div>

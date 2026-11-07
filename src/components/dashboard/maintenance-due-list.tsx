@@ -1,9 +1,13 @@
+'use client';
+
 import Link from "next/link";
 import { formatDistanceToNow, isPast, isToday } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations, useLocale } from "next-intl";
+import { getDateLocale } from "@/lib/utils/date-locale";
 
 interface MaintenanceTaskItem {
   id: string;
@@ -21,35 +25,40 @@ interface MaintenanceDueListProps {
 }
 
 export function MaintenanceDueList({ tasks, title }: MaintenanceDueListProps) {
+  const t = useTranslations('common');
+  const tDash = useTranslations('dashboard');
+  const locale = useLocale();
+  const dateLocale = getDateLocale(locale);
+
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center">
-          <Wrench className="w-5 h-5 mr-2" />
+          <Wrench className="w-5 h-5 me-2" />
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {tasks.length === 0 ? (
           <p className="text-muted-foreground text-sm py-4 text-center border rounded-md bg-muted/20">
-            No maintenance tasks due.
+            {tDash('maintenanceDue.noItems')}
           </p>
         ) : (
           <div className="space-y-3">
             {tasks.map((task) => {
-              let dueLabel = "Scheduled";
+              let dueLabel = t('status.scheduled');
               let dueColor = "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800";
 
               if (task.dueDate) {
                 const date = new Date(task.dueDate);
                 if (isPast(date) && !isToday(date)) {
-                  dueLabel = "Overdue";
+                  dueLabel = t('status.overdue');
                   dueColor = "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800 font-medium";
                 } else if (isToday(date)) {
-                  dueLabel = "Due Today";
+                  dueLabel = tDash('maintenanceDue.dueToday');
                   dueColor = "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800 font-medium";
                 } else {
-                  dueLabel = "Due Soon";
+                  dueLabel = t('status.scheduled');
                   dueColor = "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/40 dark:text-yellow-300 dark:border-yellow-800";
                 }
               }
@@ -71,7 +80,7 @@ export function MaintenanceDueList({ tasks, title }: MaintenanceDueListProps) {
                     </div>
                     {task.dueDate && (
                       <div className="text-xs text-muted-foreground whitespace-nowrap self-start sm:self-auto">
-                        {formatDistanceToNow(new Date(task.dueDate), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(task.dueDate), { addSuffix: true, locale: dateLocale })}
                       </div>
                     )}
                   </div>
@@ -84,4 +93,3 @@ export function MaintenanceDueList({ tasks, title }: MaintenanceDueListProps) {
     </Card>
   );
 }
-

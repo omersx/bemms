@@ -18,6 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { NavBadge, type NavBadgeConfig } from './nav-badge'
 import { useNavCounts } from '@/components/providers/nav-counts-provider'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface SidebarProps {
   user: { name: string; role: string; email: string; roles: string[] }
@@ -26,6 +27,7 @@ interface SidebarProps {
 export interface SidebarLink {
   href: string;
   label: string;
+  labelKey: string;
   icon: any;
   badgeKey?: 'notifications' | 'triage' | 'tickets' | 'maintenance' | 'workOrders' | 'pmPlans' | string;
   badgeConfig?: Partial<NavBadgeConfig>;
@@ -33,41 +35,41 @@ export interface SidebarLink {
 
 // Staff-specific nav: simplified, focused on their department
 const STAFF_LINKS: SidebarLink[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/my-department', label: 'My Department', icon: Building2 },
-  { href: '/scan', label: 'Scan QR', icon: QrCode },
-  { href: '/tickets/create', label: 'Report Problem', icon: PlusCircle },
-  { href: '/tickets', label: 'My Tickets', icon: TicketCheck, badgeKey: 'tickets' },
-  { href: '/engineering-team', label: 'Engineering Team', icon: UsersRound },
-  { href: '/notifications', label: 'Notifications', icon: Bell, badgeKey: 'notifications' },
+  { href: '/dashboard', label: 'Dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
+  { href: '/my-department', label: 'My Department', labelKey: 'nav.myDepartment', icon: Building2 },
+  { href: '/scan', label: 'Scan QR', labelKey: 'nav.scanQr', icon: QrCode },
+  { href: '/tickets/create', label: 'Report Problem', labelKey: 'nav.reportProblem', icon: PlusCircle },
+  { href: '/tickets', label: 'My Tickets', labelKey: 'nav.myTickets', icon: TicketCheck, badgeKey: 'tickets' },
+  { href: '/engineering-team', label: 'Engineering Team', labelKey: 'nav.engineeringTeam', icon: UsersRound },
+  { href: '/notifications', label: 'Notifications', labelKey: 'nav.notifications', icon: Bell, badgeKey: 'notifications' },
 ]
 
 // Engineer/Technician nav: workflow-optimized for BME daily work
 const ENGINEER_LINKS: SidebarLink[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/rounds', label: 'Daily Round', icon: Route },
-  { href: '/scan', label: 'Scan QR', icon: QrCode },
-  { href: '/tickets', label: 'Helpdesk Tickets', icon: TicketCheck, badgeKey: 'tickets' },
-  { href: '/devices', label: 'Devices', icon: Monitor },
-  { href: '/departments', label: 'Departments', icon: Building2 },
-  { href: '/team', label: 'Engineering Team', icon: UsersRound },
-  { href: '/maintenance', label: 'Maintenance', icon: Wrench, badgeKey: 'maintenance' },
-  { href: '/reports', label: 'Reports', icon: BarChart3 },
-  { href: '/notifications', label: 'Notifications', icon: Bell, badgeKey: 'notifications' },
+  { href: '/dashboard', label: 'Dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
+  { href: '/rounds', label: 'Daily Round', labelKey: 'nav.dailyRound', icon: Route },
+  { href: '/scan', label: 'Scan QR', labelKey: 'nav.scanQr', icon: QrCode },
+  { href: '/tickets', label: 'Helpdesk Tickets', labelKey: 'nav.helpdeskTickets', icon: TicketCheck, badgeKey: 'tickets' },
+  { href: '/devices', label: 'Devices', labelKey: 'nav.devices', icon: Monitor },
+  { href: '/departments', label: 'Departments', labelKey: 'nav.departments', icon: Building2 },
+  { href: '/team', label: 'Engineering Team', labelKey: 'nav.engineeringTeam', icon: UsersRound },
+  { href: '/maintenance', label: 'Maintenance', labelKey: 'nav.maintenance', icon: Wrench, badgeKey: 'maintenance' },
+  { href: '/reports', label: 'Reports', labelKey: 'nav.reports', icon: BarChart3 },
+  { href: '/notifications', label: 'Notifications', labelKey: 'nav.notifications', icon: Bell, badgeKey: 'notifications' },
 ]
 
 // Full nav for managers and admins (includes team management + admin access)
 const FULL_LINKS: SidebarLink[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/rounds', label: 'Daily Round', icon: Route },
-  { href: '/scan', label: 'Scan QR', icon: QrCode },
-  { href: '/devices', label: 'Devices', icon: Monitor },
-  { href: '/departments', label: 'Departments', icon: Building2 },
-  { href: '/team', label: 'Engineering Team', icon: UsersRound },
-  { href: '/tickets', label: 'Helpdesk Tickets', icon: TicketCheck, badgeKey: 'tickets' },
-  { href: '/maintenance', label: 'Maintenance', icon: Wrench, badgeKey: 'maintenance' },
-  { href: '/reports', label: 'Reports', icon: BarChart3 },
-  { href: '/notifications', label: 'Notifications', icon: Bell, badgeKey: 'notifications' },
+  { href: '/dashboard', label: 'Dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
+  { href: '/rounds', label: 'Daily Round', labelKey: 'nav.dailyRound', icon: Route },
+  { href: '/scan', label: 'Scan QR', labelKey: 'nav.scanQr', icon: QrCode },
+  { href: '/devices', label: 'Devices', labelKey: 'nav.devices', icon: Monitor },
+  { href: '/departments', label: 'Departments', labelKey: 'nav.departments', icon: Building2 },
+  { href: '/team', label: 'Engineering Team', labelKey: 'nav.engineeringTeam', icon: UsersRound },
+  { href: '/tickets', label: 'Helpdesk Tickets', labelKey: 'nav.helpdeskTickets', icon: TicketCheck, badgeKey: 'tickets' },
+  { href: '/maintenance', label: 'Maintenance', labelKey: 'nav.maintenance', icon: Wrench, badgeKey: 'maintenance' },
+  { href: '/reports', label: 'Reports', labelKey: 'nav.reports', icon: BarChart3 },
+  { href: '/notifications', label: 'Notifications', labelKey: 'nav.notifications', icon: Bell, badgeKey: 'notifications' },
 ]
 
 function getSidebarLinks(roles: string[]): SidebarLink[] {
@@ -79,15 +81,12 @@ function getSidebarLinks(roles: string[]): SidebarLink[] {
   const hasEngineer = roles.some(r => engineerRoles.includes(r));
   const hasAdminManager = roles.some(r => adminManagerRoles.includes(r));
 
-  // Admin/Manager roles get full nav (includes admin link)
   if (hasAdminManager) {
     return FULL_LINKS;
   }
-  // Engineer/Technician get workflow-optimized nav
   if (hasEngineer) {
     return ENGINEER_LINKS;
   }
-  // Staff-only users get simplified nav
   if (hasStaff) {
     return STAFF_LINKS;
   }
@@ -96,6 +95,9 @@ function getSidebarLinks(roles: string[]): SidebarLink[] {
 
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+  const t = useTranslations('common')
   const [collapsed, setCollapsed] = useState(false)
   const [mounted, setMounted] = useState(false)
   const { resolveBadge } = useNavCounts()
@@ -103,13 +105,15 @@ export function Sidebar({ user }: SidebarProps) {
   useEffect(() => {
     setMounted(true)
   }, [])
+
   const isAdmin = user.roles.some(r => ['SYS_ADMIN', 'ORG_ADMIN', 'HOSP_ADMIN'].includes(r))
   const links = getSidebarLinks(user.roles)
+  const tooltipSide = isRtl ? 'left' : 'right'
 
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col fixed inset-y-0 left-0 z-50 bg-card border-r border-border transition-all duration-300",
+        "hidden md:flex flex-col fixed inset-y-0 start-0 z-50 bg-card border-e border-border transition-all duration-300",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -124,7 +128,11 @@ export function Sidebar({ user }: SidebarProps) {
           className="h-8 w-8 hidden md:flex"
           onClick={() => setCollapsed(!collapsed)}
         >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {collapsed ? (
+            isRtl ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
+          ) : (
+            isRtl ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />
+          )}
         </Button>
       </div>
 
@@ -138,6 +146,7 @@ export function Sidebar({ user }: SidebarProps) {
                 (link.href === '/maintenance' && pathname.startsWith('/maintenance'))
 
               const badge = resolveBadge(link.badgeKey, link.badgeConfig, { isCollapsed: collapsed })
+              const label = t(link.labelKey as any) || link.label
 
               const navLink = (
                 <Link
@@ -156,7 +165,7 @@ export function Sidebar({ user }: SidebarProps) {
                   </div>
                   {!collapsed && (
                     <>
-                      <span className="truncate">{link.label}</span>
+                      <span className="truncate">{label}</span>
                       {badge && (
                         <NavBadge
                           {...badge}
@@ -174,8 +183,8 @@ export function Sidebar({ user }: SidebarProps) {
                   {mounted && collapsed ? (
                     <Tooltip>
                       <TooltipTrigger asChild>{navLink}</TooltipTrigger>
-                      <TooltipContent side="right" className="flex items-center gap-2">
-                        <span>{link.label}</span>
+                      <TooltipContent side={tooltipSide} className="flex items-center gap-2">
+                        <span>{label}</span>
                         {badge && <NavBadge {...badge} position="inline" />}
                       </TooltipContent>
                     </Tooltip>
@@ -186,6 +195,7 @@ export function Sidebar({ user }: SidebarProps) {
               )
             })}
             {isAdmin && (() => {
+              const adminLabel = t('nav.administration')
               const adminLink = (
                 <Link
                   href="/admin"
@@ -196,7 +206,7 @@ export function Sidebar({ user }: SidebarProps) {
                   )}
                 >
                   <Settings className="h-5 w-5 shrink-0" />
-                  {!collapsed && <span>Administration</span>}
+                  {!collapsed && <span>{adminLabel}</span>}
                 </Link>
               )
 
@@ -205,7 +215,7 @@ export function Sidebar({ user }: SidebarProps) {
                   {mounted && collapsed ? (
                     <Tooltip>
                       <TooltipTrigger asChild>{adminLink}</TooltipTrigger>
-                      <TooltipContent side="right">Administration</TooltipContent>
+                      <TooltipContent side={tooltipSide}>{adminLabel}</TooltipContent>
                     </Tooltip>
                   ) : (
                     adminLink
@@ -223,7 +233,7 @@ export function Sidebar({ user }: SidebarProps) {
             <Link
               href="/profile"
               className="hover:opacity-80 transition rounded-lg p-1 hover:bg-muted/50"
-              title="View My Profile"
+              title={t('header.viewProfile')}
             >
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary/10 text-primary text-xs">
@@ -243,10 +253,10 @@ export function Sidebar({ user }: SidebarProps) {
                       onClick={() => signOut({ callbackUrl: '/login' })}
                     >
                       <LogOut className="h-4 w-4" />
-                      <span className="sr-only">Log out</span>
+                      <span className="sr-only">{t('header.logOut')}</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="right">Log out</TooltipContent>
+                  <TooltipContent side={tooltipSide}>{t('header.logOut')}</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )}
@@ -256,7 +266,7 @@ export function Sidebar({ user }: SidebarProps) {
             <Link
               href="/profile"
               className="flex items-center gap-3 hover:opacity-80 transition rounded-lg p-1.5 -m-1 hover:bg-muted/50 flex-1 min-w-0"
-              title="View My Profile"
+              title={t('header.viewProfile')}
             >
               <Avatar className="h-8 w-8 shrink-0">
                 <AvatarFallback className="bg-primary/10 text-primary text-xs">
@@ -281,10 +291,10 @@ export function Sidebar({ user }: SidebarProps) {
                         onClick={() => signOut({ callbackUrl: '/login' })}
                       >
                         <LogOut className="h-4 w-4" />
-                        <span className="sr-only">Log out</span>
+                        <span className="sr-only">{t('header.logOut')}</span>
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="top">Log out</TooltipContent>
+                    <TooltipContent side="top">{t('header.logOut')}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               )}

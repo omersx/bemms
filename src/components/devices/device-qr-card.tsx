@@ -118,7 +118,7 @@ export function DeviceQrCard({ device, qrLabel }: DeviceQrCardProps) {
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">No active QR label for this device.</p>
               <Button onClick={handleRegenerate} disabled={isGenerating}>
-                <RefreshCw className="w-4 h-4 mr-2" /> Generate QR Label
+                <RefreshCw className="w-4 h-4 me-2" /> Generate QR Label
               </Button>
             </div>
           )}

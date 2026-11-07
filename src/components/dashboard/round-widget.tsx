@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Route, CheckCircle2, Clock, ArrowRight, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { RoundAutoRefresh } from '@/components/rounds/round-auto-refresh';
+import { getTranslations } from 'next-intl/server';
 
 export async function RoundWidget() {
   const enabled = await isEngineerRoundEnabled();
@@ -12,6 +13,9 @@ export async function RoundWidget() {
 
   const result = await getTodayRound();
   if (!result.success) return null;
+
+  const t = await getTranslations('rounds');
+  const tCommon = await getTranslations('common');
 
   // Off day
   if (result.isOffDay) {
@@ -23,13 +27,13 @@ export async function RoundWidget() {
               <Route className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-medium">Daily Engineering Round</p>
-              <p className="text-xs text-muted-foreground">Not a scheduled working day</p>
+              <p className="text-sm font-medium">{t('title')}</p>
+              <p className="text-xs text-muted-foreground">{t('noActiveRound')}</p>
             </div>
           </div>
           <Link href="/rounds/history">
             <Button variant="ghost" size="sm" className="gap-1 text-xs">
-              History <ArrowRight className="h-3 w-3" />
+              {t('roundHistory')} <ArrowRight className="h-3 w-3 rtl:rotate-180" />
             </Button>
           </Link>
         </CardContent>
@@ -49,16 +53,16 @@ export async function RoundWidget() {
                 <Route className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Today&apos;s Engineering Round</p>
+                <p className="text-sm font-semibold">{t('startRound')}</p>
                 <p className="text-xs text-muted-foreground">
-                  {result.departments?.length || 0} departments scheduled · {result.shiftType} shift
+                  {result.departments?.length || 0} {tCommon('labels.department')} · {result.shiftType}
                 </p>
               </div>
             </div>
             <Link href="/rounds">
               <Button size="sm" className="gap-1.5 w-full sm:w-auto">
                 <ShieldCheck className="h-4 w-4" />
-                Start Round
+                {t('startRound')}
               </Button>
             </Link>
           </CardContent>
@@ -87,19 +91,18 @@ export async function RoundWidget() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">
-                    {isCompleted ? 'Daily Round Completed' : 'Daily Round In Progress'}
+                    {isCompleted ? t('history.completed') : t('roundInProgress')}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {completed} / {total} departments visited ({progress}%)
-                    {round.totalIssuesReported > 0 ? ` · ${round.totalIssuesReported} issues reported` : ''}
+                    {t('completedDepartments', { completed, total })} ({progress}%)
                   </p>
                 </div>
               </div>
 
               <Link href="/rounds">
                 <Button variant={isCompleted ? 'outline' : 'default'} size="sm" className="gap-1 text-xs">
-                  {isCompleted ? 'View Round' : 'Continue Round'}
-                  <ArrowRight className="h-3 w-3" />
+                  {isCompleted ? tCommon('buttons.view') : t('continueRound')}
+                  <ArrowRight className="h-3 w-3 rtl:rotate-180" />
                 </Button>
               </Link>
             </div>

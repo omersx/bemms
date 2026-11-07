@@ -281,7 +281,7 @@ export function ManagerRoundsDashboard({
                       <Link href={`/rounds/${member.round.id}`}>
                         <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs px-2.5">
                           View Round
-                          <ArrowRight className="h-3.5 w-3.5" />
+                          <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
                         </Button>
                       </Link>
                     ) : null}

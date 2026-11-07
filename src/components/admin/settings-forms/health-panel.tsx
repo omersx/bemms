@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Activity, Database, Server, Cpu, Clock, RefreshCw, ShieldAlert, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getSystemHealth, type SystemHealthData } from '@/lib/actions/system-settings';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface HealthPanelProps {
   initialData: SystemHealthData;
@@ -28,6 +29,8 @@ function formatUptime(seconds: number): string {
 }
 
 export function HealthPanel({ initialData }: HealthPanelProps) {
+  const t = useTranslations('admin');
+  const tCommon = useTranslations('common');
   const [health, setHealth] = useState<SystemHealthData>(initialData);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -37,12 +40,12 @@ export function HealthPanel({ initialData }: HealthPanelProps) {
       const res = await getSystemHealth();
       if (res.success && res.data) {
         setHealth(res.data);
-        toast.success('Telemetry updated');
+        toast.success(tCommon('status.active'));
       } else {
-        toast.error(res.error || 'Failed to refresh health status');
+        toast.error(res.error || t('saveFailed'));
       }
     } catch {
-      toast.error('An error occurred while fetching health data');
+      toast.error(t('unexpectedError'));
     } finally {
       setRefreshing(false);
     }
@@ -57,10 +60,10 @@ export function HealthPanel({ initialData }: HealthPanelProps) {
           <div>
             <CardTitle className="flex items-center gap-2 text-xl">
               <Activity className="h-5 w-5 text-primary" />
-              Operational Telemetry & System Health
+              {t('settings.health.title')}
             </CardTitle>
             <CardDescription>
-              Safe, read-only status of database connections, runtime environment, and background health.
+              {isHealthy ? t('settings.health.connected') : t('settings.health.disconnected')}
             </CardDescription>
           </div>
           <Button
@@ -71,7 +74,7 @@ export function HealthPanel({ initialData }: HealthPanelProps) {
             className="gap-2"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {tCommon('buttons.refresh')}
           </Button>
         </CardHeader>
 
@@ -92,12 +95,10 @@ export function HealthPanel({ initialData }: HealthPanelProps) {
               )}
               <div>
                 <h4 className="font-semibold text-base">
-                  {isHealthy ? 'All Systems Operational' : 'System Degraded'}
+                  {isHealthy ? t('settings.health.connected') : t('settings.health.disconnected')}
                 </h4>
                 <p className="text-xs opacity-90">
-                  {isHealthy
-                    ? 'PostgreSQL database connected and query latency within acceptable limits.'
-                    : 'System is experiencing elevated latency or service degradation.'}
+                  {t('settings.health.databaseStatus')}: {isHealthy ? t('settings.health.connected') : t('settings.health.disconnected')}
                 </p>
               </div>
             </div>
@@ -111,7 +112,7 @@ export function HealthPanel({ initialData }: HealthPanelProps) {
             {/* Database Metric */}
             <div className="p-4 border rounded-lg bg-card space-y-1">
               <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-xs font-medium">Database Latency</span>
+                <span className="text-xs font-medium">{t('settings.health.databaseStatus')}</span>
                 <Database className="h-4 w-4" />
               </div>
               <div className="text-2xl font-bold">
@@ -119,14 +120,14 @@ export function HealthPanel({ initialData }: HealthPanelProps) {
               </div>
               <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
-                PostgreSQL 16 Connected
+                PostgreSQL 16 {t('settings.health.connected')}
               </span>
             </div>
 
             {/* Uptime Metric */}
             <div className="p-4 border rounded-lg bg-card space-y-1">
               <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-xs font-medium">Application Uptime</span>
+                <span className="text-xs font-medium">{t('settings.health.uptime')}</span>
                 <Clock className="h-4 w-4" />
               </div>
               <div className="text-2xl font-bold">{formatUptime(health.uptimeSeconds)}</div>
@@ -150,7 +151,7 @@ export function HealthPanel({ initialData }: HealthPanelProps) {
             {/* Runtime Metric */}
             <div className="p-4 border rounded-lg bg-card space-y-1">
               <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-xs font-medium">Platform & Node</span>
+                <span className="text-xs font-medium">{t('settings.health.version')}</span>
                 <Server className="h-4 w-4" />
               </div>
               <div className="text-2xl font-bold">{health.runtime.nodeVersion}</div>

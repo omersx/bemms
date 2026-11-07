@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Search, TicketCheck, MessageCircle, CheckCircle, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface StaffTicketsViewProps {
   tickets: StaffTicketItem[];
@@ -16,6 +17,7 @@ interface StaffTicketsViewProps {
 type TicketFilter = 'all' | 'active' | 'needs_response' | 'resolved';
 
 export function StaffTicketsView({ tickets }: StaffTicketsViewProps) {
+  const t = useTranslations('tickets');
   const [filter, setFilter] = useState<TicketFilter>('all');
   const [search, setSearch] = useState('');
 
@@ -57,13 +59,13 @@ export function StaffTicketsView({ tickets }: StaffTicketsViewProps) {
   return (
     <div className="space-y-6 max-w-3xl mx-auto pb-10">
       <PageHeader
-        title="My Tickets"
-        description="Monitor biomedical repair progress and communicate with engineers"
+        title={t('staffView.title')}
+        description={t('staffView.subtitle')}
       >
         <Link href="/tickets/create">
           <Button size="lg" className="min-h-[44px]">
-            <PlusCircle className="mr-2 h-5 w-5" />
-            Report Problem
+            <PlusCircle className="me-2 h-5 w-5" />
+            {t('staffView.reportProblem')}
           </Button>
         </Link>
       </PageHeader>
@@ -74,26 +76,26 @@ export function StaffTicketsView({ tickets }: StaffTicketsViewProps) {
           <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200">
             <MessageCircle className="w-4 h-4 text-amber-600 shrink-0" />
             <span>
-              <strong>{counts.needsResponse} ticket(s)</strong> require your response so engineering can proceed.
+              <strong>{counts.needsResponse}</strong> {t('staffView.needsResponseBanner')}
             </span>
           </div>
           <button
             onClick={() => setFilter('needs_response')}
             className="text-primary font-semibold hover:underline shrink-0"
           >
-            Show Tickets →
+            {t('staffView.showTickets')}
           </button>
         </div>
       )}
 
       {/* Search Input */}
       <div className="relative">
-        <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
+        <Search className="w-4 h-4 absolute start-3 top-3 text-muted-foreground" />
         <Input
-          placeholder="Search by ticket number, issue, or equipment..."
+          placeholder={t('staffView.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 pr-4 text-sm bg-card"
+          className="ps-9 pe-4 text-sm bg-card"
         />
       </div>
 
@@ -108,7 +110,7 @@ export function StaffTicketsView({ tickets }: StaffTicketsViewProps) {
               : 'bg-card text-muted-foreground border-border hover:bg-muted'
           )}
         >
-          All ({counts.total})
+          {t('staffView.all')} ({counts.total})
         </button>
 
         <button
@@ -121,7 +123,7 @@ export function StaffTicketsView({ tickets }: StaffTicketsViewProps) {
           )}
         >
           <Wrench className="w-3 h-3" />
-          Active Repair ({counts.active})
+          {t('staffView.activeRepair')} ({counts.active})
         </button>
 
         {counts.needsResponse > 0 && (
@@ -135,7 +137,7 @@ export function StaffTicketsView({ tickets }: StaffTicketsViewProps) {
             )}
           >
             <MessageCircle className="w-3 h-3" />
-            Needs Reply ({counts.needsResponse})
+            {t('staffView.needsReply')} ({counts.needsResponse})
           </button>
         )}
 
@@ -149,7 +151,7 @@ export function StaffTicketsView({ tickets }: StaffTicketsViewProps) {
           )}
         >
           <CheckCircle className="w-3 h-3" />
-          Resolved ({counts.resolved})
+          {t('staffView.resolved')} ({counts.resolved})
         </button>
       </div>
 
@@ -159,15 +161,15 @@ export function StaffTicketsView({ tickets }: StaffTicketsViewProps) {
           <TicketCheck className="w-8 h-8 text-muted-foreground mx-auto" />
           <p className="text-muted-foreground text-sm font-medium">
             {search
-              ? 'No tickets match your search.'
+              ? t('staffView.noMatch')
               : filter === 'needs_response'
-              ? 'No tickets currently waiting for your response.'
+              ? t('staffView.noWaiting')
               : filter === 'active'
-              ? 'No active tickets in progress.'
-              : "You haven't reported any equipment problems yet."}
+              ? t('staffView.noActive')
+              : t('staffView.noReported')}
           </p>
           <p className="text-muted-foreground text-xs">
-            Scan a device QR code or click &quot;Report Problem&quot; above to submit an issue.
+            {t('staffView.scanQrHint')}
           </p>
         </div>
       ) : (

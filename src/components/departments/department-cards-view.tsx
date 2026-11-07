@@ -173,7 +173,7 @@ export function DepartmentCardsView({ departments, hospitals }: DepartmentCardsV
                           </div>
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 rtl:rotate-180 transition-all shrink-0 mt-1" />
                     </div>
 
                     {/* Operational Health Progress Bar */}

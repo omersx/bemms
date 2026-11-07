@@ -1,0 +1,63 @@
+{
+  "title": "لوحة التحكم",
+  "welcomeBack": "مرحباً بعودتك، {name}",
+  "stats": {
+    "criticalTickets": "تذاكر حرجة",
+    "overdueMaintenance": "صيانة متأخرة",
+    "activeDevices": "أجهزة عاملة",
+    "openTickets": "تذاكر مفتوحة",
+    "pendingTasks": "مهام قيد الانتظار",
+    "todaysRound": "جولة اليوم",
+    "totalDevices": "إجمالي الأجهزة",
+    "scheduledPM": "صيانة وقائية مجدولة",
+    "completedToday": "أنجزت اليوم",
+    "uptime": "نسبة الجاهزية",
+    "untriaged": "بانتظار الفرز",
+    "dueOverdue": "مستحقة / متأخرة",
+    "outOfService": "خارج الخدمة",
+    "pmCompliance": "نسبة الامتثال للـ PM",
+    "awaitingReview": "بانتظار المراجعة",
+    "devicesAvailable": "الأجهزة المتاحة"
+  },
+  "quickActions": {
+    "title": "إجراءات سريعة",
+    "scanQr": "مسح QR",
+    "createTicket": "إنشاء تذكرة",
+    "startRound": "بدء الجولة",
+    "viewDevices": "عرض الأجهزة",
+    "newDevice": "جهاز جديد",
+    "viewReports": "عرض التقارير"
+  },
+  "recentTickets": {
+    "title": "أحدث التذاكر",
+    "noTickets": "لا توجد تذاكر حديثة",
+    "viewAll": "عرض جميع التذاكر"
+  },
+  "maintenanceDue": {
+    "title": "الصيانة المستحقة",
+    "noItems": "لا توجد مواعيد صيانة مستحقة حالياً",
+    "dueIn": "مستحقة خلال {days} يوم",
+    "overdue": "متأخرة بـ {days} يوم",
+    "dueToday": "مستحقة اليوم",
+    "viewAll": "عرض الكل"
+  },
+  "adminAlerts": {
+    "title": "تنبيهات النظام",
+    "noAlerts": "لا توجد تنبيهات",
+    "usersNeedAttention": "مستخدمون بحاجة للمراجعة",
+    "systemHealth": "حالة النظام"
+  },
+  "availabilityAlerts": {
+    "title": "تنبيهات جاهزية الأجهزة",
+    "devicesDown": "{count} أجهزة خارج الخدمة حالياً",
+    "allOperational": "جميع الأجهزة تعمل بكفاءة"
+  },
+  "roundWidget": {
+    "title": "الجولة الهندسية اليومية",
+    "noActiveRound": "لا توجد جولة نشطة حالياً",
+    "startRound": "بدء الجولة",
+    "continueRound": "متابعة الجولة",
+    "completedDepartments": "تمت تغطية {completed} من أصل {total} أقسام",
+    "roundInProgress": "الجولة جارية حالياً"
+  }
+}

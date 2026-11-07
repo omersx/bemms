@@ -32,6 +32,7 @@ import {
   Globe,
   Hash,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export interface AuditLogItem {
   id: string;
@@ -107,6 +108,8 @@ function parseJsonState(val: any): string | null {
  * and responsive pagination controls.
  */
 export function AuditLogTable({ logs, pagination }: AuditLogTableProps) {
+  const t = useTranslations('admin');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
@@ -129,13 +132,13 @@ export function AuditLogTable({ logs, pagination }: AuditLogTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="w-[180px]">Timestamp</TableHead>
-              <TableHead className="w-[180px]">Actor</TableHead>
-              <TableHead className="w-[130px]">Action</TableHead>
-              <TableHead className="w-[140px]">Entity Type</TableHead>
-              <TableHead className="w-[160px]">Entity ID</TableHead>
-              <TableHead>Reason</TableHead>
-              <TableHead className="w-[80px] text-right">Details</TableHead>
+              <TableHead className="w-[180px]">{t('auditLogs.timestamp')}</TableHead>
+              <TableHead className="w-[180px]">{t('auditLogs.user')}</TableHead>
+              <TableHead className="w-[130px]">{t('auditLogs.action')}</TableHead>
+              <TableHead className="w-[140px]">{t('auditLogs.resource')}</TableHead>
+              <TableHead className="w-[160px]">{t('auditLogs.resource')} ID</TableHead>
+              <TableHead>{t('changeReason')}</TableHead>
+              <TableHead className="w-[80px] text-end">{t('auditLogs.details')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -144,8 +147,7 @@ export function AuditLogTable({ logs, pagination }: AuditLogTableProps) {
                 <TableCell colSpan={7} className="h-40 text-center">
                   <div className="flex flex-col items-center justify-center text-muted-foreground space-y-2">
                     <Database className="h-8 w-8 text-muted-foreground/50" />
-                    <p className="text-sm font-medium">No audit logs found.</p>
-                    <p className="text-xs">Try adjusting your filters or search term.</p>
+                    <p className="text-sm font-medium">{t('auditLogs.noLogs')}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -236,9 +238,8 @@ export function AuditLogTable({ logs, pagination }: AuditLogTableProps) {
       {/* Pagination Controls */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-1 text-sm text-muted-foreground">
         <div>
-          Showing <span className="font-medium text-foreground">{startEntry}</span> to{' '}
-          <span className="font-medium text-foreground">{endEntry}</span> of{' '}
-          <span className="font-medium text-foreground">{total}</span> entries
+          {tCommon('table.showing')} <span className="font-medium text-foreground">{startEntry}</span> {tCommon('table.of')}{' '}
+          <span className="font-medium text-foreground">{endEntry}</span> ({total})
         </div>
 
         <div className="flex items-center gap-2">
@@ -249,12 +250,12 @@ export function AuditLogTable({ logs, pagination }: AuditLogTableProps) {
             disabled={page <= 1}
             className="h-8 px-2.5"
           >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Previous
+            <ChevronLeft className="h-4 w-4 me-1 rtl:rotate-180" />
+            {tCommon('buttons.previous')}
           </Button>
 
           <span className="text-xs font-medium px-2">
-            Page {page} of {totalPages}
+            {tCommon('table.page')} {page} {tCommon('table.of')} {totalPages}
           </span>
 
           <Button
@@ -264,8 +265,8 @@ export function AuditLogTable({ logs, pagination }: AuditLogTableProps) {
             disabled={page >= totalPages}
             className="h-8 px-2.5"
           >
-            Next
-            <ChevronRight className="h-4 w-4 ml-1" />
+            {tCommon('buttons.next')}
+            <ChevronRight className="h-4 w-4 ms-1 rtl:rotate-180" />
           </Button>
         </div>
       </div>

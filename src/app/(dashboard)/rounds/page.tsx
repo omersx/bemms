@@ -12,6 +12,7 @@ import { RoundAutoRefresh } from '@/components/rounds/round-auto-refresh';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { History, AlertCircle, Coffee, Users, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,7 @@ export default async function RoundsPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
+  const t = await getTranslations("rounds");
   const user = session.user as any;
   const enabled = await isEngineerRoundEnabled();
 
@@ -56,15 +58,15 @@ export default async function RoundsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <PageHeader
-        title="Engineer's Round"
-        description="Daily department inspection round"
+        title={t("title")}
+        description={t("subtitle")}
       >
         <div className="flex items-center gap-2">
           {!isManager && <RoundAutoRefresh showControls={true} />}
           <Link href="/rounds/history">
             <Button variant="outline" size="sm" className="gap-1.5">
               <History className="h-4 w-4" />
-              History
+              {t("historyButton")}
             </Button>
           </Link>
         </div>
@@ -84,11 +86,11 @@ export default async function RoundsPage() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="team" className="gap-1.5">
               <Users className="h-4 w-4" />
-              Team Rounds Today
+              {t("teamRoundsToday")}
             </TabsTrigger>
             <TabsTrigger value="mine" className="gap-1.5">
               <ShieldCheck className="h-4 w-4" />
-              My Daily Round
+              {t("myDailyRound")}
             </TabsTrigger>
           </TabsList>
 

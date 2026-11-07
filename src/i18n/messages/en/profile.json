@@ -1,0 +1,28 @@
+{
+  "title": "My Profile & Clinical Details",
+  "subtitle": "Your contact details, clinical speciality, and ward assignment",
+  "personalInfo": "Personal Information",
+  "fullName": "Full Name",
+  "username": "Username",
+  "email": "Email Address",
+  "phone": "Phone Number",
+  "roles": "Assigned Roles",
+  "department": "Department",
+  "hospital": "Hospital / Facility",
+  "security": "Security & Password",
+  "changePassword": "Change Password",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm New Password",
+  "updateProfile": "Update Profile",
+  "updatePassword": "Update Password",
+  "preferences": "Display & Preferences",
+  "language": "Interface Language",
+  "theme": "Color Theme",
+  "toast": {
+    "profileUpdated": "Profile updated successfully",
+    "passwordChanged": "Password changed successfully",
+    "updateFailed": "Failed to update profile",
+    "passwordMismatch": "New passwords do not match"
+  }
+}

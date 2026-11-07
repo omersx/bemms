@@ -11,44 +11,46 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "next-intl"
 
 interface MaintenanceNavProps {
   className?: string
   showNewTaskButton?: boolean
 }
 
-const TABS = [
-  {
-    href: "/maintenance",
-    label: "Overview",
-    icon: Wrench,
-    exact: true,
-  },
-  {
-    href: "/maintenance/tasks",
-    label: "Work Orders",
-    icon: ClipboardList,
-    exact: false,
-  },
-  {
-    href: "/maintenance/plans",
-    label: "PM Plans",
-    icon: Calendar,
-    exact: false,
-  },
-  {
-    href: "/maintenance/checklists",
-    label: "Checklists",
-    icon: CheckSquare,
-    exact: false,
-  },
-]
-
 export function MaintenanceNav({
   className,
   showNewTaskButton = true,
 }: MaintenanceNavProps) {
   const pathname = usePathname()
+  const t = useTranslations("maintenance")
+
+  const tabs = [
+    {
+      href: "/maintenance",
+      label: t("nav.overview"),
+      icon: Wrench,
+      exact: true,
+    },
+    {
+      href: "/maintenance/tasks",
+      label: t("nav.tasks"),
+      icon: ClipboardList,
+      exact: false,
+    },
+    {
+      href: "/maintenance/plans",
+      label: t("nav.plans"),
+      icon: Calendar,
+      exact: false,
+    },
+    {
+      href: "/maintenance/checklists",
+      label: t("nav.checklists"),
+      icon: CheckSquare,
+      exact: false,
+    },
+  ]
 
   const isTabActive = (href: string, exact: boolean) => {
     if (exact) {
@@ -69,7 +71,7 @@ export function MaintenanceNav({
         aria-label="Maintenance navigation"
         className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5"
       >
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const active = isTabActive(tab.href, tab.exact)
           const Icon = tab.icon
 
@@ -97,7 +99,7 @@ export function MaintenanceNav({
           <Link href="/maintenance/tasks/new">
             <Button size="sm" className="gap-1.5 shadow-sm">
               <Plus className="w-4 h-4" />
-              <span>New Task</span>
+              <span>{t("tasks.create")}</span>
             </Button>
           </Link>
         </div>

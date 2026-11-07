@@ -1,0 +1,60 @@
+{
+  "title": "Electronic Signatures",
+  "signDocument": "Sign Document",
+  "signatureRequired": "Electronic Signature Required",
+  "complianceNotice": "Compliant with 21 CFR Part 11 electronic records and signature guidelines.",
+  "reason": "Signing Reason",
+  "meaning": "Signature Meaning",
+  "meanings": {
+    "author": "I am the author of this document / record",
+    "approval": "I approve the contents of this record",
+    "review": "I have reviewed and verified this record",
+    "workCompleted": "I verify that the described biomedical work has been performed"
+  },
+  "reAuthenticate": "Enter Password to Sign",
+  "confirmSign": "Confirm & Sign",
+  "signing": "Authenticating & Signing...",
+  "statusPanel": {
+    "title": "Signature Status",
+    "signedBy": "Signed by",
+    "signedOn": "Signed on",
+    "integrityVerified": "Cryptographic Hash Verified",
+    "pending": "Pending Required Signature",
+    "awaiting": "Awaiting your signature",
+    "awaitingReview": "Awaiting review",
+    "notYetRequired": "Not yet required (waiting for previous steps)"
+  },
+  "history": {
+    "title": "Signature Audit Trail",
+    "signer": "Signer",
+    "timestamp": "Timestamp",
+    "meaning": "Meaning",
+    "hash": "Digest"
+  },
+  "toast": {
+    "success": "Electronic signature applied successfully",
+    "invalidPassword": "Password verification failed. Signature rejected.",
+    "error": "Failed to apply electronic signature"
+  },
+  "dialog": {
+    "signedSuccessfully": "{action} Signed Successfully",
+    "signedBy": "Signed by",
+    "status": "Status",
+    "complete": "Complete",
+    "device": "Device",
+    "asset": "Asset",
+    "record": "Record",
+    "action": "Action",
+    "workSummary": "Work Summary",
+    "result": "Result",
+    "signingAs": "Signing as",
+    "time": "Time",
+    "passwordLabel": "Electronic Signature Password",
+    "passwordPlaceholder": "Enter your password to sign",
+    "commentsLabel": "Comments (optional)",
+    "commentsPlaceholder": "Add any additional comments here...",
+    "signButton": "Sign Record",
+    "signingRecord": "Signing Record...",
+    "close": "Close"
+  }
+}

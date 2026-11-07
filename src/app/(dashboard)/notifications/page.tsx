@@ -34,7 +34,7 @@ export default async function NotificationsPage() {
             <Bell className="h-4 w-4" />
             Inbox
             {unreadCount > 0 && (
-              <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary font-semibold">
+              <span className="ms-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary font-semibold">
                 {unreadCount}
               </span>
             )}

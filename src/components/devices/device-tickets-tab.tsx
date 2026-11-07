@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { Ticket, Plus, AlertCircle, Clock, CheckCircle2, User, ChevronRight } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Ticket, Plus, Clock, User, ChevronRight } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { TicketStatusBadge, TicketPriorityBadge } from "@/components/tickets/ticket-badges"
+import { useTranslations } from "next-intl"
 
 interface DeviceTicketsTabProps {
   tickets: any[]
@@ -13,6 +14,7 @@ interface DeviceTicketsTabProps {
 }
 
 export function DeviceTicketsTab({ tickets = [], deviceId, deviceName }: DeviceTicketsTabProps) {
+  const t = useTranslations('tickets')
   const total = tickets.length
   const openCount = tickets.filter(t => !["resolved", "closed", "cancelled"].includes(t.statusCode)).length
   const inProgressCount = tickets.filter(t => t.statusCode === "in_progress").length
@@ -24,34 +26,34 @@ export function DeviceTicketsTab({ tickets = [], deviceId, deviceName }: DeviceT
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Card className="p-4 flex flex-col items-center justify-center text-center">
           <span className="text-2xl font-bold">{total}</span>
-          <span className="text-xs text-muted-foreground mt-0.5">Total Tickets</span>
+          <span className="text-xs text-muted-foreground mt-0.5">{t('detail.totalTickets')}</span>
         </Card>
         <Card className="p-4 flex flex-col items-center justify-center text-center">
           <span className="text-2xl font-bold text-amber-600">{openCount}</span>
-          <span className="text-xs text-muted-foreground mt-0.5">Open / Active</span>
+          <span className="text-xs text-muted-foreground mt-0.5">{t('detail.openActive')}</span>
         </Card>
         <Card className="p-4 flex flex-col items-center justify-center text-center">
           <span className="text-2xl font-bold text-blue-600">{inProgressCount}</span>
-          <span className="text-xs text-muted-foreground mt-0.5">In Progress</span>
+          <span className="text-xs text-muted-foreground mt-0.5">{t('detail.inProgress')}</span>
         </Card>
         <Card className="p-4 flex flex-col items-center justify-center text-center">
           <span className="text-2xl font-bold text-emerald-600">{resolvedCount}</span>
-          <span className="text-xs text-muted-foreground mt-0.5">Resolved / Closed</span>
+          <span className="text-xs text-muted-foreground mt-0.5">{t('detail.resolvedClosed')}</span>
         </Card>
       </div>
 
       {/* 2. Ticket History Section Header & Action */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold">Service &amp; Problem History</h3>
+          <h3 className="text-base font-semibold">{t('detail.historyTitle')}</h3>
           <p className="text-xs text-muted-foreground">
-            All incident reports and service tickets submitted for this device
+            {t('detail.historySubtitle')}
           </p>
         </div>
         <Button asChild size="sm" className="gap-1.5">
           <Link href={`/tickets/create?deviceId=${deviceId}&source=device_profile`}>
-            <Plus className="w-4 h-4" />
-            Report a Problem
+            <Plus className="w-4 h-4 me-1.5" />
+            {t('reportProblem')}
           </Link>
         </Button>
       </div>
@@ -61,15 +63,15 @@ export function DeviceTicketsTab({ tickets = [], deviceId, deviceName }: DeviceT
         <div className="text-center py-12 border rounded-lg bg-muted/20 space-y-3">
           <Ticket className="w-12 h-12 text-muted-foreground mx-auto opacity-40" />
           <div>
-            <h4 className="text-sm font-medium text-foreground">No Tickets Reported</h4>
+            <h4 className="text-sm font-medium text-foreground">{t('detail.noTicketsReported')}</h4>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto mt-1">
-              This equipment currently has no reported problems or maintenance tickets in the registry.
+              {t('detail.noTicketsDesc')}
             </p>
           </div>
           <Button asChild variant="outline" size="sm" className="mt-2">
             <Link href={`/tickets/create?deviceId=${deviceId}&source=device_profile`}>
-              <Plus className="w-4 h-4 mr-1.5" />
-              Report First Ticket
+              <Plus className="w-4 h-4 me-1.5" />
+              {t('detail.reportFirstTicket')}
             </Link>
           </Button>
         </div>
@@ -79,7 +81,7 @@ export function DeviceTicketsTab({ tickets = [], deviceId, deviceName }: DeviceT
             const reportedDate = ticket.reportedAt || ticket.createdAt
             const formattedDate = reportedDate
               ? new Date(reportedDate).toISOString().replace("T", " ").substring(0, 16)
-              : "Unknown date"
+              : "—"
 
             return (
               <Link
@@ -113,7 +115,7 @@ export function DeviceTicketsTab({ tickets = [], deviceId, deviceName }: DeviceT
                       <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center text-xs text-muted-foreground shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 gap-1.5">
                         <div className="flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
-                          <span suppressHydrationWarning>{formattedDate} UTC</span>
+                          <span suppressHydrationWarning>{formattedDate}</span>
                         </div>
                         {ticket.assignedEngineer?.fullName && (
                           <div className="flex items-center gap-1 text-foreground/80">
@@ -122,7 +124,7 @@ export function DeviceTicketsTab({ tickets = [], deviceId, deviceName }: DeviceT
                           </div>
                         )}
                         <span className="text-primary group-hover:translate-x-0.5 transition-transform hidden sm:inline-flex items-center gap-0.5 text-xs font-medium">
-                          View details <ChevronRight className="w-3.5 h-3.5" />
+                          {t('detail.viewDetails')} <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
                         </span>
                       </div>
                     </div>

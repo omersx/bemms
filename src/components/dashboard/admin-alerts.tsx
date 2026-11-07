@@ -24,7 +24,7 @@ export function AdminAlerts({ alerts }: AdminAlertsProps) {
     <Card className="border-red-200">
       <CardHeader className="pb-3 bg-red-50/50 rounded-t-xl border-b border-red-100">
         <CardTitle className="text-lg flex items-center text-red-800">
-          <ShieldAlert className="w-5 h-5 mr-2 text-red-500" />
+          <ShieldAlert className="w-5 h-5 me-2 text-red-500" />
           System Administration Alerts
         </CardTitle>
       </CardHeader>

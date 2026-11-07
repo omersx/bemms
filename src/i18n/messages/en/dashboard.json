@@ -1,0 +1,63 @@
+{
+  "title": "Dashboard",
+  "welcomeBack": "Welcome back, {name}",
+  "stats": {
+    "criticalTickets": "Critical Tickets",
+    "overdueMaintenance": "Overdue Maintenance",
+    "activeDevices": "Active Devices",
+    "openTickets": "Open Tickets",
+    "pendingTasks": "Pending Tasks",
+    "todaysRound": "Today's Round",
+    "totalDevices": "Total Devices",
+    "scheduledPM": "Scheduled PM",
+    "completedToday": "Completed Today",
+    "uptime": "Uptime",
+    "untriaged": "Untriaged",
+    "dueOverdue": "Due / Overdue",
+    "outOfService": "Out of Service",
+    "pmCompliance": "PM Compliance",
+    "awaitingReview": "Awaiting Review",
+    "devicesAvailable": "Devices Available"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "scanQr": "Scan QR",
+    "createTicket": "Create Ticket",
+    "startRound": "Start Round",
+    "viewDevices": "View Devices",
+    "newDevice": "New Device",
+    "viewReports": "View Reports"
+  },
+  "recentTickets": {
+    "title": "Recent Tickets",
+    "noTickets": "No recent tickets",
+    "viewAll": "View All Tickets"
+  },
+  "maintenanceDue": {
+    "title": "Maintenance Due",
+    "noItems": "No maintenance items due",
+    "dueIn": "Due in {days} days",
+    "overdue": "Overdue by {days} days",
+    "dueToday": "Due Today",
+    "viewAll": "View All"
+  },
+  "adminAlerts": {
+    "title": "System Alerts",
+    "noAlerts": "No alerts",
+    "usersNeedAttention": "Users Need Attention",
+    "systemHealth": "System Health"
+  },
+  "availabilityAlerts": {
+    "title": "Availability Alerts",
+    "devicesDown": "{count} devices currently unavailable",
+    "allOperational": "All devices operational"
+  },
+  "roundWidget": {
+    "title": "Daily Round",
+    "noActiveRound": "No active round",
+    "startRound": "Start Round",
+    "continueRound": "Continue Round",
+    "completedDepartments": "{completed} of {total} departments",
+    "roundInProgress": "Round in Progress"
+  }
+}

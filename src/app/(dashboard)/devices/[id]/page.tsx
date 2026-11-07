@@ -25,6 +25,7 @@ import { DeviceMiniQr } from "@/components/devices/device-mini-qr"
 import { AlertTriangle, Wrench, ShieldCheck, FileText, Activity, MapPin, Ticket } from "lucide-react"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { getLocale, getTranslations } from "next-intl/server"
 
 export default async function DeviceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -35,6 +36,10 @@ export default async function DeviceDetailPage({ params }: { params: Promise<{ i
 }
 
 async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
+  const t = await getTranslations("devices")
+  const locale = await getLocale()
+  const isArabic = locale === "ar"
+
   const [
     profileResult,
     statusResult,
@@ -75,12 +80,12 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
   if (!device) {
     return (
       <div className="p-12 text-center">
-        <h2 className="text-xl font-semibold mb-2">Device Not Found</h2>
+        <h2 className="text-xl font-semibold mb-2">{t('detail.notFound')}</h2>
         <p className="text-muted-foreground text-sm mb-4">
-          The requested device record could not be found or you do not have permission to view it.
+          {t('detail.notFoundDesc')}
         </p>
         <Link href="/devices">
-          <Button variant="outline">Back to Device Inventory</Button>
+          <Button variant="outline">{t('detail.backToInventory')}</Button>
         </Link>
       </div>
     )
@@ -101,7 +106,7 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
       {/* Role-shaped Header with Action Buttons */}
       <PageHeader
         title={device.name}
-        description={`${device.internalCode} — Asset #${device.assetNumber}`}
+        description={`${device.internalCode} — ${t('columns.assetNumber')} ${device.assetNumber}`}
       >
         <DeviceActionButtons
           deviceId={device.id}
@@ -123,30 +128,30 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
       {/* Tabbed Navigation */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="flex flex-wrap h-auto p-1 gap-1">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          {showTechnical && <TabsTrigger value="technical">Technical</TabsTrigger>}
+          <TabsTrigger value="overview">{t('detail.overview')}</TabsTrigger>
+          {showTechnical && <TabsTrigger value="technical">{t('detail.technicalSpecs')}</TabsTrigger>}
           <TabsTrigger value="tickets" className="gap-1.5">
             <Ticket className="w-3.5 h-3.5" />
-            Tickets ({allTickets.length})
+            {t('detail.tickets')} ({allTickets.length})
           </TabsTrigger>
           {showMaintenance && (
             <TabsTrigger value="maintenance" className="gap-1.5">
               <Wrench className="w-3.5 h-3.5" />
-              Maintenance ({maintenanceTasks.length})
+              {t('detail.maintenance')} ({maintenanceTasks.length})
             </TabsTrigger>
           )}
           {showSignatures && (
             <TabsTrigger value="signatures" className="gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Signatures ({signedActivitiesCount})
+              {t('detail.signatures')} ({signedActivitiesCount})
             </TabsTrigger>
           )}
-          {showStatusHistory && <TabsTrigger value="status-history">Status History</TabsTrigger>}
-          {showLocationHistory && <TabsTrigger value="location-history">Location History</TabsTrigger>}
+          {showStatusHistory && <TabsTrigger value="status-history">{t('detail.statusHistory')}</TabsTrigger>}
+          {showLocationHistory && <TabsTrigger value="location-history">{t('detail.locationHistory')}</TabsTrigger>}
           {showDocuments && (
             <TabsTrigger value="documents" className="gap-1.5">
               <FileText className="w-3.5 h-3.5" />
-              Documents ({documents.length})
+              {t('detail.documents')} ({documents.length})
             </TabsTrigger>
           )}
         </TabsList>
@@ -157,7 +162,7 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
             {/* Identity Card */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Device Identity</CardTitle>
+                <CardTitle className="text-base">{t('detail.identity')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 {qrLabel && (
@@ -171,39 +176,39 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
 
                 <div className="grid gap-3 pt-1">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Internal Code</span>
+                    <span className="text-muted-foreground">{t('detail.internalCode')}</span>
                     <span className="font-mono font-medium">{device.internalCode}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Asset Number</span>
+                    <span className="text-muted-foreground">{t('detail.assetNumber')}</span>
                     <span className="font-mono font-medium">{device.assetNumber}</span>
                   </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Serial Number</span>
+                  <span className="text-muted-foreground">{t('detail.serialNumber')}</span>
                   <span>{device.serialNumber || "—"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Category</span>
+                  <span className="text-muted-foreground">{t('detail.category')}</span>
                   <span>{(device as any).deviceCategory?.name || "—"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Manufacturer</span>
+                  <span className="text-muted-foreground">{t('detail.manufacturer')}</span>
                   <span>{(device as any).manufacturer?.name || "—"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Model</span>
+                  <span className="text-muted-foreground">{t('detail.model')}</span>
                   <span>{(device as any).deviceModel?.modelName || device.modelNameFree || "—"}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Status</span>
+                  <span className="text-muted-foreground">{t('detail.status')}</span>
                   <DeviceStatusBadge status={device.currentStatusCode} />
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Criticality</span>
+                  <span className="text-muted-foreground">{t('detail.criticality')}</span>
                   <CriticalityBadge level={device.criticalityLevel} />
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Risk Class</span>
+                  <span className="text-muted-foreground">{t('detail.riskClass')}</span>
                   <RiskClassBadge classification={device.riskClassification} />
                 </div>
               </div>
@@ -212,31 +217,31 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
 
             {/* Location & Assignment Card */}
             <Card>
-              <CardHeader><CardTitle className="text-base">Location & Assignment</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t('detail.locationAssignment')}</CardTitle></CardHeader>
               <CardContent className="grid gap-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Organization</span>
+                  <span className="text-muted-foreground">{t('detail.organization')}</span>
                   <span>{(device as any).organization?.name || "—"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Hospital</span>
+                  <span className="text-muted-foreground">{t('detail.hospital')}</span>
                   <span>{(device as any).hospital?.name || "—"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Department</span>
+                  <span className="text-muted-foreground">{t('detail.department')}</span>
                   <span>{(device as any).department?.name || "—"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Location / Room</span>
+                  <span className="text-muted-foreground">{t('detail.locationRoom')}</span>
                   <span>{(device as any).location?.name || device.exactLocationDescription || "—"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Assigned Engineer</span>
-                  <span>{(device as any).assignedEngineer?.fullName || "Unassigned"}</span>
+                  <span className="text-muted-foreground">{t('detail.assignedEngineer')}</span>
+                  <span>{(device as any).assignedEngineer?.fullName || t('detail.unassigned')}</span>
                 </div>
                 {qrLabel && (
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">QR Reference</span>
+                    <span className="text-muted-foreground">{t('detail.qrReference')}</span>
                     <Link
                       href={`/devices/${device.id}/qr`}
                       className="font-mono text-xs text-primary hover:underline"
@@ -247,7 +252,7 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
                 )}
                 {device.nextPmDueDate && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Next PM Due</span>
+                    <span className="text-muted-foreground">{t('detail.nextPmDue')}</span>
                     <span className="font-medium">{new Date(device.nextPmDueDate).toLocaleDateString()}</span>
                   </div>
                 )}
@@ -256,30 +261,30 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
 
             {/* Purchase & Warranty Card */}
             <Card className="md:col-span-2">
-              <CardHeader><CardTitle className="text-base">Purchase & Warranty</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t('detail.purchaseWarranty')}</CardTitle></CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 text-sm">
                 <div>
-                  <span className="text-muted-foreground block text-xs">Purchase Date</span>
+                  <span className="text-muted-foreground block text-xs">{t('detail.purchaseDate')}</span>
                   <span>{device.purchaseDate ? new Date(device.purchaseDate).toLocaleDateString() : "—"}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-xs">Purchase Cost</span>
+                  <span className="text-muted-foreground block text-xs">{t('detail.purchaseCost')}</span>
                   <span>{device.purchaseCost ? `${device.currency || "USD"} ${device.purchaseCost}` : "—"}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-xs">Installation Date</span>
+                  <span className="text-muted-foreground block text-xs">{t('detail.installationDate')}</span>
                   <span>{device.installationDate ? new Date(device.installationDate).toLocaleDateString() : "—"}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-xs">Warranty Start</span>
+                  <span className="text-muted-foreground block text-xs">{t('detail.warrantyStart')}</span>
                   <span>{device.warrantyStartDate ? new Date(device.warrantyStartDate).toLocaleDateString() : "—"}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-xs">Warranty End</span>
+                  <span className="text-muted-foreground block text-xs">{t('detail.warrantyEnd')}</span>
                   <span>{device.warrantyEndDate ? new Date(device.warrantyEndDate).toLocaleDateString() : "—"}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-xs">Lifecycle Status</span>
+                  <span className="text-muted-foreground block text-xs">{t('detail.lifecycleStatus')}</span>
                   <span className="capitalize font-medium">{device.lifecycleStatus}</span>
                 </div>
               </CardContent>
@@ -291,31 +296,31 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
                 <CardHeader className="bg-amber-50/60 dark:bg-amber-950/20 pb-4 border-b border-amber-100 dark:border-amber-900/40">
                   <CardTitle className="text-amber-900 dark:text-amber-300 text-base flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    Active Service Tickets ({activeTickets.length})
+                    {t('detail.activeTickets')} ({activeTickets.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4 grid gap-3">
-                  {activeTickets.map((t: any) => (
+                  {activeTickets.map((tItem: any) => (
                     <div
-                      key={t.id}
+                      key={tItem.id}
                       className="flex flex-col md:flex-row md:items-center justify-between p-3.5 rounded-lg border bg-card gap-4"
                     >
                       <div className="space-y-1">
                         <Link
-                          href={`/tickets/${t.id}`}
+                          href={`/tickets/${tItem.id}`}
                           className="font-medium hover:underline text-primary flex items-center gap-2"
                         >
                           <span className="font-mono text-xs px-1.5 py-0.5 bg-muted rounded">
-                            {t.ticketNumber}
+                            {tItem.ticketNumber}
                           </span>
-                          {t.title}
+                          {tItem.title}
                         </Link>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{t.description}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{tItem.description}</p>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <TicketStatusBadge status={t.statusCode} />
+                        <TicketStatusBadge status={tItem.statusCode} />
                         <Button asChild variant="outline" size="sm">
-                          <Link href={`/tickets/${t.id}`}>View Ticket</Link>
+                          <Link href={`/tickets/${tItem.id}`}>{t('detail.viewTicket')}</Link>
                         </Button>
                       </div>
                     </div>
@@ -330,14 +335,14 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
         {showTechnical && (
           <TabsContent value="technical">
             <Card>
-              <CardHeader><CardTitle className="text-base">Technical Specifications</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t('detail.technicalSpecs')}</CardTitle></CardHeader>
               <CardContent>
                 {device.technicalSpecifications ? (
                   <pre className="bg-muted p-4 rounded-md text-xs font-mono overflow-auto max-h-96">
                     {JSON.stringify(device.technicalSpecifications, null, 2)}
                   </pre>
                 ) : (
-                  <p className="text-muted-foreground text-sm">No technical specifications recorded.</p>
+                  <p className="text-muted-foreground text-sm">{t('detail.noSpecs')}</p>
                 )}
               </CardContent>
             </Card>
@@ -377,7 +382,7 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
         {showStatusHistory && (
           <TabsContent value="status-history">
             <Card>
-              <CardHeader><CardTitle className="text-base">Status Change History</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t('detail.statusHistory')}</CardTitle></CardHeader>
               <CardContent>
                 <DeviceStatusTimeline entries={statusHistory as any} />
               </CardContent>
@@ -389,7 +394,7 @@ async function DeviceDetailContent({ deviceId }: { deviceId: string }) {
         {showLocationHistory && (
           <TabsContent value="location-history">
             <Card>
-              <CardHeader><CardTitle className="text-base">Location Transfer History</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t('detail.locationHistory')}</CardTitle></CardHeader>
               <CardContent>
                 <DeviceLocationTimeline entries={locationHistory as any} />
               </CardContent>

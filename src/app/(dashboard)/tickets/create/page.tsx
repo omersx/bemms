@@ -30,6 +30,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, Suspense } from "react";
 import { cn } from "@/lib/utils";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function CreateTicketPage() {
   return (
@@ -39,7 +40,7 @@ export default function CreateTicketPage() {
   );
 }
 
-const QUICK_PROBLEM_CHIPS = [
+const QUICK_PROBLEM_CHIPS_EN = [
   { label: "Won't turn on / Power issue", category: "power_issue" },
   { label: "Alarm constantly sounding", category: "alarm_problem" },
   { label: "Error code displayed", category: "display_interface" },
@@ -50,9 +51,26 @@ const QUICK_PROBLEM_CHIPS = [
   { label: "Physical drop / mechanical damage", category: "mechanical_damage" },
 ];
 
+const QUICK_PROBLEM_CHIPS_AR = [
+  { label: "الجهاز لا يعمل / مشكلة بالطاقة", category: "power_issue" },
+  { label: "إنذار مستمر بدون توقف", category: "alarm_problem" },
+  { label: "رمز خطأ على الشاشة (Error Code)", category: "display_interface" },
+  { label: "الشاشة سوداء أو تومض", category: "display_interface" },
+  { label: "البطارية لا تشحن", category: "power_issue" },
+  { label: "تلف في الكيبل أو الحساس أو المجس", category: "sensor_accessory" },
+  { label: "مشكلة معايرة أو قراءات غير دقيقة", category: "performance_concern" },
+  { label: "سقوط أو كسر ميكانيكي / تلف فيزيائي", category: "mechanical_damage" },
+];
+
 function CreateTicketContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("tickets");
+  const tc = useTranslations("common");
+  const locale = useLocale();
+  const isArabic = locale === "ar";
+  const quickProblemChips = isArabic ? QUICK_PROBLEM_CHIPS_AR : QUICK_PROBLEM_CHIPS_EN;
+
   const prefilledDeviceId = searchParams.get("deviceId");
   const prefilledHospitalId = searchParams.get("hospitalId");
   const prefilledDepartmentId = searchParams.get("departmentId");
@@ -250,21 +268,21 @@ function CreateTicketContent() {
           onClick={() => router.back()}
           className="h-9 px-2 text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Back
+          <ArrowLeft className="w-4 h-4 me-1 rtl:rotate-180" />
+          {tc("buttons.back")}
         </Button>
       </div>
 
       <PageHeader
-        title="Report Equipment Problem"
-        description="Notify the Biomedical Engineering team for immediate inspection or repair"
+        title={t("reportProblem")}
+        description={isArabic ? "إخطار فريق الهندسة الطبية للفحص والمعاينة الفورية أو الإصلاح" : "Notify the Biomedical Engineering team for immediate inspection or repair"}
       />
 
       {error && (
         <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive text-sm flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold">Unable to submit report</p>
+            <p className="font-semibold">{isArabic ? "تعذر تقديم البلاغ" : "Unable to submit report"}</p>
             <p className="text-xs mt-0.5">{error}</p>
           </div>
         </div>
@@ -277,7 +295,7 @@ function CreateTicketContent() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
                 <Monitor className="w-4 h-4 text-primary" />
-                Equipment Selected
+                {isArabic ? "الجهاز المحدد" : "Equipment Selected"}
               </CardTitle>
               <DeviceStatusBadge status={device.currentStatusCode} />
             </div>
@@ -303,23 +321,23 @@ function CreateTicketContent() {
                   }}
                   className="self-start sm:self-auto text-xs"
                 >
-                  Change Device
+                  {isArabic ? "تغيير الجهاز" : "Change Device"}
                 </Button>
               )}
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-lg border">
               <div>
-                <span className="block text-[11px] font-semibold text-foreground">Hospital</span>
-                <span>{(device as any).hospital?.name || "General Hospital"}</span>
+                <span className="block text-[11px] font-semibold text-foreground">{isArabic ? "المستشفى" : "Hospital"}</span>
+                <span>{(device as any).hospital?.name || (isArabic ? "المستشفى العام" : "General Hospital")}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-semibold text-foreground">Department</span>
-                <span>{(device as any).department?.name || "Clinical Department"}</span>
+                <span className="block text-[11px] font-semibold text-foreground">{isArabic ? "القسم" : "Department"}</span>
+                <span>{(device as any).department?.name || (isArabic ? "القسم السريري" : "Clinical Department")}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-semibold text-foreground">Registered Room</span>
-                <span>{(device as any).location?.name || device.exactLocationDescription || "Room not set"}</span>
+                <span className="block text-[11px] font-semibold text-foreground">{isArabic ? "الغرفة المسجلة" : "Registered Room"}</span>
+                <span>{(device as any).location?.name || device.exactLocationDescription || (isArabic ? "غير محددة" : "Room not set")}</span>
               </div>
             </div>
           </CardContent>
@@ -329,21 +347,21 @@ function CreateTicketContent() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Search className="w-4 h-4 text-primary" />
-              Which device is having problems?
+              {isArabic ? "ما هو الجهاز الذي يواجه المشكلة؟" : "Which device is having problems?"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
+              <Search className="w-4 h-4 absolute start-3 top-3 text-muted-foreground" />
               <Input
-                placeholder="Search by asset tag (e.g. ICU-003), device name, or model..."
+                placeholder={isArabic ? "بحث برقم الأصل (مثل ICU-003)، أو اسم الجهاز، أو الطراز..." : "Search by asset tag (e.g. ICU-003), device name, or model..."}
                 value={deviceSearch}
                 onChange={(e) => handleDeviceSearch(e.target.value)}
-                className="pl-9 pr-4 py-2 text-sm"
+                className="ps-9 pe-4 py-2 text-sm"
               />
             </div>
 
-            {searching && <p className="text-xs text-muted-foreground">Searching equipment catalog...</p>}
+            {searching && <p className="text-xs text-muted-foreground">{isArabic ? "جاري البحث في كتالوج الأجهزة الطبية..." : "Searching equipment catalog..."}</p>}
 
             {deviceResults.length > 0 && (
               <div className="border rounded-xl divide-y max-h-56 overflow-auto bg-card shadow-inner">
@@ -490,8 +508,8 @@ function CreateTicketContent() {
         <Card className="shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center justify-between">
-              <span>Clinical Urgency & Impact *</span>
-              <span className="text-xs font-normal text-muted-foreground">Select current state</span>
+              <span>{isArabic ? "درجة الإلحاح والتأثير السريري *" : "Clinical Urgency & Impact *"}</span>
+              <span className="text-xs font-normal text-muted-foreground">{isArabic ? "حدد الوضع الحالي للجهاز" : "Select current state"}</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -501,18 +519,18 @@ function CreateTicketContent() {
                 type="button"
                 onClick={() => setImpact("device_usable")}
                 className={cn(
-                  "flex flex-col text-left p-3.5 rounded-xl border-2 transition-all",
+                  "flex flex-col text-start p-3.5 rounded-xl border-2 transition-all",
                   impact === "device_usable"
                     ? "border-green-600 bg-green-50/70 dark:bg-green-950/30 text-green-900 dark:text-green-200 shadow-sm"
                     : "border-border bg-card hover:bg-muted/40 text-muted-foreground"
                 )}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-semibold text-sm text-foreground">Still Usable</span>
+                  <span className="font-semibold text-sm text-foreground">{isArabic ? "لا يزال صالحاً للاستخدام" : "Still Usable"}</span>
                   <span className="w-3 h-3 rounded-full bg-green-500" />
                 </div>
                 <p className="text-xs leading-relaxed">
-                  Working with minor issue (alarm, accessory, display artifact). Safe for care.
+                  {isArabic ? "يعمل مع مشكلة بسيطة (إنذار، ملحق، عيب بالشاشة). آمن لرعاية المرضى." : "Working with minor issue (alarm, accessory, display artifact). Safe for care."}
                 </p>
               </button>
 
@@ -521,18 +539,18 @@ function CreateTicketContent() {
                 type="button"
                 onClick={() => setImpact("device_not_usable")}
                 className={cn(
-                  "flex flex-col text-left p-3.5 rounded-xl border-2 transition-all",
+                  "flex flex-col text-start p-3.5 rounded-xl border-2 transition-all",
                   impact === "device_not_usable"
                     ? "border-amber-500 bg-amber-50/70 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 shadow-sm"
                     : "border-border bg-card hover:bg-muted/40 text-muted-foreground"
                 )}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-semibold text-sm text-foreground">NOT Usable</span>
+                  <span className="font-semibold text-sm text-foreground">{isArabic ? "غير صالح للاستخدام" : "NOT Usable"}</span>
                   <span className="w-3 h-3 rounded-full bg-amber-500" />
                 </div>
                 <p className="text-xs leading-relaxed">
-                  Device is inoperable or unsafe. Removed from patient use and waiting repair.
+                  {isArabic ? "الجهاز متوقف أو غير آمن. تم إيقافه عن المرضى وبانتظار مهندس الصيانة." : "Device is inoperable or unsafe. Removed from patient use and waiting repair."}
                 </p>
               </button>
 
@@ -541,7 +559,7 @@ function CreateTicketContent() {
                 type="button"
                 onClick={() => setImpact("patient_care_affected")}
                 className={cn(
-                  "flex flex-col text-left p-3.5 rounded-xl border-2 transition-all",
+                  "flex flex-col text-start p-3.5 rounded-xl border-2 transition-all",
                   impact === "patient_care_affected"
                     ? "border-red-600 bg-red-50/80 dark:bg-red-950/40 text-red-950 dark:text-red-100 shadow-md ring-2 ring-red-500/20"
                     : "border-border bg-card hover:bg-muted/40 text-muted-foreground"
@@ -550,12 +568,12 @@ function CreateTicketContent() {
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-bold text-sm text-red-700 dark:text-red-400 flex items-center gap-1">
                     <Zap className="w-3.5 h-3.5" />
-                    Patient Affected
+                    {isArabic ? "تأثرت رعاية المرضى" : "Patient Affected"}
                   </span>
                   <span className="w-3 h-3 rounded-full bg-red-600 animate-pulse" />
                 </div>
                 <p className="text-xs leading-relaxed text-red-800 dark:text-red-300">
-                  CRITICAL: Procedure or patient monitoring interrupted. Immediate P1 dispatch.
+                  {isArabic ? "حرج وطارئ: توقف الإجراء الطبي أو مراقبة المريض. يتطلب تدخلاً فورياً P1." : "CRITICAL: Procedure or patient monitoring interrupted. Immediate P1 dispatch."}
                 </p>
               </button>
             </div>
@@ -565,14 +583,14 @@ function CreateTicketContent() {
         {/* Problem Information */}
         <Card className="shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">What happened?</CardTitle>
+            <CardTitle className="text-base">{isArabic ? "ماذا حدث للجهاز؟" : "What happened?"}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Quick Chips */}
             <div>
-              <p className="text-xs text-muted-foreground mb-2">Tap a common symptom to quickly prefill:</p>
+              <p className="text-xs text-muted-foreground mb-2">{isArabic ? "اضغط على عرض شائع للتعبئة السريعة:" : "Tap a common symptom to quickly prefill:"}</p>
               <div className="flex flex-wrap gap-1.5">
-                {QUICK_PROBLEM_CHIPS.map((chip) => (
+                {quickProblemChips.map((chip) => (
                   <button
                     key={chip.label}
                     type="button"
@@ -587,13 +605,13 @@ function CreateTicketContent() {
 
             <div>
               <Label htmlFor="title" className="text-sm font-semibold">
-                Problem Summary *
+                {isArabic ? "ملخص المشكلة أو العطل *" : "Problem Summary *"}
               </Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Infusion pump beeping error code E-42"
+                placeholder={isArabic ? "مثال: مضخة الحقن تصدر صفير وتظهر رمز الخطأ E-42" : "e.g. Infusion pump beeping error code E-42"}
                 required
                 className="mt-1.5"
               />
@@ -601,14 +619,14 @@ function CreateTicketContent() {
 
             <div>
               <Label htmlFor="description" className="text-sm font-semibold">
-                Detailed Observation (optional but helpful)
+                {isArabic ? "ملاحظات وتفاصيل إضافية (اختياري لكن مفيد)" : "Detailed Observation (optional but helpful)"}
               </Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                placeholder="Describe what occurred: Started during morning rounds? Any alarms heard? Did restart resolve it?"
+                placeholder={isArabic ? "صف ما حدث: هل بدأ العطل أثناء الجولة؟ هل صدر صوت إنذار؟ هل أدت إعادة التشغيل لحل المشكلة؟" : "Describe what occurred: Started during morning rounds? Any alarms heard? Did restart resolve it?"}
                 className="mt-1.5 text-sm"
               />
             </div>
@@ -616,7 +634,7 @@ function CreateTicketContent() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
                 <Label htmlFor="category" className="text-xs font-medium">
-                  Technical Category
+                  {isArabic ? "التصنيف الفني" : "Technical Category"}
                 </Label>
                 <select
                   id="category"
@@ -624,27 +642,27 @@ function CreateTicketContent() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full mt-1.5 rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 >
-                  <option value="">Auto-detected / Other</option>
-                  <option value="power_issue">Power / Battery</option>
-                  <option value="alarm_problem">Alarm Malfunction</option>
-                  <option value="display_interface">Display / Screen</option>
-                  <option value="sensor_accessory">Sensor / Cable / Probe</option>
-                  <option value="mechanical_damage">Mechanical / Physical Damage</option>
-                  <option value="performance_concern">Calibration / Accuracy</option>
-                  <option value="software_configuration">Software / Settings</option>
-                  <option value="other">General Other</option>
+                  <option value="">{isArabic ? "تحديد تلقائي / أخرى" : "Auto-detected / Other"}</option>
+                  <option value="power_issue">{isArabic ? "طاقة / بطارية" : "Power / Battery"}</option>
+                  <option value="alarm_problem">{isArabic ? "عطل بجهاز الإنذار" : "Alarm Malfunction"}</option>
+                  <option value="display_interface">{isArabic ? "شاشة العرض / الواجهة" : "Display / Screen"}</option>
+                  <option value="sensor_accessory">{isArabic ? "حساس / كيبل / مجس" : "Sensor / Cable / Probe"}</option>
+                  <option value="mechanical_damage">{isArabic ? "تلف ميكانيكي / فيزيائي" : "Mechanical / Physical Damage"}</option>
+                  <option value="performance_concern">{isArabic ? "معايرة / دقة القراءات" : "Calibration / Accuracy"}</option>
+                  <option value="software_configuration">{isArabic ? "برمجيات / إعدادات" : "Software / Settings"}</option>
+                  <option value="other">{isArabic ? "أخرى عامة" : "General Other"}</option>
                 </select>
               </div>
 
               <div>
                 <Label htmlFor="locationCorrection" className="text-xs font-medium">
-                  Current Room / Bed (if moved)
+                  {isArabic ? "الغرفة / السرير الحالي (في حال تم النقل)" : "Current Room / Bed (if moved)"}
                 </Label>
                 <Input
                   id="locationCorrection"
                   value={locationCorrection}
                   onChange={(e) => setLocationCorrection(e.target.value)}
-                  placeholder="e.g. Moved to Bed 4, ICU"
+                  placeholder={isArabic ? "مثال: تم النقل إلى سرير 4، العناية المركزة" : "e.g. Moved to Bed 4, ICU"}
                   className="mt-1.5 text-sm"
                 />
               </div>
@@ -652,16 +670,16 @@ function CreateTicketContent() {
 
             <div>
               <Label htmlFor="contactPhone" className="text-xs font-medium">
-                Your Contact Extension / Phone (for engineer callback)
+                {isArabic ? "تحويلة التواصل / الهاتف (لمعاودة الاتصال بك من المهندس)" : "Your Contact Extension / Phone (for engineer callback)"}
               </Label>
               <div className="relative mt-1.5">
-                <Phone className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
+                <Phone className="w-4 h-4 absolute start-3 top-3 text-muted-foreground" />
                 <Input
                   id="contactPhone"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="e.g. Ext. 3120 (Nurse Station) or mobile"
-                  className="pl-9 text-sm"
+                  placeholder={isArabic ? "مثال: تحويلة 3120 (محطة التمريض) أو الجوال" : "e.g. Ext. 3120 (Nurse Station) or mobile"}
+                  className="ps-9 text-sm"
                 />
               </div>
             </div>
@@ -678,15 +696,15 @@ function CreateTicketContent() {
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-200">
-                    Biomedical Engineers Available Now
+                    {isArabic ? "المهندسون والفنيون المتاحون حالياً" : "Biomedical Engineers Available Now"}
                   </h4>
                   <p className="text-xs text-purple-700 dark:text-purple-300 mt-0.5">
-                    {onDutyEngineers.map((e) => `${e.fullName} (${e.extension ? `Ext. ${e.extension}` : e.jobTitle})`).join(" · ")}
+                    {onDutyEngineers.map((e) => `${e.fullName} (${e.extension ? `${isArabic ? "تحويلة" : "Ext."} ${e.extension}` : e.jobTitle})`).join(" · ")}
                   </p>
                 </div>
               </div>
               <Button asChild variant="outline" size="sm" className="self-start sm:self-auto text-xs bg-card">
-                <Link href="/engineering-team">View Duty Roster</Link>
+                <Link href="/engineering-team">{isArabic ? "عرض جدول المناوبات" : "View Duty Roster"}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -702,7 +720,7 @@ function CreateTicketContent() {
             disabled={loading}
             className="w-full sm:w-auto"
           >
-            Cancel
+            {tc("buttons.cancel")}
           </Button>
           <Button
             type="submit"
@@ -713,7 +731,11 @@ function CreateTicketContent() {
               impact === "patient_care_affected" && "bg-red-600 hover:bg-red-700 text-white"
             )}
           >
-            {loading ? "Transmitting Report..." : impact === "patient_care_affected" ? "Submit URGENT Report" : "Submit Problem Report"}
+            {loading
+              ? t("form.submitting")
+              : impact === "patient_care_affected"
+              ? (isArabic ? "إرسال بلاغ عاجل وطارئ" : "Submit URGENT Report")
+              : t("form.submit")}
           </Button>
         </div>
       </form>

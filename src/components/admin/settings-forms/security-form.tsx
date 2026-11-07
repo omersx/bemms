@@ -10,6 +10,7 @@ import { ShieldCheck, Lock, KeyRound, AlertTriangle, Loader2, Save } from 'lucid
 import { toast } from 'sonner';
 import { updateOrganizationSettings } from '@/lib/actions/system-settings';
 import type { SecuritySettings } from '@/lib/validators/system-settings';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface SecurityFormProps {
   initialData: SecuritySettings;
@@ -17,6 +18,11 @@ interface SecurityFormProps {
 }
 
 export function SecurityForm({ initialData, organizationId }: SecurityFormProps) {
+  const t = useTranslations('admin');
+  const tc = useTranslations('common');
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
+
   const [formData, setFormData] = useState<SecuritySettings>(initialData);
   const [changeReason, setChangeReason] = useState('');
   const [saving, setSaving] = useState(false);
@@ -52,10 +58,12 @@ export function SecurityForm({ initialData, organizationId }: SecurityFormProps)
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <ShieldCheck className="h-5 w-5 text-primary" />
-            Security & 21 CFR Part 11 Compliance
+            {isArabic ? "الأمان والامتثال لمعايير 21 CFR Part 11" : "Security & 21 CFR Part 11 Compliance"}
           </CardTitle>
           <CardDescription>
-            Configure authentication thresholds, inactivity timeouts, and electronic signature safeguards.
+            {isArabic
+              ? "تكوين عتبات المصادقة، فترات انتهاء الجلسات غير النشطة، وضمانات التوقيع الإلكتروني الإلزامية."
+              : "Configure authentication thresholds, inactivity timeouts, and electronic signature safeguards."}
           </CardDescription>
         </CardHeader>
 
@@ -65,7 +73,7 @@ export function SecurityForm({ initialData, organizationId }: SecurityFormProps)
             <div className="space-y-2">
               <Label htmlFor="sessionTimeout" className="flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
-                Session Inactivity Timeout (Minutes)
+                {t("settings.security.sessionTimeout")}
               </Label>
               <Input
                 id="sessionTimeout"
@@ -78,7 +86,7 @@ export function SecurityForm({ initialData, organizationId }: SecurityFormProps)
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Inactivity duration before active user sessions are terminated automatically (standard: 15-30m).
+                {t("settings.security.sessionTimeoutHelp")}
               </p>
             </div>
 
@@ -86,7 +94,7 @@ export function SecurityForm({ initialData, organizationId }: SecurityFormProps)
             <div className="space-y-2">
               <Label htmlFor="passwordExpiry" className="flex items-center gap-2">
                 <KeyRound className="h-4 w-4 text-muted-foreground" />
-                Password Expiration Policy (Days)
+                {t("settings.security.passwordExpiry")}
               </Label>
               <Input
                 id="passwordExpiry"
@@ -99,7 +107,7 @@ export function SecurityForm({ initialData, organizationId }: SecurityFormProps)
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Set to 0 to disable automated expiry, or specify hospital policy interval (e.g., 90 days).
+                {t("settings.security.passwordExpiryHelp")}
               </p>
             </div>
 
@@ -107,7 +115,7 @@ export function SecurityForm({ initialData, organizationId }: SecurityFormProps)
             <div className="space-y-2">
               <Label htmlFor="maxAttempts" className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                Max Failed Login Attempts
+                {t("settings.security.maxLoginAttempts")}
               </Label>
               <Input
                 id="maxAttempts"
@@ -120,19 +128,19 @@ export function SecurityForm({ initialData, organizationId }: SecurityFormProps)
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Account lockout threshold to prevent brute-force attacks.
+                {t("settings.security.maxLoginAttemptsHelp")}
               </p>
             </div>
 
             {/* Re-auth for Signatures */}
             <div className="flex flex-col justify-between space-y-2 p-4 border rounded-lg bg-muted/20">
               <div className="flex items-center justify-between">
-                <div className="space-y-0.5 pr-4">
+                <div className="space-y-0.5 pe-4">
                   <Label htmlFor="requireReAuth" className="font-medium text-sm">
-                    Re-Authenticate for Electronic Signatures
+                    {t("settings.security.requireReAuth")}
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Enforces password/PIN re-entry when signing maintenance release and calibration records (FDA 21 CFR Part 11).
+                    {t("settings.security.requireReAuthHelp")}
                   </p>
                 </div>
                 <Switch
@@ -149,17 +157,17 @@ export function SecurityForm({ initialData, organizationId }: SecurityFormProps)
           {/* Audit Trace Reason */}
           <div className="space-y-2 pt-2 border-t">
             <Label htmlFor="changeReason" className="text-sm font-medium">
-              Change Reason (21 CFR Part 11 Audit Trace)
+              {isArabic ? "سبب التعديل (أثر التدقيق والمطابقة 21 CFR Part 11)" : "Change Reason (21 CFR Part 11 Audit Trace)"}
             </Label>
             <Input
               id="changeReason"
-              placeholder="e.g., Hospital IT security policy annual review"
+              placeholder={isArabic ? "مثال: مراجعة سياسة أمن المعلومات السنوية للمستشفى" : "e.g., Hospital IT security policy annual review"}
               value={changeReason}
               onChange={(e) => setChangeReason(e.target.value)}
               className="max-w-xl"
             />
             <p className="text-xs text-muted-foreground">
-              Required reason for modifying clinical and infrastructure security parameters.
+              {isArabic ? "السبب الإلزامي لحفظ تعديلات معايير الأمان والبنية السريرية." : "Required reason for modifying clinical and infrastructure security parameters."}
             </p>
           </div>
         </CardContent>
@@ -169,12 +177,12 @@ export function SecurityForm({ initialData, organizationId }: SecurityFormProps)
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
+                {tc("buttons.saving")}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Save Security Settings
+                {t("settings.security.saveSecurity")}
               </>
             )}
           </Button>

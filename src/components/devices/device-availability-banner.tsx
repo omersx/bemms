@@ -1,5 +1,8 @@
+'use client'
+
 import { AlertTriangle, CheckCircle, AlertCircle, Wrench, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 const bannerConfig: Record<string, { icon: any; bg: string; border: string; text: string; message: string }> = {
   operational: {
@@ -41,16 +44,30 @@ const bannerConfig: Record<string, { icon: any; bg: string; border: string; text
 }
 
 export function DeviceAvailabilityBanner({ status, limitationsNote }: { status: string; limitationsNote?: string | null }) {
+  const t = useTranslations('devices')
   const config = bannerConfig[status] || bannerConfig.operational
   const Icon = config.icon
 
+  let localizedMessage = config.message
+  try {
+    const key = `availability.${status}` as any
+    const translated = t(key)
+    if (translated && translated !== key) {
+      localizedMessage = translated
+    }
+  } catch {
+    // fallback
+  }
+
   return (
     <div className={cn("rounded-lg border-2 p-4 flex items-start gap-3", config.bg, config.border)}>
-      <Icon className={cn("w-6 h-6 mt-0.5 flex-shrink-0", config.text)} />
+      <Icon className={cn("w-6 h-6 mt-0.5 shrink-0", config.text)} />
       <div>
-        <p className={cn("font-semibold text-base", config.text)}>{config.message}</p>
+        <p className={cn("font-semibold text-base", config.text)}>{localizedMessage}</p>
         {limitationsNote && status === 'operational_with_limitations' && (
-          <p className={cn("mt-1 text-sm", config.text)}>Note: {limitationsNote}</p>
+          <p className={cn("mt-1 text-sm", config.text)}>
+            {t('availability.note')}: {limitationsNote}
+          </p>
         )}
       </div>
     </div>

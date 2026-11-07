@@ -68,6 +68,7 @@
     "nanoid": "^6.0.1",
     "next": "^15.1.0",
     "next-auth": "5.0.0-beta.25",
+    "next-intl": "^4.14.9",
     "pg": "^8.13.1",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",

@@ -18,7 +18,7 @@ export function StatCard({ title, value, icon, href, trend, className }: StatCar
     <Link href={href} className="block min-h-[44px]">
       <Card className={cn("hover:bg-muted/50 transition-colors cursor-pointer h-full", className)}>
         <CardContent className="p-6">
-          <div className="flex items-center justify-between space-x-2">
+          <div className="flex items-center justify-between gap-2">
             <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
             {icon}
           </div>

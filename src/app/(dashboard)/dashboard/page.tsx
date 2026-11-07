@@ -13,7 +13,6 @@ import {
   getDevicesOutOfService,
   getAdminAlerts,
 } from '@/lib/actions/dashboard';
-import { getEngineersTeam } from '@/lib/actions/engineers';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { ActionButtons } from '@/components/dashboard/action-buttons';
 import { RoundWidget } from '@/components/dashboard/round-widget';
@@ -22,12 +21,12 @@ import { MaintenanceDueList } from '@/components/dashboard/maintenance-due-list'
 import { AvailabilityAlerts } from '@/components/dashboard/availability-alerts';
 import { AdminAlerts } from '@/components/dashboard/admin-alerts';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import {
   Monitor, TicketCheck, Wrench, AlertTriangle,
-  ShieldAlert, ClipboardCheck, Clock, UsersRound, MessageCircle, Building2,
+  ShieldAlert, ClipboardCheck, Clock, MessageCircle, Building2,
 } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 function formatGreetingName(fullName?: string | null): string {
   if (!fullName) return 'there';
@@ -66,7 +65,8 @@ export default async function DashboardPage() {
   const isAdmin = hasRole(roles, 'SYS_ADMIN', 'ORG_ADMIN');
   const isStaff = hasRole(roles, 'STAFF', 'DEPT_MGR');
 
-  // Fetch data based on role
+  const t = await getTranslations('dashboard');
+
   const [stats, staffDeptStats] = await Promise.all([
     getDashboardStats(),
     isStaff ? getStaffDepartmentStats() : Promise.resolve(null),
@@ -77,7 +77,7 @@ export default async function DashboardPage() {
       {/* Greeting */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          Welcome back, {displayName}
+          {t('welcomeBack', { name: displayName })}
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
           {roles.map(r => r.replace(/_/g, ' ')).join(' · ')}
@@ -85,20 +85,20 @@ export default async function DashboardPage() {
       </div>
 
       {/* Staff Dashboard */}
-      {isStaff && <StaffDashboard stats={stats} userId={user.id} deptStats={staffDeptStats} />}
+      {isStaff && <StaffDashboard stats={stats} userId={user.id} deptStats={staffDeptStats} t={t} />}
 
       {/* BME Dashboard */}
-      {isBME && !isManager && <BMEDashboard stats={stats} />}
+      {isBME && !isManager && <BMEDashboard stats={stats} t={t} />}
 
       {/* Manager Dashboard */}
-      {isManager && <ManagerDashboard stats={stats} />}
+      {isManager && <ManagerDashboard stats={stats} t={t} />}
 
       {/* Admin Dashboard */}
-      {isAdmin && <AdminDashboard stats={stats} />}
+      {isAdmin && <AdminDashboard stats={stats} t={t} />}
 
       {/* Fallback if no specific role matched */}
       {!isStaff && !isBME && !isManager && !isAdmin && (
-        <GenericDashboard stats={stats} />
+        <GenericDashboard stats={stats} t={t} />
       )}
     </div>
   );
@@ -109,10 +109,12 @@ async function StaffDashboard({
   stats,
   userId,
   deptStats,
+  t,
 }: {
   stats: any;
   userId: string;
   deptStats: any;
+  t: any;
 }) {
   const [myTickets, alerts] = await Promise.all([
     getMyTickets(5),
@@ -134,7 +136,7 @@ async function StaffDashboard({
         </div>
       )}
 
-      {/* Quick Actions - full width on mobile */}
+      {/* Quick Actions */}
       <ActionButtons role="staff" />
 
       {/* Action Required: Response Requested on Tickets */}
@@ -173,20 +175,20 @@ async function StaffDashboard({
       {/* My Tickets */}
       <TicketListCompact
         tickets={myTickets}
-        title="My Recent Tickets"
-        emptyMessage="No tickets need your attention."
+        title={t('recentTickets.title')}
+        emptyMessage={t('recentTickets.noTickets')}
       />
 
       {/* Stats row - scoped to staff's department */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Open Tickets"
+          title={t('stats.openTickets')}
           value={deptStats?.openTickets ?? 0}
           icon={<TicketCheck className="h-4 w-4 text-orange-500" />}
           href="/tickets"
         />
         <StatCard
-          title="Devices Available"
+          title={t('stats.devicesAvailable')}
           value={deptStats?.activeDevices ?? 0}
           icon={<Monitor className="h-4 w-4 text-green-500" />}
           href="/my-department"
@@ -197,7 +199,7 @@ async function StaffDashboard({
 }
 
 // ── BME Dashboard ────────────────────────────────────────────────────────
-async function BMEDashboard({ stats }: { stats: any }) {
+async function BMEDashboard({ stats, t }: { stats: any; t: any }) {
   const [triage, assigned, maintenanceDue, review, outOfService] =
     await Promise.all([
       getTriageQueue(5),
@@ -213,27 +215,27 @@ async function BMEDashboard({ stats }: { stats: any }) {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {(stats?.criticalTickets || 0) > 0 && (
           <StatCard
-            title="Critical Tickets"
+            title={t('stats.criticalTickets')}
             value={stats.criticalTickets}
             icon={<ShieldAlert className="h-4 w-4 text-red-500" />}
             href="/tickets?priority=p1_critical"
           />
         )}
         <StatCard
-          title="Untriaged"
+          title={t('stats.untriaged')}
           value={triage.length}
           icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}
           href="/tickets/triage"
         />
         <StatCard
-          title="Due / Overdue"
+          title={t('stats.dueOverdue')}
           value={`${maintenanceDue.due_today + maintenanceDue.overdue}`}
           icon={<Clock className={`h-4 w-4 ${maintenanceDue.overdue > 0 ? 'text-red-500' : 'text-yellow-500'}`} />}
           href="/maintenance/tasks?due=today"
           trend={maintenanceDue.overdue > 0 ? `${maintenanceDue.overdue} overdue` : undefined}
         />
         <StatCard
-          title="Out of Service"
+          title={t('stats.outOfService')}
           value={stats?.outOfService || 0}
           icon={<AlertTriangle className="h-4 w-4 text-red-500" />}
           href="/devices?status=out_of_service"
@@ -296,7 +298,7 @@ async function BMEDashboard({ stats }: { stats: any }) {
 }
 
 // ── Manager Dashboard ────────────────────────────────────────────────────
-async function ManagerDashboard({ stats }: { stats: any }) {
+async function ManagerDashboard({ stats, t }: { stats: any; t: any }) {
   const [triage, review, maintenanceDue, outOfService] = await Promise.all([
     getTriageQueue(5),
     getAwaitingReview(5),
@@ -311,25 +313,25 @@ async function ManagerDashboard({ stats }: { stats: any }) {
       {/* Exception-first metric cards */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Critical Tickets"
+          title={t('stats.criticalTickets')}
           value={stats?.criticalTickets || 0}
           icon={<ShieldAlert className="h-4 w-4 text-red-500" />}
           href="/tickets?priority=p1_critical"
         />
         <StatCard
-          title="Overdue Maintenance"
+          title={t('stats.overdueMaintenance')}
           value={maintenanceDue.overdue}
           icon={<Clock className={`h-4 w-4 ${maintenanceDue.overdue > 0 ? 'text-red-500' : 'text-green-500'}`} />}
           href="/maintenance/tasks?due=overdue"
         />
         <StatCard
-          title="Out of Service"
+          title={t('stats.outOfService')}
           value={stats?.outOfService || 0}
           icon={<AlertTriangle className="h-4 w-4 text-red-500" />}
           href="/devices?status=out_of_service"
         />
         <StatCard
-          title="PM Compliance"
+          title={t('stats.pmCompliance')}
           value={`${complianceRate}%`}
           icon={<ClipboardCheck className={`h-4 w-4 ${complianceRate >= 90 ? 'text-green-500' : 'text-amber-500'}`} />}
           href="/reports/maintenance"
@@ -339,25 +341,25 @@ async function ManagerDashboard({ stats }: { stats: any }) {
       {/* Overall stats */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Devices"
+          title={t('stats.totalDevices')}
           value={stats?.totalDevices || 0}
           icon={<Monitor className="h-4 w-4 text-blue-500" />}
           href="/devices"
         />
         <StatCard
-          title="Open Tickets"
+          title={t('stats.openTickets')}
           value={stats?.openTickets || 0}
           icon={<TicketCheck className="h-4 w-4 text-orange-500" />}
           href="/tickets?status=open"
         />
         <StatCard
-          title="Untriaged"
+          title={t('stats.untriaged')}
           value={triage.length}
           icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}
           href="/tickets/triage"
         />
         <StatCard
-          title="Awaiting Review"
+          title={t('stats.awaitingReview')}
           value={review.length}
           icon={<Wrench className="h-4 w-4 text-purple-500" />}
           href="/maintenance/tasks?status=awaiting_review"
@@ -393,7 +395,7 @@ async function ManagerDashboard({ stats }: { stats: any }) {
 }
 
 // ── Admin Dashboard ──────────────────────────────────────────────────────
-async function AdminDashboard({ stats }: { stats: any }) {
+async function AdminDashboard({ stats, t }: { stats: any; t: any }) {
   const adminAlerts = await getAdminAlerts();
 
   return (
@@ -404,25 +406,25 @@ async function AdminDashboard({ stats }: { stats: any }) {
       {/* System Overview */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Devices"
+          title={t('stats.totalDevices')}
           value={stats?.totalDevices || 0}
           icon={<Monitor className="h-4 w-4 text-blue-500" />}
           href="/devices"
         />
         <StatCard
-          title="Open Tickets"
+          title={t('stats.openTickets')}
           value={stats?.openTickets || 0}
           icon={<TicketCheck className="h-4 w-4 text-orange-500" />}
           href="/tickets"
         />
         <StatCard
-          title="Out of Service"
+          title={t('stats.outOfService')}
           value={stats?.outOfService || 0}
           icon={<AlertTriangle className="h-4 w-4 text-red-500" />}
           href="/devices?status=out_of_service"
         />
         <StatCard
-          title="PM Compliance"
+          title={t('stats.pmCompliance')}
           value={`${stats?.pmComplianceRate || 100}%`}
           icon={<ClipboardCheck className="h-4 w-4 text-green-500" />}
           href="/reports/maintenance"
@@ -436,19 +438,19 @@ async function AdminDashboard({ stats }: { stats: any }) {
 }
 
 // ── Generic Fallback ─────────────────────────────────────────────────────
-function GenericDashboard({ stats }: { stats: any }) {
+function GenericDashboard({ stats, t }: { stats: any; t: any }) {
   return (
     <>
       <ActionButtons role="staff" />
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Devices"
+          title={t('stats.totalDevices')}
           value={stats?.totalDevices || 0}
           icon={<Monitor className="h-4 w-4 text-blue-500" />}
           href="/devices"
         />
         <StatCard
-          title="Open Tickets"
+          title={t('stats.openTickets')}
           value={stats?.openTickets || 0}
           icon={<TicketCheck className="h-4 w-4 text-orange-500" />}
           href="/tickets"

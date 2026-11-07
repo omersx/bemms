@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Shield, Loader2, CheckCircle2, ShieldCheck, XCircle } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export interface SignActionDialogProps {
   open: boolean;
@@ -53,6 +54,7 @@ export function SignActionDialog({
   onSign,
   nextStep,
 }: SignActionDialogProps) {
+  const t = useTranslations('signatures')
   const [password, setPassword] = useState("")
   const [comments, setComments] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -92,10 +94,10 @@ export function SignActionDialog({
       if (result.success) {
         setSuccess(true)
       } else {
-        setError(result.error || "Failed to sign record. Please verify your credentials.")
+        setError(result.error || t('toast.invalidPassword'))
       }
-    } catch (err) {
-      setError("An unexpected error occurred during signing.")
+    } catch {
+      setError(t('toast.error'))
     } finally {
       setIsSubmitting(false)
     }
@@ -116,10 +118,10 @@ export function SignActionDialog({
             
             <div className="space-y-2">
               <h2 className="text-xl font-bold tracking-tight text-foreground">
-                {actionLabel} Signed Successfully
+                {t('dialog.signedSuccessfully', { action: actionLabel })}
               </h2>
               <p className="text-sm text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
-                Signed by: <span className="font-medium text-foreground">{signerName}</span>, {signerRole}
+                {t('dialog.signedBy')}: <span className="font-medium text-foreground">{signerName}</span>, {signerRole}
                 <br />
                 {serverTime}
               </p>
@@ -127,52 +129,52 @@ export function SignActionDialog({
 
             <div className="w-full p-3 rounded-lg bg-muted/50 border border-border/50">
               <p className="text-sm font-medium text-foreground">
-                Status: <span className="text-primary">{nextStep || 'Complete'}</span>
+                {t('dialog.status')}: <span className="text-primary">{nextStep || t('dialog.complete')}</span>
               </p>
             </div>
 
             <Button onClick={handleClose} className="w-full mt-2" variant="outline">
-              Close
+              {t('dialog.close')}
             </Button>
           </div>
         ) : (
           <>
-            <DialogHeader className="space-y-3 pb-2">
+            <DialogHeader className="space-y-3 pb-2 text-start">
               <DialogTitle className="flex items-center gap-2 text-xl">
                 <ShieldCheck className="h-5 w-5 text-primary" />
                 {actionLabel}
               </DialogTitle>
               <DialogDescription className="sr-only">
-                Review and sign the electronic record
+                {t('complianceNotice')}
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">
               <div className="space-y-1">
-                <p className="text-sm font-medium">Device: {deviceName} <span className="text-muted-foreground">• Asset: {assetNumber}</span></p>
-                <p className="text-sm text-muted-foreground">Record: {recordType} {recordNumber}</p>
+                <p className="text-sm font-medium">{t('dialog.device')}: {deviceName} <span className="text-muted-foreground">• {t('dialog.asset')}: {assetNumber}</span></p>
+                <p className="text-sm text-muted-foreground">{t('dialog.record')}: {recordType} {recordNumber}</p>
               </div>
               
               <Separator />
               
               <div className="space-y-2 text-sm">
-                <div className="grid grid-cols-[100px_1fr] gap-2">
-                  <span className="text-muted-foreground">Action:</span>
+                <div className="grid grid-cols-[110px_1fr] gap-2">
+                  <span className="text-muted-foreground">{t('dialog.action')}:</span>
                   <span className="font-medium">{actionLabel}</span>
                 </div>
-                <div className="grid grid-cols-[100px_1fr] gap-2">
-                  <span className="text-muted-foreground">Work Summary:</span>
+                <div className="grid grid-cols-[110px_1fr] gap-2">
+                  <span className="text-muted-foreground">{t('dialog.workSummary')}:</span>
                   <span>{workSummary}</span>
                 </div>
                 {finalResult && (
-                  <div className="grid grid-cols-[100px_1fr] gap-2">
-                    <span className="text-muted-foreground">Result:</span>
+                  <div className="grid grid-cols-[110px_1fr] gap-2">
+                    <span className="text-muted-foreground">{t('dialog.result')}:</span>
                     <span className="font-medium">{finalResult}</span>
                   </div>
                 )}
                 {proposedDeviceStatus && (
-                  <div className="grid grid-cols-[100px_1fr] gap-2">
-                    <span className="text-muted-foreground">Status:</span>
+                  <div className="grid grid-cols-[110px_1fr] gap-2">
+                    <span className="text-muted-foreground">{t('dialog.status')}:</span>
                     <span className="font-medium">{proposedDeviceStatus}</span>
                   </div>
                 )}
@@ -180,26 +182,26 @@ export function SignActionDialog({
 
               <Separator />
 
-              <blockquote className="border-l-4 border-primary/50 bg-muted/40 px-4 py-3 text-sm italic text-foreground/90 rounded-r-md">
+              <blockquote className="border-s-4 border-primary/50 bg-muted/40 px-4 py-3 text-sm italic text-foreground/90 rounded-e-md">
                 &quot;{attestationText}&quot;
               </blockquote>
               
               <div className="space-y-1 bg-primary/5 p-3 rounded-md border border-primary/10">
-                <p className="text-sm">Signing as: <span className="font-semibold">{signerName}</span>, <span className="text-muted-foreground">{signerRole}</span></p>
-                <p className="text-xs text-muted-foreground">Time: {serverTime}</p>
+                <p className="text-sm">{t('dialog.signingAs')}: <span className="font-semibold">{signerName}</span>, <span className="text-muted-foreground">{signerRole}</span></p>
+                <p className="text-xs text-muted-foreground">{t('dialog.time')}: {serverTime}</p>
               </div>
 
               <Separator />
               
               <form onSubmit={handleSign} className="space-y-4 pt-1">
                 <div className="space-y-2">
-                  <Label htmlFor="password">Electronic Signature Password</Label>
+                  <Label htmlFor="password">{t('dialog.passwordLabel')}</Label>
                   <Input 
                     id="password" 
                     type="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password to sign"
+                    placeholder={t('dialog.passwordPlaceholder')}
                     required
                     disabled={isSubmitting}
                   />
@@ -212,12 +214,12 @@ export function SignActionDialog({
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="comments">Comments (optional)</Label>
+                  <Label htmlFor="comments">{t('dialog.commentsLabel')}</Label>
                   <Textarea 
                     id="comments" 
                     value={comments}
                     onChange={(e) => setComments(e.target.value)}
-                    placeholder="Add any additional comments here..."
+                    placeholder={t('dialog.commentsPlaceholder')}
                     className="resize-none h-20"
                     disabled={isSubmitting}
                   />
@@ -231,13 +233,13 @@ export function SignActionDialog({
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing Record...
+                        <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                        {t('dialog.signingRecord')}
                       </>
                     ) : (
                       <>
-                        <Shield className="mr-2 h-4 w-4" />
-                        Sign Record
+                        <Shield className="me-2 h-4 w-4" />
+                        {t('dialog.signButton')}
                       </>
                     )}
                   </Button>

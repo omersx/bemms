@@ -1,0 +1,43 @@
+{
+  "title": "Departments",
+  "subtitle": "Browse clinical departments, equipment health, and device allocations",
+  "myDepartment": "My Department",
+  "addDepartment": "Add Department",
+  "editDepartment": "Edit Department",
+  "departmentDetails": "Department Details",
+  "noDepartments": "No departments found",
+  "searchPlaceholder": "Search departments...",
+  "form": {
+    "name": "Department Name",
+    "code": "Department Code",
+    "type": "Department Type",
+    "hospital": "Hospital",
+    "floor": "Floor",
+    "location": "Location / Wing",
+    "headOfDepartment": "Head of Department",
+    "contactPhone": "Contact Phone",
+    "contactEmail": "Contact Email",
+    "notes": "Notes",
+    "save": "Save Department",
+    "update": "Update Department"
+  },
+  "stats": {
+    "totalDevices": "Total Devices",
+    "operational": "Operational",
+    "underMaintenance": "Under Maintenance",
+    "openTickets": "Open Tickets",
+    "assignedEngineers": "Assigned Engineers"
+  },
+  "sections": {
+    "devices": "Department Devices",
+    "tickets": "Active Tickets",
+    "engineers": "Assigned Biomedical Staff",
+    "visuals": "Department Overview"
+  },
+  "toast": {
+    "created": "Department created successfully",
+    "updated": "Department updated successfully",
+    "deleted": "Department deleted successfully",
+    "failed": "Failed to save department"
+  }
+}

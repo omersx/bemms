@@ -10,6 +10,9 @@ import { Globe, Clock, Calendar, Languages, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { updateOrganizationSettings } from '@/lib/actions/system-settings';
 import type { LocalizationSettings } from '@/lib/validators/system-settings';
+import { setUserLocale } from '@/i18n/locale';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface LocalizationFormProps {
   initialData: LocalizationSettings;
@@ -26,6 +29,8 @@ const COMMON_TIMEZONES = [
 ];
 
 export function LocalizationForm({ initialData, organizationId }: LocalizationFormProps) {
+  const t = useTranslations('admin');
+  const router = useRouter();
   const [formData, setFormData] = useState<LocalizationSettings>(initialData);
   const [changeReason, setChangeReason] = useState('');
   const [saving, setSaving] = useState(false);
@@ -43,13 +48,15 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
       });
 
       if (res.success) {
-        toast.success('Localization settings saved successfully');
+        await setUserLocale(formData.language);
+        toast.success(t('saved'));
         setChangeReason('');
+        router.refresh();
       } else {
-        toast.error(res.error || 'Failed to update localization settings');
+        toast.error(res.error || t('saveFailed'));
       }
     } catch {
-      toast.error('An unexpected error occurred');
+      toast.error(t('unexpectedError'));
     } finally {
       setSaving(false);
     }
@@ -61,10 +68,10 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <Globe className="h-5 w-5 text-primary" />
-            Localization & Regional Preferences
+            {t('settings.localization.title')}
           </CardTitle>
           <CardDescription>
-            Configure time display, calendar formats, and operational language for this facility.
+            {t('settings.localization.description')}
           </CardDescription>
         </CardHeader>
 
@@ -74,14 +81,14 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
             <div className="space-y-2">
               <Label htmlFor="timezone" className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                Default Facility Timezone
+                {t('settings.localization.timezone')}
               </Label>
               <Select
                 value={formData.timezone}
                 onValueChange={(val) => setFormData((prev) => ({ ...prev, timezone: val }))}
               >
                 <SelectTrigger id="timezone">
-                  <SelectValue placeholder="Select timezone" />
+                  <SelectValue placeholder={t('settings.localization.selectTimezone')} />
                 </SelectTrigger>
                 <SelectContent>
                   {COMMON_TIMEZONES.map((tz) => (
@@ -92,7 +99,7 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                All maintenance schedules, PM occurrences, and audit events will display in this timezone.
+                {t('settings.localization.timezoneHelp')}
               </p>
             </div>
 
@@ -100,22 +107,22 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
             <div className="space-y-2">
               <Label htmlFor="language" className="flex items-center gap-2">
                 <Languages className="h-4 w-4 text-muted-foreground" />
-                Default Language
+                {t('settings.localization.language')}
               </Label>
               <Select
                 value={formData.language}
                 onValueChange={(val: 'en' | 'ar') => setFormData((prev) => ({ ...prev, language: val }))}
               >
                 <SelectTrigger id="language">
-                  <SelectValue placeholder="Select language" />
+                  <SelectValue placeholder={t('settings.localization.selectLanguage')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en">English (US / UK)</SelectItem>
-                  <SelectItem value="ar">العربية (Arabic - Future Support)</SelectItem>
+                  <SelectItem value="en">{t('settings.localization.english')}</SelectItem>
+                  <SelectItem value="ar">{t('settings.localization.arabic')}</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Application interface language preference (Section 14.1).
+                {t('settings.localization.languageHelp')}
               </p>
             </div>
 
@@ -123,7 +130,7 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
             <div className="space-y-2">
               <Label htmlFor="dateFormat" className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                Date Format
+                {t('settings.localization.dateFormat')}
               </Label>
               <Select
                 value={formData.dateFormat}
@@ -146,7 +153,7 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
             <div className="space-y-2">
               <Label htmlFor="timeFormat" className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                Time Display
+                {t('settings.localization.timeFormat')}
               </Label>
               <Select
                 value={formData.timeFormat}
@@ -156,8 +163,8 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
                   <SelectValue placeholder="Select time format" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="24h">24-hour (14:30) - Clinical Standard</SelectItem>
-                  <SelectItem value="12h">12-hour (2:30 PM)</SelectItem>
+                  <SelectItem value="24h">{t('settings.localization.time24h')}</SelectItem>
+                  <SelectItem value="12h">{t('settings.localization.time12h')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -166,17 +173,17 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
           {/* Audit Trace Reason */}
           <div className="space-y-2 pt-2 border-t">
             <Label htmlFor="changeReason" className="text-sm font-medium">
-              Change Reason (21 CFR Part 11 Audit Trace)
+              {t('changeReason')}
             </Label>
             <Input
               id="changeReason"
-              placeholder="e.g., Hospital shifted default timezone to local regional time"
+              placeholder={t('changeReasonPlaceholder')}
               value={changeReason}
               onChange={(e) => setChangeReason(e.target.value)}
               className="max-w-xl"
             />
             <p className="text-xs text-muted-foreground">
-              Optional documentation justification recorded in the immutable audit log.
+              {t('changeReasonHelp')}
             </p>
           </div>
         </CardContent>
@@ -186,12 +193,12 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
+                {t('saving')}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Save Localization
+                {t('settings.localization.saveLocalization')}
               </>
             )}
           </Button>
@@ -200,4 +207,3 @@ export function LocalizationForm({ initialData, organizationId }: LocalizationFo
     </form>
   );
 }
-

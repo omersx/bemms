@@ -12,13 +12,13 @@ import {
   requestNativeNotificationPermission,
 } from '@/lib/utils/sound';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from '@/components/ui/popover';
 import { NavBadge } from '@/components/layout/nav-badge';
 import { NotificationItem } from './notification-item';
 import { getNotifications, markAsRead, markAllAsRead } from '@/lib/actions/notifications';
+import { useTranslations } from 'next-intl';
 
 // ── Toast Component ──────────────────────────────────────────────────────────────
 
@@ -49,7 +49,7 @@ function NotificationToast({
 
   return (
     <div
-      className={`fixed top-4 right-4 z-[100] max-w-sm w-full animate-in slide-in-from-top-2 fade-in duration-300 cursor-pointer ${
+      className={`fixed top-4 end-4 z-[100] max-w-sm w-full animate-in slide-in-from-top-2 fade-in duration-300 cursor-pointer ${
         isCritical
           ? 'bg-red-50 border-red-300 dark:bg-red-950 dark:border-red-800'
           : 'bg-card border'
@@ -92,6 +92,8 @@ function NotificationToast({
 // ── Main Notification Bell ───────────────────────────────────────────────────────
 
 export function NotificationBell() {
+  const t = useTranslations('notifications');
+  const tCommon = useTranslations('common');
   const [unreadCount, setUnreadCount] = useState(0);
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -102,7 +104,6 @@ export function NotificationBell() {
   const toastQueueRef = useRef<Array<typeof toast>>([]);
   const showingToastRef = useRef(false);
 
-  // Show next toast from queue
   const showNextToast = useCallback(() => {
     if (toastQueueRef.current.length === 0) {
       showingToastRef.current = false;
@@ -115,7 +116,6 @@ export function NotificationBell() {
 
   const dismissToast = useCallback(() => {
     setToast(null);
-    // Small delay before showing next queued toast
     setTimeout(showNextToast, 300);
   }, [showNextToast]);
 
@@ -126,7 +126,6 @@ export function NotificationBell() {
     }
   }, [showNextToast]);
 
-  // Unlock Web Audio API & request native notification permission on first user interaction for desktop & mobile
   useEffect(() => {
     const handleFirstInteraction = () => {
       unlockAudio();
@@ -145,7 +144,6 @@ export function NotificationBell() {
     };
   }, []);
 
-  // SSE connection for real-time unread count + new notification events
   useEffect(() => {
     let eventSource: EventSource | null = null;
 
@@ -160,7 +158,6 @@ export function NotificationBell() {
             setUnreadCount(data.count);
           }
 
-          // Real-time toast for new notifications
           if (data.type === 'new_notifications' && Array.isArray(data.notifications)) {
             let hasCritical = false;
             data.notifications.forEach((notif: any) => {
@@ -174,7 +171,6 @@ export function NotificationBell() {
                 actionUrl: notif.actionUrl || undefined,
                 notificationType: notif.notificationType,
               });
-              // Show native OS notification (desktop notification center / mobile notification drawer)
               showNativeNotification({
                 title: notif.title,
                 body: notif.body,
@@ -183,7 +179,6 @@ export function NotificationBell() {
               }).catch(() => {});
             });
 
-            // Play notification sound (urgent alarm for critical, chime for normal)
             if (data.notifications.length > 0) {
               if (hasCritical) {
                 playUrgentNotificationSound();
@@ -192,7 +187,6 @@ export function NotificationBell() {
               }
             }
 
-            // Dispatch global event for live page sync (ticket detail, tickets list, etc.)
             if (typeof window !== 'undefined') {
               window.dispatchEvent(
                 new CustomEvent('bemms:notification', { detail: data.notifications })
@@ -200,20 +194,18 @@ export function NotificationBell() {
             }
           }
         } catch (e) {
-          // Ignore parse errors
+          // Ignore
         }
       };
 
       eventSource.onerror = () => {
         eventSource?.close();
-        // Reconnect after 30 seconds
         setTimeout(connect, 30000);
       };
     };
 
     connect();
 
-    // Also listen for service worker push messages for instant toast
     const handleSWMessage = (event: MessageEvent) => {
       if (event.data?.type === 'PUSH_RECEIVED') {
         const notif = event.data.notification;
@@ -224,10 +216,8 @@ export function NotificationBell() {
             actionUrl: notif.url || undefined,
             notificationType: notif.data?.type,
           });
-          // Bump unread count immediately
           setUnreadCount((prev) => prev + 1);
 
-          // Play notification sound for push-received notifications
           const isCritical =
             notif.data?.priority === 'p1_critical' ||
             notif.data?.impact === 'patient_care_affected' ||
@@ -239,7 +229,6 @@ export function NotificationBell() {
             playNotificationSound();
           }
 
-          // Show native OS notification if not in background
           showNativeNotification({
             title: notif.title,
             body: notif.body,
@@ -247,7 +236,6 @@ export function NotificationBell() {
             isCritical,
           }).catch(() => {});
 
-          // Dispatch global event for live page sync
           if (typeof window !== 'undefined') {
             window.dispatchEvent(
               new CustomEvent('bemms:notification', { detail: [notif] })
@@ -269,7 +257,6 @@ export function NotificationBell() {
     };
   }, [queueToast]);
 
-  // Load notifications when popover opens
   const loadNotifications = useCallback(async () => {
     if (loading) return;
     setLoading(true);
@@ -287,7 +274,7 @@ export function NotificationBell() {
     if (open) {
       loadNotifications();
     }
-  }, [open]);
+  }, [open, loadNotifications]);
 
   const handleMarkRead = async (id: string) => {
     await markAsRead(id);
@@ -309,12 +296,10 @@ export function NotificationBell() {
 
   return (
     <>
-      {/* Toast Notification */}
       {toast && (
         <NotificationToast notification={toast} onDismiss={dismissToast} />
       )}
 
-      {/* Bell Button */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="ghost" size="icon" className="relative min-h-[44px] min-w-[44px]">
@@ -328,12 +313,12 @@ export function NotificationBell() {
               hideWhenZero={true}
               ariaLabel={`${unreadCount} unread notifications`}
             />
-            <span className="sr-only">Notifications</span>
+            <span className="sr-only">{t('title')}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 md:w-96 p-0" align="end" sideOffset={8}>
           <div className="flex items-center justify-between px-4 py-3 border-b">
-            <h3 className="font-semibold text-sm">Notifications</h3>
+            <h3 className="font-semibold text-sm">{t('title')}</h3>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
@@ -342,7 +327,7 @@ export function NotificationBell() {
                 onClick={handleMarkAllRead}
               >
                 <CheckCheck className="h-3.5 w-3.5" />
-                Mark all read
+                {tCommon('buttons.markAllRead')}
               </Button>
             )}
           </div>
@@ -350,12 +335,12 @@ export function NotificationBell() {
           <div className="max-h-[400px] overflow-y-auto">
             {loading && items.length === 0 ? (
               <div className="py-8 text-center text-sm text-muted-foreground">
-                Loading...
+                {tCommon('buttons.loading')}
               </div>
             ) : items.length === 0 ? (
               <div className="py-8 text-center">
                 <Bell className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No notifications yet</p>
+                <p className="text-sm text-muted-foreground">{t('empty')}</p>
               </div>
             ) : (
               <div className="divide-y">
@@ -379,10 +364,11 @@ export function NotificationBell() {
           <div className="border-t px-4 py-2">
             <Link
               href="/notifications"
-              className="text-xs text-primary hover:underline"
+              className="text-xs text-primary hover:underline flex items-center justify-between"
               onClick={() => setOpen(false)}
             >
-              View all notifications →
+              <span>{t('bell.viewAll')}</span>
+              <span className="rtl:rotate-180 inline-block">→</span>
             </Link>
           </div>
         </PopoverContent>

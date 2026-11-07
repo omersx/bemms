@@ -115,7 +115,7 @@ export function DepartmentDetailView({
           href="/departments"
           className="inline-flex items-center gap-1 hover:text-foreground transition-colors min-h-[36px] py-1"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
           <span>All Departments</span>
         </Link>
         <span>/</span>
@@ -346,7 +346,7 @@ export function DepartmentDetailView({
                           {device.criticalityLevel && (
                             <CriticalityBadge level={device.criticalityLevel} />
                           )}
-                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 rtl:rotate-180 transition-all" />
                         </div>
                       </div>
                     </CardContent>
@@ -414,7 +414,7 @@ export function DepartmentDetailView({
                       <div className="flex items-center gap-2 text-xs text-muted-foreground self-start sm:self-auto shrink-0">
                         <Clock className="w-3.5 h-3.5" />
                         <span>{new Date(ticket.reportedAt).toLocaleDateString()}</span>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors ml-1" />
+                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors ms-1 rtl:rotate-180" />
                       </div>
                     </div>
                   </Card>

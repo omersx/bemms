@@ -22,7 +22,7 @@ export function AvailabilityAlerts({ devices }: AvailabilityAlertsProps) {
     <Card className="border-orange-200 dark:border-orange-900 shadow-sm">
       <CardHeader className="pb-3 bg-orange-50/50 dark:bg-orange-950/30 rounded-t-xl border-b border-orange-100 dark:border-orange-900">
         <CardTitle className="text-lg flex items-center text-orange-800 dark:text-orange-300">
-          <AlertTriangle className="w-5 h-5 mr-2 text-orange-500" />
+          <AlertTriangle className="w-5 h-5 me-2 text-orange-500" />
           Unavailable Devices
         </CardTitle>
       </CardHeader>

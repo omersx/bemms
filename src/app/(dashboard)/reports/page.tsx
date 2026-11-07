@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Monitor, TicketCheck, Wrench, DollarSign, Users,
   History, ArrowRight,
 } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 const reportTypes = [
   {
@@ -50,22 +51,24 @@ export default async function ReportsPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
+  const t = await getTranslations("reports");
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Reports</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground mt-1">
-          Operational statistics and compliance reports
+          {t("subtitle")}
         </p>
       </div>
 
       <Tabs defaultValue="live" className="w-full">
         <TabsList className="w-full md:w-auto">
           <TabsTrigger value="live" className="flex-1 md:flex-none min-h-[44px]">
-            Live Statistics
+            {t("liveStats")}
           </TabsTrigger>
           <TabsTrigger value="history" className="flex-1 md:flex-none min-h-[44px]">
-            Report History
+            {t("reportHistory")}
           </TabsTrigger>
         </TabsList>
 
@@ -87,7 +90,7 @@ export default async function ReportsPage() {
                           </p>
                         </div>
                       </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
+                      <ArrowRight className="h-4 w-4 text-muted-foreground mt-1 shrink-0 rtl:rotate-180" />
                     </div>
                   </CardContent>
                 </Card>

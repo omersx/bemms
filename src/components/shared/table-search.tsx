@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface TableSearchProps {
   children: ReactNode;
@@ -12,9 +13,13 @@ interface TableSearchProps {
 
 export function TableSearch({
   children,
-  placeholder = "Search...",
-  emptyMessage = "No matching records found.",
+  placeholder,
+  emptyMessage,
 }: TableSearchProps) {
+  const t = useTranslations('common');
+  const resolvedPlaceholder = placeholder || t('table.searchPlaceholder');
+  const resolvedEmptyMessage = emptyMessage || t('table.noResults');
+
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -40,10 +45,10 @@ export function TableSearch({
   return (
     <div ref={containerRef} className="space-y-4">
       <div className="relative max-w-sm">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder={placeholder}
-          className="pl-8 bg-card"
+          placeholder={resolvedPlaceholder}
+          className="ps-8 bg-card"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -52,4 +57,3 @@ export function TableSearch({
     </div>
   );
 }
-

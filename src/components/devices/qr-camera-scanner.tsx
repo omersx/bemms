@@ -17,6 +17,7 @@ import {
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { playQrBeep, unlockAudio } from "@/lib/utils/sound"
+import { useLocale, useTranslations } from "next-intl"
 
 interface CameraDevice {
   id: string
@@ -25,6 +26,9 @@ interface CameraDevice {
 
 export function QrCameraScanner() {
   const router = useRouter()
+  const locale = useLocale()
+  const isArabic = locale === "ar"
+  const t = useTranslations("devices")
   const [isScanning, setIsScanning] = React.useState(false)
   const [isStarting, setIsStarting] = React.useState(false)
   const [isProcessingFile, setIsProcessingFile] = React.useState(false)
@@ -49,7 +53,7 @@ export function QrCameraScanner() {
 
       // Audio feedback
       playQrBeep()
-      toast.success("QR Code detected!")
+      toast.success(isArabic ? "تم اكتشاف رمز QR بنجاح!" : "QR Code detected!")
 
       const cleanText = decodedText.trim()
 
@@ -299,14 +303,14 @@ export function QrCameraScanner() {
             </div>
 
             <div className="space-y-1">
-              <p className="font-semibold text-base text-foreground">Camera QR Scanner</p>
+              <p className="font-semibold text-base text-foreground">{isArabic ? "ماسح رمز QR بالكاميرا" : "Camera QR Scanner"}</p>
               <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
-                Position the BEMMS equipment QR code within camera view to open its service profile.
+                {isArabic ? "وجّه الكاميرا نحو ملصق QR الخاص بالجهاز الطبي لفتح ملف الخدمة المباشر." : "Position the BEMMS equipment QR code within camera view to open its service profile."}
               </p>
             </div>
 
             {errorMsg && (
-              <div className="flex items-start gap-2 text-xs text-destructive text-left bg-destructive/10 p-3 rounded-lg border border-destructive/20 w-full max-w-xs">
+              <div className="flex items-start gap-2 text-xs text-destructive text-start bg-destructive/10 p-3 rounded-lg border border-destructive/20 w-full max-w-xs">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <p className="leading-tight">{errorMsg}</p>
               </div>
@@ -325,12 +329,12 @@ export function QrCameraScanner() {
                 {isStarting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Starting Camera...
+                    {isArabic ? "جاري تشغيل الكاميرا..." : "Starting Camera..."}
                   </>
                 ) : (
                   <>
                     <Camera className="w-4 h-4" />
-                    Enable Camera
+                    {isArabic ? "تشغيل الكاميرا" : "Enable Camera"}
                   </>
                 )}
               </Button>
@@ -341,7 +345,7 @@ export function QrCameraScanner() {
                 </div>
                 <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
                   <span className="bg-muted/80 px-2 text-muted-foreground font-medium rounded">
-                    or
+                    {isArabic ? "أو" : "or"}
                   </span>
                 </div>
               </div>
@@ -357,12 +361,12 @@ export function QrCameraScanner() {
                 {isProcessingFile ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Scanning Image...
+                    {isArabic ? "جاري فحص الصورة..." : "Scanning Image..."}
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4 text-primary" />
-                    Upload QR Image
+                    {isArabic ? "رفع صورة رمز QR" : "Upload QR Image"}
                   </>
                 )}
               </Button>
@@ -382,10 +386,10 @@ export function QrCameraScanner() {
               size="sm"
               onClick={switchCamera}
               className="gap-1.5 text-xs h-9"
-              title="Switch camera"
+              title={isArabic ? "تبديل الكاميرا" : "Switch camera"}
             >
               <SwitchCamera className="w-3.5 h-3.5" />
-              Switch Camera
+              {isArabic ? "تبديل الكاميرا" : "Switch Camera"}
             </Button>
           )}
 
@@ -397,10 +401,10 @@ export function QrCameraScanner() {
               size="sm"
               onClick={toggleTorch}
               className="gap-1.5 text-xs h-9"
-              title={isTorchOn ? "Turn off flashlight" : "Turn on flashlight"}
+              title={isTorchOn ? (isArabic ? "إيقاف الفلاش" : "Turn off flashlight") : (isArabic ? "تشغيل الفلاش" : "Turn on flashlight")}
             >
               {isTorchOn ? <ZapOff className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5" />}
-              {isTorchOn ? "Flash Off" : "Flash On"}
+              {isTorchOn ? (isArabic ? "إيقاف الفلاش" : "Flash Off") : (isArabic ? "تشغيل الفلاش" : "Flash On")}
             </Button>
           )}
 
@@ -412,14 +416,14 @@ export function QrCameraScanner() {
             onClick={() => fileInputRef.current?.click()}
             disabled={isProcessingFile}
             className="gap-1.5 text-xs h-9"
-            title="Scan from image file"
+            title={isArabic ? "فحص من ملف صورة" : "Scan from image file"}
           >
             {isProcessingFile ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <FileImage className="w-3.5 h-3.5" />
             )}
-            Upload Image
+            {isArabic ? "رفع صورة" : "Upload Image"}
           </Button>
 
           {/* Stop Camera Button */}
@@ -431,7 +435,7 @@ export function QrCameraScanner() {
             className="gap-1.5 text-xs h-9 text-destructive border-destructive/30 hover:bg-destructive/10"
           >
             <CameraOff className="w-3.5 h-3.5" />
-            Stop Camera
+            {isArabic ? "إيقاف الكاميرا" : "Stop Camera"}
           </Button>
         </div>
       )}

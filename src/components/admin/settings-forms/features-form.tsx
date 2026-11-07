@@ -10,6 +10,7 @@ import { Sliders, Route, Loader2, Save, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { updateOrganizationSettings } from '@/lib/actions/system-settings';
 import type { FeaturesSettings } from '@/lib/validators/system-settings';
+import { useTranslations } from 'next-intl';
 
 interface FeaturesFormProps {
   initialData?: FeaturesSettings;
@@ -17,6 +18,7 @@ interface FeaturesFormProps {
 }
 
 export function FeaturesForm({ initialData, organizationId }: FeaturesFormProps) {
+  const t = useTranslations('admin');
   const [formData, setFormData] = useState<FeaturesSettings>(
     initialData || { engineerRoundEnabled: false, copilotEnabled: false }
   );
@@ -36,13 +38,13 @@ export function FeaturesForm({ initialData, organizationId }: FeaturesFormProps)
       });
 
       if (res.success) {
-        toast.success('Feature settings saved successfully');
+        toast.success(t('saved'));
         setChangeReason('');
       } else {
-        toast.error(res.error || 'Failed to update feature settings');
+        toast.error(res.error || t('saveFailed'));
       }
     } catch {
-      toast.error('An unexpected error occurred');
+      toast.error(t('unexpectedError'));
     } finally {
       setSaving(false);
     }
@@ -54,10 +56,10 @@ export function FeaturesForm({ initialData, organizationId }: FeaturesFormProps)
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <Sliders className="h-5 w-5 text-primary" />
-            Optional Module & Feature Toggles
+            {t('settings.features.title')}
           </CardTitle>
           <CardDescription>
-            Enable or deactivate optional modules and workflows to tailor BEMMS to your hospital&apos;s operations.
+            {t('settings.features.description')}
           </CardDescription>
         </CardHeader>
 
@@ -70,14 +72,10 @@ export function FeaturesForm({ initialData, organizationId }: FeaturesFormProps)
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="engineerRoundEnabled" className="text-base font-semibold cursor-pointer">
-                    Engineer&apos;s Daily Round
+                    {t('settings.features.engineerRound')}
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Digitize the daily physical walk-through performed by biomedical engineers across hospital
-                    departments with electronic signatures, to-do checklists, notes with @device mentions, and round history tracking.
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    When disabled, the Daily Round menu items and scheduling will be hidden.
+                    {t('settings.features.engineerRoundHelp')}
                   </p>
                 </div>
               </div>
@@ -100,14 +98,10 @@ export function FeaturesForm({ initialData, organizationId }: FeaturesFormProps)
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="copilotEnabled" className="text-base font-semibold cursor-pointer">
-                    Engineering Copilot (AI)
+                    {t('settings.features.copilot')}
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Enable the AI Engineering Copilot that helps biomedical engineers find historical maintenance
-                    data, similar past cases, and evidence-based insights from finalized BEMMS records.
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    When disabled, the Copilot panel and AI features will be hidden across all pages.
+                    {t('settings.features.copilotHelp')}
                   </p>
                 </div>
               </div>
@@ -123,10 +117,10 @@ export function FeaturesForm({ initialData, organizationId }: FeaturesFormProps)
           </div>
 
           <div className="space-y-2 pt-2 border-t">
-            <Label htmlFor="changeReasonFeatures">Change Reason (for compliance audit trail)</Label>
+            <Label htmlFor="changeReasonFeatures">{t('changeReason')}</Label>
             <Input
               id="changeReasonFeatures"
-              placeholder="e.g., Enabled Daily Rounds for biomedical engineering staff"
+              placeholder={t('changeReasonPlaceholder')}
               value={changeReason}
               onChange={(e) => setChangeReason(e.target.value)}
             />
@@ -136,7 +130,7 @@ export function FeaturesForm({ initialData, organizationId }: FeaturesFormProps)
         <CardFooter className="flex justify-end border-t pt-4">
           <Button type="submit" disabled={saving} className="gap-2">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Changes
+            {t('settings.features.saveFeatures')}
           </Button>
         </CardFooter>
       </Card>

@@ -9,6 +9,7 @@ import { Database, HardDrive, CalendarClock, Loader2, Save } from 'lucide-react'
 import { toast } from 'sonner';
 import { updateOrganizationSettings } from '@/lib/actions/system-settings';
 import type { RetentionSettings } from '@/lib/validators/system-settings';
+import { useTranslations } from 'next-intl';
 
 interface RetentionFormProps {
   initialData: RetentionSettings;
@@ -16,6 +17,7 @@ interface RetentionFormProps {
 }
 
 export function RetentionForm({ initialData, organizationId }: RetentionFormProps) {
+  const t = useTranslations('admin');
   const [formData, setFormData] = useState<RetentionSettings>(initialData);
   const [changeReason, setChangeReason] = useState('');
   const [saving, setSaving] = useState(false);
@@ -33,13 +35,13 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
       });
 
       if (res.success) {
-        toast.success('Data retention settings saved successfully');
+        toast.success(t('saved'));
         setChangeReason('');
       } else {
-        toast.error(res.error || 'Failed to update retention settings');
+        toast.error(res.error || t('saveFailed'));
       }
     } catch {
-      toast.error('An unexpected error occurred');
+      toast.error(t('unexpectedError'));
     } finally {
       setSaving(false);
     }
@@ -51,10 +53,10 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <Database className="h-5 w-5 text-primary" />
-            Data Retention & Operational Windows
+            {t('settings.retention.title')}
           </CardTitle>
           <CardDescription>
-            Configure legal audit trail archiving periods, PM notification lead times, and attachment quotas.
+            {t('settings.retention.description')}
           </CardDescription>
         </CardHeader>
 
@@ -64,7 +66,7 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
             <div className="space-y-2">
               <Label htmlFor="auditRetention" className="flex items-center gap-2">
                 <Database className="h-4 w-4 text-muted-foreground" />
-                Audit Trail Retention (Days)
+                {t('settings.retention.auditLogRetention')}
               </Label>
               <Input
                 id="auditRetention"
@@ -77,7 +79,7 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Minimum duration immutable audit records are preserved for regulatory inspection (365 days = 1 year).
+                {t('settings.retention.auditLogRetentionHelp')}
               </p>
             </div>
 
@@ -85,7 +87,7 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
             <div className="space-y-2">
               <Label htmlFor="pmAlertWindow" className="flex items-center gap-2">
                 <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                Preventive Maintenance Alert Window (Days)
+                {t('settings.retention.pmAlertWindow')}
               </Label>
               <Input
                 id="pmAlertWindow"
@@ -98,7 +100,7 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Advance notification notice before scheduled PM occurrences become due (standard: 14 days).
+                {t('settings.retention.pmAlertWindowHelp')}
               </p>
             </div>
 
@@ -106,7 +108,7 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
             <div className="space-y-2">
               <Label htmlFor="attachmentQuota" className="flex items-center gap-2">
                 <HardDrive className="h-4 w-4 text-muted-foreground" />
-                Facility Attachment Storage Quota (MB)
+                {t('settings.retention.attachmentQuota')}
               </Label>
               <Input
                 id="attachmentQuota"
@@ -119,7 +121,7 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Total storage allocation for manuals, service sheets, and photo evidence (5000 MB = 5 GB).
+                {t('settings.retention.attachmentQuotaHelp')}
               </p>
             </div>
           </div>
@@ -127,17 +129,17 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
           {/* Audit Trace Reason */}
           <div className="space-y-2 pt-2 border-t">
             <Label htmlFor="changeReason" className="text-sm font-medium">
-              Change Reason (21 CFR Part 11 Audit Trace)
+              {t('changeReason')}
             </Label>
             <Input
               id="changeReason"
-              placeholder="e.g., Clinical engineering policy update on PM warning lead times"
+              placeholder={t('changeReasonPlaceholder')}
               value={changeReason}
               onChange={(e) => setChangeReason(e.target.value)}
               className="max-w-xl"
             />
             <p className="text-xs text-muted-foreground">
-              Required rationale recorded in the immutable audit log upon modification.
+              {t('changeReasonHelp')}
             </p>
           </div>
         </CardContent>
@@ -147,12 +149,12 @@ export function RetentionForm({ initialData, organizationId }: RetentionFormProp
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
+                {t('saving')}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Save Retention Settings
+                {t('settings.retention.saveRetention')}
               </>
             )}
           </Button>

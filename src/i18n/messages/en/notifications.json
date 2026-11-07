@@ -1,0 +1,27 @@
+{
+  "title": "Notifications",
+  "unread": "Unread",
+  "all": "All",
+  "markAllRead": "Mark all as read",
+  "empty": "No notifications to display",
+  "noUnread": "No unread notifications",
+  "bell": {
+    "title": "Notifications",
+    "viewAll": "View all notifications"
+  },
+  "types": {
+    "ticketCreated": "Ticket Created",
+    "ticketAssigned": "Ticket Assigned",
+    "ticketStatusChanged": "Ticket Status Updated",
+    "maintenanceDue": "Maintenance Due",
+    "pmScheduled": "PM Scheduled",
+    "signatureRequested": "Signature Required",
+    "systemAlert": "System Alert"
+  },
+  "push": {
+    "enable": "Enable Push Notifications",
+    "enabled": "Push Notifications Active",
+    "denied": "Notifications Blocked in Browser",
+    "unsupported": "Push Notifications Not Supported"
+  }
+}

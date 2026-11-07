@@ -1,0 +1,56 @@
+{
+  "title": "Engineer's Round",
+  "subtitle": "Daily department inspection round",
+  "startRound": "Start Round",
+  "startNewRound": "Start New Round",
+  "continueRound": "Continue Round",
+  "completeRound": "Complete Round",
+  "endRound": "End Round",
+  "roundHistory": "Round History",
+  "teamRoundsToday": "Team Rounds Today",
+  "myDailyRound": "My Daily Round",
+  "historyButton": "History",
+  "noActiveRound": "No active round",
+  "activeRound": "Active Round",
+  "roundInProgress": "Round in Progress",
+  "startedAt": "Started At",
+  "completedAt": "Completed At",
+  "duration": "Duration",
+  "departmentsVisited": "Departments Visited",
+  "departmentsRemaining": "Departments Remaining",
+  "completedDepartments": "{completed} of {total} departments",
+  "departmentList": {
+    "title": "Department Checklist",
+    "markVisited": "Mark as Visited",
+    "visited": "Visited",
+    "notVisited": "Not Visited",
+    "notes": "Notes",
+    "addNotes": "Add notes for this department...",
+    "issues": "Issues Found",
+    "noIssues": "No issues found",
+    "addIssue": "Report Issue"
+  },
+  "history": {
+    "title": "Round History",
+    "noHistory": "No round history",
+    "viewDetails": "View Details",
+    "date": "Date",
+    "engineer": "Engineer",
+    "departments": "Departments",
+    "status": "Status",
+    "completed": "Completed",
+    "incomplete": "Incomplete",
+    "cancelled": "Cancelled"
+  },
+  "calendar": {
+    "title": "Round Calendar",
+    "roundsCompleted": "Rounds Completed",
+    "noRoundsThisMonth": "No rounds this month"
+  },
+  "toast": {
+    "started": "Round started",
+    "completed": "Round completed successfully",
+    "departmentVisited": "Department marked as visited",
+    "failed": "Operation failed"
+  }
+}

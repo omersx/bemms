@@ -21,10 +21,15 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
+  const t = await getTranslations("admin");
+  const locale = await getLocale();
+  const isArabic = locale === "ar";
+
   const [stats, alerts, auditRes] = await Promise.all([
     getAdminDashboardStats(),
     getAdminAlerts(),
@@ -35,44 +40,44 @@ export default async function AdminDashboardPage() {
 
   const statCards = [
     {
-      title: "Health System",
+      title: isArabic ? "المؤسسة الصحية" : "Health System",
       value: stats.totalOrganizations.toString(),
-      subtitle: "Registered Organization",
+      subtitle: isArabic ? "المؤسسة المسجلة" : "Registered Organization",
       icon: Building2,
       href: "/admin/general",
     },
     {
-      title: "Hospital Campuses",
+      title: isArabic ? "المستشفيات والمنشآت" : "Hospital Campuses",
       value: stats.totalHospitals.toString(),
-      subtitle: "Active Facilities",
+      subtitle: isArabic ? "المرافق النشطة" : "Active Facilities",
       icon: Hospital,
       href: "/admin/general",
     },
     {
-      title: "Active Users",
+      title: isArabic ? "المستخدمون النشطون" : "Active Users",
       value: `${stats.activeUsers} / ${stats.totalUsers}`,
-      subtitle: "Active / Total Accounts",
+      subtitle: isArabic ? "حساب نشط / إجمالي" : "Active / Total Accounts",
       icon: Users,
       href: "/admin/users",
     },
     {
-      title: "System Roles",
+      title: isArabic ? "الأدوار والصلاحيات" : "System Roles",
       value: stats.totalRoles.toString(),
-      subtitle: "Configured Roles",
+      subtitle: isArabic ? "الأدوار المهيأة" : "Configured Roles",
       icon: Shield,
       href: "/admin/roles",
     },
     {
-      title: "Departments",
+      title: isArabic ? "الأقسام السريرية" : "Departments",
       value: stats.totalDepartments.toString(),
-      subtitle: "Operational Units",
+      subtitle: isArabic ? "الوحدات التشغيلية" : "Operational Units",
       icon: Layers,
       href: "/departments",
     },
     {
-      title: "Medical Devices",
+      title: isArabic ? "الأجهزة الطبية" : "Medical Devices",
       value: stats.totalDevices.toString(),
-      subtitle: "Total Registered",
+      subtitle: isArabic ? "إجمالي الأجهزة المسجلة" : "Total Registered",
       icon: Cpu,
       href: "/devices",
     },
@@ -81,19 +86,19 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Admin Dashboard"
-        description="System configuration, security governance, and operational health"
+        title={t("title")}
+        description={isArabic ? "تكوين النظام، الحوكمة الأمنية، ومتابعة الصحة التشغيلية" : "System configuration, security governance, and operational health"}
       >
         <Button variant="outline" asChild>
           <Link href="/admin/users?action=new">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Add User
+            <UserPlus className="w-4 h-4 me-2" />
+            {t("users.addUser")}
           </Link>
         </Button>
         <Button asChild>
           <Link href="/admin/general">
-            <Building2 className="w-4 h-4 mr-2" />
-            General Settings
+            <Building2 className="w-4 h-4 me-2" />
+            {t("nav.general")}
           </Link>
         </Button>
       </PageHeader>
@@ -190,9 +195,11 @@ export default async function AdminDashboardPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-primary" />
-              Administrative Portals
+              {isArabic ? "بوابات الإدارة والتحكم" : "Administrative Portals"}
             </CardTitle>
-            <p className="text-xs text-muted-foreground">Quick access to core admin functions</p>
+            <p className="text-xs text-muted-foreground">
+              {isArabic ? "الوصول السريع إلى المهام والوظائف الإدارية الرئيسية" : "Quick access to core admin functions"}
+            </p>
           </CardHeader>
           <CardContent className="space-y-2">
             <Link
@@ -201,8 +208,8 @@ export default async function AdminDashboardPage() {
             >
               <Users className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <div className="space-y-0.5">
-                <div className="text-sm font-medium">User Governance</div>
-                <div className="text-xs text-muted-foreground">Manage user accounts, roles & scopes</div>
+                <div className="text-sm font-medium">{t("users.title")}</div>
+                <div className="text-xs text-muted-foreground">{isArabic ? "إدارة حسابات المستخدمين، الأدوار والصلاحيات" : "Manage user accounts, roles & scopes"}</div>
               </div>
             </Link>
 
@@ -212,8 +219,8 @@ export default async function AdminDashboardPage() {
             >
               <Shield className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <div className="space-y-0.5">
-                <div className="text-sm font-medium">Roles & Permissions</div>
-                <div className="text-xs text-muted-foreground">Verify RBAC and separation of duties</div>
+                <div className="text-sm font-medium">{t("roles.title")}</div>
+                <div className="text-xs text-muted-foreground">{isArabic ? "التحقق من صلاحيات RBAC والفصل بين المهام" : "Verify RBAC and separation of duties"}</div>
               </div>
             </Link>
 
@@ -223,8 +230,8 @@ export default async function AdminDashboardPage() {
             >
               <FileSpreadsheet className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <div className="space-y-0.5">
-                <div className="text-sm font-medium">General & Master Data</div>
-                <div className="text-xs text-muted-foreground">Health system, hospitals & device catalogs</div>
+                <div className="text-sm font-medium">{isArabic ? "الإعدادات العامة والبيانات المرجعية" : "General & Master Data"}</div>
+                <div className="text-xs text-muted-foreground">{isArabic ? "المؤسسة، المستشفيات، وكتالوجات الأجهزة" : "Health system, hospitals & device catalogs"}</div>
               </div>
             </Link>
 
@@ -234,8 +241,8 @@ export default async function AdminDashboardPage() {
             >
               <UploadCloud className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <div className="space-y-0.5">
-                <div className="text-sm font-medium">Export & Import Center</div>
-                <div className="text-xs text-muted-foreground">Bulk CSV/Excel import and dataset backup</div>
+                <div className="text-sm font-medium">{t("dataManagement.title")}</div>
+                <div className="text-xs text-muted-foreground">{isArabic ? "استيراد وتصدير ملفات CSV/Excel والنسخ الاحتياطي" : "Bulk CSV/Excel import and dataset backup"}</div>
               </div>
             </Link>
 
@@ -245,8 +252,8 @@ export default async function AdminDashboardPage() {
             >
               <History className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <div className="space-y-0.5">
-                <div className="text-sm font-medium">Audit Trail</div>
-                <div className="text-xs text-muted-foreground">Comprehensive compliance logs</div>
+                <div className="text-sm font-medium">{t("auditLogs.title")}</div>
+                <div className="text-xs text-muted-foreground">{isArabic ? "سجلات الامتثال والتدقيق الشاملة" : "Comprehensive compliance logs"}</div>
               </div>
             </Link>
           </CardContent>

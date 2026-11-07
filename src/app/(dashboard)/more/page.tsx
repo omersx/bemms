@@ -25,6 +25,7 @@ import {
 import { SignOutButton } from '@/components/shared/sign-out-button';
 import { MoreItemBadge } from '@/components/layout/more-item-badge';
 import { ThemeSelectorCard } from '@/components/theme/theme-selector-card';
+import { LanguageSelectorCard } from '@/components/theme/language-selector-card';
 
 export default async function MorePage() {
   const session = await auth();
@@ -255,7 +256,7 @@ export default async function MorePage() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <MoreItemBadge badgeKey={(item as any).badgeKey} />
-                    <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 rtl:rotate-180" />
                   </div>
                 </Link>
               );
@@ -263,6 +264,9 @@ export default async function MorePage() {
           </div>
         </div>
       ))}
+
+      {/* Language Settings */}
+      <LanguageSelectorCard />
 
       {/* Theme Settings */}
       <ThemeSelectorCard />

@@ -32,7 +32,7 @@ export default async function DashboardLayout({
     <NavCountsProvider>
       <div className="flex min-h-screen bg-slate-50/50 dark:bg-slate-950/50">
         <Sidebar user={user} />
-        <div className="flex-1 flex flex-col min-w-0 md:ml-64 transition-all duration-300">
+        <div className="flex-1 flex flex-col min-w-0 md:ms-64 transition-all duration-300">
           <Header user={user} />
           <main className="flex-1 w-full max-w-full overflow-x-hidden p-3 sm:p-4 md:p-6 pb-24 md:pb-6">{children}</main>
         </div>

@@ -5,6 +5,7 @@ import { Wrench } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 interface DeviceMaintenanceTabProps {
   maintenanceTasks: any[];
@@ -25,47 +26,48 @@ const statusColors: Record<string, string> = {
 }
 
 export function DeviceMaintenanceTab({ maintenanceTasks = [], deviceId }: DeviceMaintenanceTabProps) {
+  const t = useTranslations('maintenance')
   const total = maintenanceTasks.length
-  const completed = maintenanceTasks.filter(t => (t.statusCode || t.status) === "closed").length
+  const completed = maintenanceTasks.filter(tItem => (tItem.statusCode || tItem.status) === "closed").length
   const pending = total - completed
-  const overdue = maintenanceTasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && (t.statusCode || t.status) !== "closed").length
+  const overdue = maintenanceTasks.filter(tItem => tItem.dueDate && new Date(tItem.dueDate) < new Date() && (tItem.statusCode || tItem.status) !== "closed").length
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Card className="p-4 flex flex-col items-center justify-center text-center">
           <span className="text-2xl font-bold">{total}</span>
-          <span className="text-sm text-muted-foreground">Total Tasks</span>
+          <span className="text-sm text-muted-foreground">{t('tasks.totalTasks')}</span>
         </Card>
         <Card className="p-4 flex flex-col items-center justify-center text-center">
           <span className="text-2xl font-bold text-emerald-600">{completed}</span>
-          <span className="text-sm text-muted-foreground">Completed</span>
+          <span className="text-sm text-muted-foreground">{t('tasks.completed')}</span>
         </Card>
         <Card className="p-4 flex flex-col items-center justify-center text-center">
           <span className="text-2xl font-bold text-blue-600">{pending}</span>
-          <span className="text-sm text-muted-foreground">Pending</span>
+          <span className="text-sm text-muted-foreground">{t('tasks.pending')}</span>
         </Card>
         <Card className="p-4 flex flex-col items-center justify-center text-center">
           <span className="text-2xl font-bold text-rose-600">{overdue}</span>
-          <span className="text-sm text-muted-foreground">Overdue</span>
+          <span className="text-sm text-muted-foreground">{t('tasks.overdue')}</span>
         </Card>
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Maintenance History</h3>
+        <h3 className="text-lg font-semibold">{t('tasks.historyTitle')}</h3>
         
         {maintenanceTasks.length === 0 ? (
           <div className="text-center py-12 border rounded-lg bg-muted/20">
             <Wrench className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h4 className="text-lg font-medium text-foreground">No maintenance records</h4>
-            <p className="text-muted-foreground text-sm mt-1">This device has no recorded maintenance history.</p>
+            <h4 className="text-lg font-medium text-foreground">{t('tasks.noHistory')}</h4>
+            <p className="text-muted-foreground text-sm mt-1">{t('tasks.noHistoryDesc')}</p>
           </div>
         ) : (
           <div className="grid gap-3">
             {maintenanceTasks.map(task => {
               const statusKey = task.statusCode || task.status || "draft"
               const typeLabel = (task.maintenanceType || task.type || "corrective").replace(/_/g, " ")
-              const assigneeName = task.assignedEngineer?.fullName || task.assignedEngineerName || "Unassigned"
+              const assigneeName = task.assignedEngineer?.fullName || task.assignedEngineerName || t('tasks.unassigned')
               const completedDate = task.completedAt || task.completedDate
               const startDate = task.startedAt || task.startDate
               const dueDate = task.dueDate
@@ -79,7 +81,7 @@ export function DeviceMaintenanceTab({ maintenanceTasks = [], deviceId }: Device
                         <span className="font-medium">{task.title}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Assigned to: {assigneeName}
+                        {t('tasks.assignedTo')} {assigneeName}
                       </div>
                     </div>
                     
@@ -88,13 +90,13 @@ export function DeviceMaintenanceTab({ maintenanceTasks = [], deviceId }: Device
                       <Badge variant="outline" className={cn("capitalize", statusColors[statusKey] || statusColors.draft)}>
                         {statusKey.replace(/_/g, " ")}
                       </Badge>
-                      <div className="text-xs text-muted-foreground sm:text-right sm:w-28">
+                      <div className="text-xs text-muted-foreground sm:text-end sm:w-28">
                         {completedDate ? (
-                          <span>Done: {new Date(completedDate).toLocaleDateString()}</span>
+                          <span>{t('tasks.done')} {new Date(completedDate).toLocaleDateString()}</span>
                         ) : startDate ? (
-                          <span>Started: {new Date(startDate).toLocaleDateString()}</span>
+                          <span>{t('tasks.started')} {new Date(startDate).toLocaleDateString()}</span>
                         ) : dueDate ? (
-                          <span>Due: {new Date(dueDate).toLocaleDateString()}</span>
+                          <span>{t('tasks.due')} {new Date(dueDate).toLocaleDateString()}</span>
                         ) : (
                           <span>—</span>
                         )}

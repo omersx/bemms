@@ -7,6 +7,7 @@ import Link from "next/link"
 import { TransferDeviceDialog } from "./transfer-device-dialog"
 import { ChangeStatusDialog } from "./change-status-dialog"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 export interface DeviceActionButtonsProps {
   deviceId: string;
@@ -28,6 +29,9 @@ export function DeviceActionButtons({
   allowedActions = ["report_problem", "view_qr", "edit", "transfer", "change_status"],
 }: DeviceActionButtonsProps) {
   const router = useRouter()
+  const t = useTranslations('devices')
+  const tTickets = useTranslations('tickets')
+  const tCommon = useTranslations('common')
   const [transferOpen, setTransferOpen] = React.useState(false)
   const [statusOpen, setStatusOpen] = React.useState(false)
 
@@ -51,8 +55,8 @@ export function DeviceActionButtons({
               size="sm"
               className="bg-amber-600 hover:bg-amber-700 text-white font-medium"
             >
-              <AlertTriangle className="w-4 h-4 mr-1.5" />
-              Report Problem
+              <AlertTriangle className="w-4 h-4 me-1.5" />
+              {tTickets('reportProblem')}
             </Button>
           </Link>
         )}
@@ -60,8 +64,8 @@ export function DeviceActionButtons({
         {canViewQr && (
           <Link href={`/devices/${deviceId}/qr`}>
             <Button variant="outline" size="sm">
-              <QrCode className="w-4 h-4 mr-1.5" />
-              QR Code
+              <QrCode className="w-4 h-4 me-1.5" />
+              {t('detail.qrCode')}
             </Button>
           </Link>
         )}
@@ -69,8 +73,8 @@ export function DeviceActionButtons({
         {canEdit && (
           <Link href={`/devices/${deviceId}/edit`}>
             <Button variant="outline" size="sm">
-              <Edit className="w-4 h-4 mr-1.5" />
-              Edit
+              <Edit className="w-4 h-4 me-1.5" />
+              {tCommon('buttons.edit')}
             </Button>
           </Link>
         )}
@@ -81,8 +85,8 @@ export function DeviceActionButtons({
             size="sm"
             onClick={() => setTransferOpen(true)}
           >
-            <ArrowLeftRight className="w-4 h-4 mr-1.5" />
-            Transfer
+            <ArrowLeftRight className="w-4 h-4 me-1.5" />
+            {t('transfer.title')}
           </Button>
         )}
 
@@ -92,8 +96,8 @@ export function DeviceActionButtons({
             size="sm"
             onClick={() => setStatusOpen(true)}
           >
-            <Activity className="w-4 h-4 mr-1.5" />
-            Change Status
+            <Activity className="w-4 h-4 me-1.5" />
+            {t('changeStatus.title')}
           </Button>
         )}
       </div>
@@ -122,4 +126,3 @@ export function DeviceActionButtons({
     </>
   )
 }
-

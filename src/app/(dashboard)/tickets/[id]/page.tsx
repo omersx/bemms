@@ -25,11 +25,20 @@ import { TicketTimeDisplay } from "@/components/tickets/ticket-time-display"
 import { TicketDetailTabs } from "@/components/tickets/ticket-detail-tabs"
 import { MapPin, Phone, User as UserIcon, Monitor, Clock, AlertTriangle, CheckCircle, ShieldCheck, AlertOctagon, Package, Info, Mail, MessageCircle } from "lucide-react"
 import Link from "next/link"
+import { getLocale, getTranslations } from "next-intl/server"
 
 export const dynamic = 'force-dynamic'
 
-function formatProblemCategory(category?: string | null): string {
-  if (!category) return "Not specified"
+function formatProblemCategory(category?: string | null, t?: any): string {
+  if (!category) return t ? t("categories.notSpecified") : "Not specified"
+  if (t) {
+    try {
+      const val = t(`categories.${category}`)
+      if (val && !val.startsWith("categories.")) return val
+    } catch {
+      // fallback
+    }
+  }
   const map: Record<string, string> = {
     power_issue: "Power Issue",
     device_not_starting: "Device Not Starting",
@@ -53,6 +62,10 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 }
 
 async function TicketDetailContent({ ticketId }: { ticketId: string }) {
+  const t = await getTranslations("tickets")
+  const tCommon = await getTranslations("common")
+  const locale = await getLocale()
+
   const [ticketRes, commentsRes, timelineRes, usersRes, signaturesRes] = await Promise.all([
     getTicketById(ticketId),
     getTicketComments(ticketId),
@@ -67,7 +80,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
   const engineers = (usersRes?.success && Array.isArray(usersRes.data)) ? usersRes.data : []
   const signatures = (signaturesRes?.success && Array.isArray(signaturesRes.data?.signatures)) ? signaturesRes.data.signatures : []
 
-  if (!ticket) return <div className="p-8 text-center text-muted-foreground">Ticket not found</div>
+  if (!ticket) return <div className="p-8 text-center text-muted-foreground">{t('noTickets')}</div>
 
   // Role checking
   const session = await auth()
@@ -95,7 +108,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
       {/* Problem Description Card */}
       <Card className="shadow-xs border-border">
         <CardHeader className="p-3.5 sm:p-5 pb-2 sm:pb-3">
-          <CardTitle className="text-sm sm:text-base font-semibold">Problem Description</CardTitle>
+          <CardTitle className="text-sm sm:text-base font-semibold">{t('detail.problemDescription')}</CardTitle>
         </CardHeader>
         <CardContent className="p-3.5 sm:p-5 pt-0 space-y-3">
           <p className="whitespace-pre-wrap text-xs sm:text-sm text-foreground/90 leading-relaxed">
@@ -104,12 +117,12 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 pt-3 border-t border-border/60">
             <div className="flex items-center gap-1.5 text-xs">
-              <span className="text-muted-foreground font-medium text-[11px] uppercase">Impact:</span>
+              <span className="text-muted-foreground font-medium text-[11px] uppercase">{t('detail.impact')}:</span>
               <TicketImpactBadge impact={ticket.reportedImpact} />
             </div>
             <div className="flex items-center gap-1.5 text-xs">
-              <span className="text-muted-foreground font-medium text-[11px] uppercase">Category:</span>
-              <span className="font-semibold text-foreground">{formatProblemCategory(ticket.reportedProblemCategory)}</span>
+              <span className="text-muted-foreground font-medium text-[11px] uppercase">{t('detail.category')}:</span>
+              <span className="font-semibold text-foreground">{formatProblemCategory(ticket.reportedProblemCategory, t)}</span>
             </div>
           </div>
         </CardContent>
@@ -127,17 +140,17 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
                   </div>
                   <div>
                     <CardTitle className="text-sm sm:text-base text-amber-950 dark:text-amber-100">
-                      Equipment On Hold — Waiting for Parts
+                      {t('detail.equipmentOnHold')}
                     </CardTitle>
                     <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80 hidden sm:block">
-                      Active maintenance paused pending replacement component delivery
+                      {t('detail.onHoldDesc')}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-amber-500 hover:bg-amber-600 text-white gap-1 border-0 shadow-xs text-[11px]">
                     <Clock className="w-3 h-3" />
-                    Parts On Order
+                    {t('detail.partsOnOrder')}
                   </Badge>
                   <ResumeWorkButton ticketId={ticketId} />
                 </div>
@@ -147,7 +160,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
               <div className="grid sm:grid-cols-2 gap-2.5 text-xs sm:text-sm">
                 <div className="p-2.5 bg-white/80 dark:bg-zinc-900/70 rounded-lg border border-amber-200/70 dark:border-amber-800/50 space-y-0.5">
                   <span className="text-[10px] font-semibold uppercase text-amber-800 dark:text-amber-300 tracking-wider">
-                    Required Part / Component
+                    {t('detail.requiredPart')}
                   </span>
                   <p className="font-semibold text-zinc-900 dark:text-zinc-100">
                     {ticket.waitingReason || "Spare parts ordered"}
@@ -157,7 +170,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 {ticket.waitingDependencyType ? (
                   <div className="p-2.5 bg-white/80 dark:bg-zinc-900/70 rounded-lg border border-amber-200/70 dark:border-amber-800/50 space-y-0.5">
                     <span className="text-[10px] font-semibold uppercase text-amber-800 dark:text-amber-300 tracking-wider">
-                      Supplier / PO Reference
+                      {t('detail.supplierPo')}
                     </span>
                     <p className="font-medium text-zinc-900 dark:text-zinc-100">
                       {ticket.waitingDependencyType}
@@ -166,7 +179,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 ) : (
                   <div className="p-2.5 bg-white/80 dark:bg-zinc-900/70 rounded-lg border border-amber-200/70 dark:border-amber-800/50 space-y-0.5">
                     <span className="text-[10px] font-semibold uppercase text-amber-800 dark:text-amber-300 tracking-wider">
-                      Equipment Status
+                      {t('detail.equipmentStatus')}
                     </span>
                     <div>
                       <DeviceStatusBadge status={ticket.device?.currentStatusCode || 'waiting_for_parts'} />
@@ -178,7 +191,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
               <div className="flex items-start gap-2 rounded-lg bg-amber-100/60 dark:bg-amber-900/30 p-2.5 text-[11px] sm:text-xs text-amber-900 dark:text-amber-200 border border-amber-200/80 dark:border-amber-800/50">
                 <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
-                  Medical device is marked <strong>Waiting for Parts</strong> across hospital dashboards. When parts arrive, click <strong>Parts Received (Resume)</strong>.
+                  {t('detail.partsNotice')}
                 </p>
               </div>
             </CardContent>
@@ -199,7 +212,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
           let headerBorder = "border-emerald-100 dark:border-emerald-900/40"
           let titleColor = "text-emerald-950 dark:text-emerald-200"
           let icon = <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-          let title = "Resolution Summary — Fully Operational"
+          let title = t('detail.resolutionFullyOperational')
 
           if (isOutOfService) {
             cardStyle = "border-rose-300 dark:border-rose-900 bg-rose-50/30 dark:bg-rose-950/20"
@@ -207,32 +220,32 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
             titleColor = "text-rose-950 dark:text-rose-200"
             icon = <AlertOctagon className="w-4 h-4 text-rose-600 shrink-0" />
             title = status === 'decommissioned'
-              ? "Disposition — Decommissioned (Retired)"
-              : "Disposition — Out of Service (Unrepairable)"
+              ? t('detail.dispositionDecommissioned')
+              : t('detail.dispositionOutOfService')
           } else if (isLimited) {
             cardStyle = "border-amber-300 dark:border-amber-900 bg-amber-50/30 dark:bg-amber-950/20"
             headerBorder = "border-amber-200 dark:border-amber-900/50"
             titleColor = "text-amber-950 dark:text-amber-200"
             icon = <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-            title = "Resolution — Operational with Limitations"
+            title = t('detail.resolutionLimitations')
           } else if (isAwaitingRelease) {
             cardStyle = "border-purple-300 dark:border-purple-900 bg-purple-50/30 dark:bg-purple-950/20"
             headerBorder = "border-purple-200 dark:border-purple-900/50"
             titleColor = "text-purple-950 dark:text-purple-200"
             icon = <Clock className="w-4 h-4 text-purple-600 shrink-0" />
-            title = "Resolution — Awaiting QA / Regulatory Release"
+            title = t('detail.resolutionSummary')
           } else if (isStandby) {
             cardStyle = "border-blue-300 dark:border-blue-900 bg-blue-50/25 dark:bg-blue-950/20"
             headerBorder = "border-blue-200 dark:border-blue-900/50"
             titleColor = "text-blue-950 dark:text-blue-200"
             icon = <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-            title = "Resolution — Restored to Standby Reserve"
+            title = t('detail.resolutionSummary')
           } else if (isConflict) {
             cardStyle = "border-amber-400 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/30"
             headerBorder = "border-amber-300 dark:border-amber-800/60"
             titleColor = "text-amber-950 dark:text-amber-200"
             icon = <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-            title = "Status Conflict — Device Still Under Repair"
+            title = t('detail.resolutionSummary')
           }
 
           return (
@@ -474,12 +487,12 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
           </div>
 
           <div className="space-y-2 pt-2 border-t">
-            <h4 className="font-semibold flex items-center gap-2"><Clock className="w-4 h-4" /> Assignment</h4>
-            <div className="pl-6 space-y-1">
+            <h4 className="font-semibold flex items-center gap-2"><Clock className="w-4 h-4" /> {t('detail.assignment')}</h4>
+            <div className="ps-6 space-y-1">
               {ticket.assignedEngineerUserId ? (
                 <p>{(ticket as any).assignedEngineer?.fullName}</p>
               ) : (
-                <p className="text-muted-foreground italic">Unassigned</p>
+                <p className="text-muted-foreground italic">{t('detail.unassigned')}</p>
               )}
             </div>
           </div>
@@ -491,7 +504,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
         <Card className="border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20 shadow-xs">
           <CardContent className="p-4">
             <h3 className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider mb-2">
-              Assigned Engineer
+              {t('detail.assignedEngineer')}
             </h3>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-700 dark:text-blue-300 font-bold text-sm">
@@ -521,7 +534,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
         title={ticket.title}
         description={
           <span className="flex items-center gap-1.5 flex-wrap text-xs sm:text-sm text-muted-foreground">
-            <span>Ticket {ticket.ticketNumber}</span>
+            <span>{t('ticketDetails')} #{ticket.ticketNumber}</span>
             {ticket.reportedAt && (
               <>
                 <span>·</span>
@@ -591,7 +604,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 <Monitor className="w-4 h-4 text-primary shrink-0" />
                 <div className="min-w-0">
                   <span className="font-semibold text-foreground truncate block">
-                    {ticket.device?.name || "No linked device"}
+                    {ticket.device?.name || t('detail.noLinkedDevice')}
                   </span>
                   {ticket.device?.assetNumber && (
                     <span className="text-muted-foreground font-mono text-[11px]">
@@ -605,7 +618,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
                   href={`/devices/${ticket.deviceId}`}
                   className="text-primary hover:underline font-medium shrink-0 text-xs"
                 >
-                  View Device
+                  {t('detail.viewDevice')}
                 </Link>
               )}
             </div>
@@ -628,7 +641,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
                   className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium text-xs shrink-0 shadow-xs transition"
                 >
                   <Phone className="w-3.5 h-3.5" />
-                  <span>Call</span>
+                  <span>{t('detail.call')}</span>
                 </a>
               )}
             </div>
@@ -647,7 +660,7 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
                   {ticket.assignedEngineerUserId ? (
                     <strong className="text-foreground">{(ticket as any).assignedEngineer?.fullName || "Assigned"}</strong>
                   ) : (
-                    <span className="italic">Unassigned</span>
+                    <span className="italic">{t('detail.unassigned')}</span>
                   )}
                 </span>
               </div>

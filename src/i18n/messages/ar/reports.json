@@ -1,0 +1,89 @@
+{
+  "title": "التقارير والإحصائيات",
+  "subtitle": "الإحصائيات التشغيلية وتقارير الامتثال والجودة الهندسية",
+  "liveStats": "الإحصائيات الحية",
+  "reportHistory": "سجل التقارير والأرشيف",
+  "nav": {
+    "overview": "نظرة عامة",
+    "tickets": "تقارير التذاكر",
+    "maintenance": "تقارير الصيانة",
+    "inventory": "تقارير جرد الأجهزة",
+    "costs": "تقارير التكاليف",
+    "workload": "تقارير عبء العمل",
+    "history": "سجل التقارير المصدرة"
+  },
+  "ticketReports": {
+    "title": "تقارير التذاكر والأعطال",
+    "totalTickets": "إجمالي التذاكر",
+    "avgResponseTime": "متوسط زمن الاستجابة",
+    "avgResolutionTime": "متوسط زمن الإصلاح",
+    "byStatus": "توزيع الحالات",
+    "byPriority": "توزيع الأولويات",
+    "byDepartment": "حسب القسم الطبي",
+    "byCategory": "حسب نوع العطل",
+    "trend": "مؤشر حركة البلاغات",
+    "topReporters": "أكثر مقدمي البلاغات"
+  },
+  "maintenanceReports": {
+    "title": "تقارير الصيانة الوقائية والتصحيحية",
+    "pmCompliance": "نسبة الالتزام بالصيانة الوقائية (PM Compliance)",
+    "completedOnTime": "أنجزت بالموعد المحدد",
+    "overdue": "مهام متأخرة",
+    "upcoming": "المهام القادمة",
+    "byType": "حسب نوع الصيانة",
+    "byEngineer": "حسب المهندس المنفذ",
+    "trend": "مؤشر إنجاز الصيانة"
+  },
+  "inventoryReports": {
+    "title": "تقارير الأجهزة الطبية والأصول",
+    "totalDevices": "إجمالي الأجهزة الطبية",
+    "byStatus": "توزيع حسب الحالة التشغيلية",
+    "byDepartment": "توزيع حسب الأقسام",
+    "byCategory": "توزيع حسب الفئة الطبية",
+    "byAge": "توزيع حسب العمر التشغيلي",
+    "warrantyExpiring": "أجهزة ينتهي ضمانها قريباً",
+    "riskDistribution": "توزيع مستويات الخطورة"
+  },
+  "costReports": {
+    "title": "تقارير التكاليف والنفقات",
+    "totalCosts": "إجمالي التكاليف",
+    "partsCosts": "تكلفة قطع الغيار",
+    "laborCosts": "تكلفة العمالة والصيانة",
+    "byDepartment": "التكاليف حسب القسم",
+    "byDevice": "التكاليف حسب الجهاز",
+    "trend": "مؤشر حركة التكاليف"
+  },
+  "workloadReports": {
+    "title": "تقارير إنتاجية وعبء عمل المهندسين",
+    "byEngineer": "حسب المهندس",
+    "tasksCompleted": "المهام المنجزة",
+    "avgTaskTime": "متوسط وقت إنجاز المهمة",
+    "openTasks": "المهام المفتوحة الحالية",
+    "distribution": "توزيع عبء العمل"
+  },
+  "history": {
+    "title": "سجل التقارير المنشأة",
+    "generatedAt": "تاريخ الإصدار",
+    "generatedBy": "تم الإصدار بواسطة",
+    "reportType": "نوع التقرير",
+    "download": "تحميل التقرير",
+    "noReports": "لا توجد تقارير تم إصدارها بعد"
+  },
+  "filters": {
+    "dateRange": "الفترة الزمنية",
+    "startDate": "من تاريخ",
+    "endDate": "إلى تاريخ",
+    "department": "القسم",
+    "allDepartments": "جميع الأقسام",
+    "engineer": "المهندس",
+    "allEngineers": "جميع المهندسين",
+    "apply": "تطبيق التصفية",
+    "reset": "إعادة تعيين"
+  },
+  "export": {
+    "exportPdf": "تصدير بصيغة PDF",
+    "exportCsv": "تصدير بصيغة CSV",
+    "exportExcel": "تصدير إلى Excel",
+    "generating": "جاري إنشاء التقرير..."
+  }
+}

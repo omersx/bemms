@@ -1,0 +1,57 @@
+{
+  "title": "فريق الهندسة الطبية",
+  "subtitle": "فريق المهندسين والفنيين الطبيين المتاحين لدعم ومساندة الأقسام الطبية",
+  "dutySchedule": "جدول المناوبات والتغطية الهندسية",
+  "addEngineer": "إضافة مهندس جديد",
+  "editEngineer": "تعديل بيانات المهندس",
+  "engineerDetails": "ملف المهندس الطبي",
+  "noEngineers": "لم يتم العثور على مهندسين",
+  "searchPlaceholder": "بحث باسم المهندس أو التخصص...",
+  "stats": {
+    "totalEngineers": "إجمالي الفريق الهندسي",
+    "onDuty": "على رأس العمل (On Duty)",
+    "offDuty": "خارج الوردية",
+    "onLeave": "في إجازة",
+    "available": "متاح للاستدعاء",
+    "avgWorkload": "متوسط عبء العمل"
+  },
+  "card": {
+    "specialization": "التخصص الهندسي",
+    "department": "القسم المسؤول عنه",
+    "activeTasks": "المهام الجارية",
+    "completedTasks": "المهام المنجزة",
+    "phone": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "viewDetails": "عرض الملف",
+    "assignedDepartments": "الأقسام المغطاة"
+  },
+  "details": {
+    "profile": "الملف التعريفي",
+    "workload": "حجم العمل الحالي",
+    "schedule": "جدول الورديات",
+    "performance": "مؤشرات الأداء",
+    "certifications": "الشهادات والاعتمادات",
+    "skills": "المهارات التقنية"
+  },
+  "schedule": {
+    "title": "جدول الورديات والمناوبات",
+    "shift": "الوردية",
+    "morning": "صباحية (Morning)",
+    "evening": "مسائية (Evening)",
+    "night": "ليلية (Night)",
+    "dayOff": "عطلة (Day Off)",
+    "onCall": "تحت الاستدعاء (On Call)"
+  },
+  "coverage": {
+    "title": "تغطية الأقسام الطبية",
+    "covered": "مغطى هندسياً",
+    "uncovered": "بدون مهندس مخصص",
+    "assignEngineer": "تخصيص مهندس"
+  },
+  "toast": {
+    "created": "تمت إضافة المهندس بنجاح",
+    "updated": "تم تحديث بيانات المهندس بنجاح",
+    "deleted": "تم حذف حساب المهندس",
+    "failed": "فشلت العملية"
+  }
+}

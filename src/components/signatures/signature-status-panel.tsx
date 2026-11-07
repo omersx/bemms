@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { CheckCircle2, Clock, Circle, XCircle, PenSquare } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export interface SignatureRequirement {
   purpose: string
@@ -64,6 +65,8 @@ export function SignatureStatusPanel({
   onSignClick,
   className,
 }: SignatureStatusPanelProps) {
+  const t = useTranslations('signatures')
+
   // Combine into an ordered list of steps based on the requirements
   const steps = required.map((req) => {
     const comp = completed.find((c) => c.purpose === req.purpose)
@@ -82,7 +85,7 @@ export function SignatureStatusPanel({
     <Card className={cn("overflow-hidden", className)}>
       <CardHeader className="bg-muted/40 pb-3 pt-4 px-4 border-b">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
-          Signature Status
+          {t('statusPanel.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -122,8 +125,8 @@ export function SignatureStatusPanel({
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {step.signAuth?.allowed 
-                          ? "Awaiting your signature" 
-                          : step.signAuth?.reason || "Awaiting review"}
+                          ? t('statusPanel.awaiting')
+                          : step.signAuth?.reason || t('statusPanel.awaitingReview')}
                       </p>
                     </div>
                     {step.signAuth?.allowed && onSignClick && (
@@ -133,7 +136,7 @@ export function SignatureStatusPanel({
                         className="shrink-0 h-8 gap-1.5"
                       >
                         <PenSquare className="h-3.5 w-3.5" />
-                        Sign
+                        {t('signDocument')}
                       </Button>
                     )}
                   </div>
@@ -150,7 +153,7 @@ export function SignatureStatusPanel({
                     {purposeLabel}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Not yet required (waiting for previous steps)
+                    {t('statusPanel.notYetRequired')}
                   </p>
                 </div>
               </div>

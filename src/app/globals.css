@@ -209,3 +209,13 @@
 #bemms-qr-reader img[alt="Info icon"] {
   display: none !important;
 }
+
+/* RTL / Arabic font support */
+html[dir="rtl"] body {
+  font-family: var(--font-cairo), var(--font-inter), sans-serif;
+}
+
+html[dir="ltr"] body {
+  font-family: var(--font-inter), var(--font-cairo), sans-serif;
+}
+

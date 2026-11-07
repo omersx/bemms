@@ -63,6 +63,7 @@ import {
   LifeBuoy,
 } from "lucide-react"
 import Link from "next/link"
+import { getTranslations, getLocale } from "next-intl/server"
 
 export default async function MaintenanceTaskDetailPage({
   params,
@@ -70,6 +71,9 @@ export default async function MaintenanceTaskDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+  const t = await getTranslations("maintenance")
+  const tCommon = await getTranslations("common")
+  const locale = await getLocale()
 
   // 1. Fetch Task and Parts/Costs concurrently
   const [taskRes, partsRes] = await Promise.all([
@@ -83,14 +87,14 @@ export default async function MaintenanceTaskDetailPage({
         <div className="rounded-full bg-muted p-4">
           <AlertTriangle className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h2 className="text-xl font-bold">Maintenance Task Not Found</h2>
+        <h2 className="text-xl font-bold">{t('tasks.notFound')}</h2>
         <p className="text-sm text-muted-foreground max-w-md">
-          {taskRes?.error || "The requested maintenance task could not be loaded or does not exist."}
+          {taskRes?.error || t('tasks.notFoundDesc')}
         </p>
         <Button asChild variant="outline">
           <Link href="/maintenance/tasks">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Maintenance Tasks
+            <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
+            {t('tasks.backToTasks')}
           </Link>
         </Button>
       </div>
@@ -206,8 +210,8 @@ export default async function MaintenanceTaskDetailPage({
           href="/maintenance/tasks"
           className="inline-flex items-center text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="mr-1.5 h-4 w-4" />
-          Back to Maintenance Tasks
+          <ArrowLeft className="me-1.5 h-4 w-4 rtl:rotate-180" />
+          {t('tasks.backToTasks')}
         </Link>
       </div>
 
@@ -354,14 +358,14 @@ export default async function MaintenanceTaskDetailPage({
         <TabsList className="grid w-full grid-cols-4 sm:w-auto sm:inline-flex">
           <TabsTrigger value="overview" className="gap-1.5 text-xs sm:text-sm">
             <Info className="h-4 w-4" />
-            <span>Overview</span>
+            <span>{t('nav.overview')}</span>
           </TabsTrigger>
 
           <TabsTrigger value="checklist" className="gap-1.5 text-xs sm:text-sm">
             <CheckSquare className="h-4 w-4" />
-            <span>Checklist</span>
+            <span>{t('checklists.title')}</span>
             {checklistTotal > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[11px] px-1.5 py-0 h-4">
+              <Badge variant="secondary" className="ms-1 text-[11px] px-1.5 py-0 h-4">
                 {checklistTotal}
               </Badge>
             )}
@@ -369,9 +373,9 @@ export default async function MaintenanceTaskDetailPage({
 
           <TabsTrigger value="parts-costs" className="gap-1.5 text-xs sm:text-sm">
             <DollarSign className="h-4 w-4" />
-            <span>Parts & Costs</span>
+            <span>{t('partsCosts.title')}</span>
             {partsAndCostsCount > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[11px] px-1.5 py-0 h-4">
+              <Badge variant="secondary" className="ms-1 text-[11px] px-1.5 py-0 h-4">
                 {partsAndCostsCount}
               </Badge>
             )}
@@ -379,9 +383,9 @@ export default async function MaintenanceTaskDetailPage({
 
           <TabsTrigger value="signatures" className="gap-1.5 text-xs sm:text-sm">
             <ShieldCheck className="h-4 w-4" />
-            <span>Signatures</span>
+            <span>{t('signatures.title')}</span>
             {signatures.length > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[11px] px-1.5 py-0 h-4">
+              <Badge variant="secondary" className="ms-1 text-[11px] px-1.5 py-0 h-4">
                 {signatures.length}
               </Badge>
             )}

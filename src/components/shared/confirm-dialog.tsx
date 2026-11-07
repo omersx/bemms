@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ReactNode, useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface ConfirmDialogProps {
   title: string;
@@ -25,12 +26,15 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   variant = "default",
   onConfirm,
   trigger,
 }: ConfirmDialogProps) {
+  const t = useTranslations('common');
+  const resolvedConfirmLabel = confirmLabel || t('buttons.confirm');
+  const resolvedCancelLabel = cancelLabel || t('buttons.cancel');
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,16 +56,15 @@ export function ConfirmDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
-            {cancelLabel}
+            {resolvedCancelLabel}
           </Button>
           <Button variant={variant} onClick={handleConfirm} disabled={isLoading}>
-            {isLoading ? "Loading..." : confirmLabel}
+            {isLoading ? t('buttons.loading') : resolvedConfirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-

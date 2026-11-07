@@ -1,0 +1,56 @@
+{
+  "title": "الجولة الهندسية اليومية",
+  "subtitle": "الجولة التفتيشية اليومية على أقسام المستشفى للأجهزة الطبية",
+  "startRound": "بدء الجولة",
+  "startNewRound": "بدء جولة جديدة",
+  "continueRound": "متابعة الجولة الحالية",
+  "completeRound": "إنهاء واعتماد الجولة",
+  "endRound": "إنهاء الجولة",
+  "roundHistory": "سجل الجولات السابقة",
+  "teamRoundsToday": "جولات الفريق اليوم",
+  "myDailyRound": "جولتي اليومية",
+  "historyButton": "سجل الجولات",
+  "noActiveRound": "لا توجد جولة نشطة في الوقت الحالي",
+  "activeRound": "الجولة النشطة",
+  "roundInProgress": "الجولة جارية الآن",
+  "startedAt": "بدأت في",
+  "completedAt": "اكتملت في",
+  "duration": "المدة الزمنية",
+  "departmentsVisited": "الأقسام المكتملة",
+  "departmentsRemaining": "الأقسام المتبقية",
+  "completedDepartments": "تمت زيارة {completed} من أصل {total} أقسام",
+  "departmentList": {
+    "title": "قائمة تفقد الأقسام",
+    "markVisited": "تسجيل كـ تمت الزيارة",
+    "visited": "تمت الزيارة",
+    "notVisited": "لم تتم الزيارة",
+    "notes": "الملاحظات",
+    "addNotes": "أضف ملاحظات تفقد هذا القسم...",
+    "issues": "الأعطال المرصودة",
+    "noIssues": "لم ترصد أعطال",
+    "addIssue": "تسجيل بلاغ عطل"
+  },
+  "history": {
+    "title": "سجل الجولات اليومية",
+    "noHistory": "لا يوجد سجل جولات سابقة",
+    "viewDetails": "عرض التفاصيل",
+    "date": "التاريخ",
+    "engineer": "المهندس القائم بالجولة",
+    "departments": "الأقسام المزارة",
+    "status": "الحالة",
+    "completed": "مكتملة",
+    "incomplete": "غير مكتملة",
+    "cancelled": "ملغاة"
+  },
+  "calendar": {
+    "title": "تقويم الجولات الهندسية",
+    "roundsCompleted": "جولات مكتملة",
+    "noRoundsThisMonth": "لا توجد جولات مسجلة لهذا الشهر"
+  },
+  "toast": {
+    "started": "تم بدء الجولة الهندسية اليومية",
+    "completed": "تم إنهاء الجولة واعتمادها بنجاح",
+    "departmentVisited": "تم تسجيل زيارة القسم",
+    "failed": "فشلت العملية"
+  }
+}

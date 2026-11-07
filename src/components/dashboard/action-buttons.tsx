@@ -1,7 +1,10 @@
+'use client';
+
 import Link from "next/link";
 import { QrCode, PlusCircle, TicketCheck, Wrench, Users, MonitorSmartphone, Monitor, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 interface ActionButtonsProps {
   role: string;
@@ -9,6 +12,8 @@ interface ActionButtonsProps {
 }
 
 export function ActionButtons({ role, triageCount = 0 }: ActionButtonsProps) {
+  const t = useTranslations('common');
+  const tDash = useTranslations('dashboard');
   const normalizedRole = (role || '').toUpperCase();
   const isStaff = normalizedRole === 'STAFF' || normalizedRole === 'DEPT_MGR';
   const isBiomed = normalizedRole.startsWith('BIOMED') || normalizedRole === 'BME';
@@ -18,8 +23,8 @@ export function ActionButtons({ role, triageCount = 0 }: ActionButtonsProps) {
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       <Button asChild size="lg" className="w-full sm:w-auto min-h-[44px]">
         <Link href="/scan">
-          <QrCode className="mr-2 h-5 w-5" />
-          Scan Device
+          <QrCode className="me-2 h-5 w-5" />
+          {tDash('quickActions.scanQr')}
         </Link>
       </Button>
 
@@ -27,14 +32,14 @@ export function ActionButtons({ role, triageCount = 0 }: ActionButtonsProps) {
         <>
           <Button asChild variant="secondary" size="lg" className="w-full sm:w-auto min-h-[44px]">
             <Link href="/tickets/create">
-              <PlusCircle className="mr-2 h-5 w-5" />
-              Report a Problem
+              <PlusCircle className="me-2 h-5 w-5" />
+              {t('nav.reportProblem')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-h-[44px]">
             <Link href="/my-department">
-              <Building2 className="mr-2 h-5 w-5" />
-              My Department
+              <Building2 className="me-2 h-5 w-5" />
+              {t('nav.myDepartment')}
             </Link>
           </Button>
         </>
@@ -44,37 +49,37 @@ export function ActionButtons({ role, triageCount = 0 }: ActionButtonsProps) {
         <>
           <Button asChild variant="secondary" size="lg" className="w-full sm:w-auto min-h-[44px] relative">
             <Link href="/tickets">
-              <TicketCheck className="mr-2 h-5 w-5" />
-              Helpdesk Tickets
+              <TicketCheck className="me-2 h-5 w-5" />
+              {t('nav.helpdeskTickets')}
               {triageCount > 0 && (
-                <Badge variant="destructive" className="ml-2 text-xs">
-                  {triageCount} new
+                <Badge variant="destructive" className="ms-2 text-xs">
+                  {triageCount} {t('status.new')}
                 </Badge>
               )}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-h-[44px]">
             <Link href="/maintenance">
-              <Wrench className="mr-2 h-5 w-5" />
-              Maintenance
+              <Wrench className="me-2 h-5 w-5" />
+              {t('nav.maintenance')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-h-[44px]">
             <Link href="/devices">
-              <Monitor className="mr-2 h-5 w-5" />
-              Devices
+              <Monitor className="me-2 h-5 w-5" />
+              {t('nav.devices')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-h-[44px]">
             <Link href="/departments">
-              <Building2 className="mr-2 h-5 w-5" />
-              Departments
+              <Building2 className="me-2 h-5 w-5" />
+              {t('nav.departments')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-h-[44px]">
             <Link href="/team">
-              <Users className="mr-2 h-5 w-5" />
-              Engineering Team
+              <Users className="me-2 h-5 w-5" />
+              {t('nav.engineeringTeam')}
             </Link>
           </Button>
         </>
@@ -84,14 +89,14 @@ export function ActionButtons({ role, triageCount = 0 }: ActionButtonsProps) {
         <>
           <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-h-[44px]">
             <Link href="/admin/users">
-              <Users className="mr-2 h-5 w-5" />
-              Manage Users
+              <Users className="me-2 h-5 w-5" />
+              {t('nav.administration')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-h-[44px]">
             <Link href="/devices">
-              <MonitorSmartphone className="mr-2 h-5 w-5" />
-              Manage Devices
+              <MonitorSmartphone className="me-2 h-5 w-5" />
+              {t('nav.devices')}
             </Link>
           </Button>
         </>

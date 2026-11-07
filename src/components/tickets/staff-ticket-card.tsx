@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { getStaffStatus, getStaffStatusStyle } from '@/lib/utils/staff-status';
 import { Monitor, User, MessageCircle } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { formatDistanceToNow } from 'date-fns';
+import { getDateLocale } from '@/lib/utils/date-locale';
 
 export interface StaffTicketItem {
   id: string;
@@ -18,15 +21,18 @@ export interface StaffTicketItem {
 }
 
 export function StaffTicketCard({ ticket }: { ticket: StaffTicketItem }) {
+  const t = useTranslations('tickets');
+  const locale = useLocale();
+  const dateLocale = getDateLocale(locale);
+
   const status = getStaffStatus(ticket.statusCode);
   const style = getStaffStatusStyle(ticket.statusCode);
   const needsResponse = ticket.statusCode === 'waiting_requester';
   const isResolved = ['resolved', 'closed'].includes(ticket.statusCode);
 
-  const updatedText = ticket.updatedAt
-    ? formatRelativeTime(new Date(ticket.updatedAt))
-    : ticket.reportedAt
-    ? formatRelativeTime(new Date(ticket.reportedAt))
+  const targetDate = ticket.updatedAt || ticket.reportedAt;
+  const updatedText = targetDate
+    ? formatDistanceToNow(new Date(targetDate), { addSuffix: true, locale: dateLocale })
     : '';
 
   return (
@@ -43,7 +49,7 @@ export function StaffTicketCard({ ticket }: { ticket: StaffTicketItem }) {
       {needsResponse && (
         <div className="bg-amber-50 dark:bg-amber-950/30 px-4 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5 border-b border-amber-200 dark:border-amber-800">
           <MessageCircle className="w-3.5 h-3.5" />
-          Response requested — tap to reply
+          {t('staffView.responseRequested')}
         </div>
       )}
 
@@ -81,29 +87,14 @@ export function StaffTicketCard({ ticket }: { ticket: StaffTicketItem }) {
           ) : (
             <span className="flex items-center gap-1 text-muted-foreground/70">
               <User className="w-3 h-3" />
-              Awaiting assignment
+              {t('staffView.awaitingAssignment')}
             </span>
           )}
           {updatedText && (
-            <span>Updated {updatedText}</span>
+            <span>{updatedText}</span>
           )}
         </div>
       </div>
     </Link>
   );
-}
-
-/** Simple relative time formatter */
-function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
 }

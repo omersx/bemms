@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getHospitals } from "@/lib/actions/hospitals"
 import { getDepartments } from "@/lib/actions/departments"
 import { transferDeviceLocation } from "@/lib/actions/devices"
+import { useTranslations } from "next-intl"
 
 interface TransferDeviceDialogProps {
   open: boolean;
@@ -35,6 +36,8 @@ export function TransferDeviceDialog({
   onSuccess
 }: TransferDeviceDialogProps) {
   const router = useRouter()
+  const t = useTranslations('devices')
+  const tCommon = useTranslations('common')
   const [loading, setLoading] = useState(false)
   const [hospitals, setHospitals] = useState<any[]>([])
   const [departments, setDepartments] = useState<any[]>([])
@@ -69,7 +72,7 @@ export function TransferDeviceDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!hospitalId || !departmentId || !reason) {
-      toast.error("Please fill in all required fields")
+      toast.error(tCommon('validation.required'))
       return
     }
 
@@ -82,13 +85,13 @@ export function TransferDeviceDialog({
         transferReason: reason as any,
         notes
       })
-      toast.success("Device transferred successfully")
+      toast.success(t('toast.transferred'))
       onSuccess()
       onOpenChange(false)
       router.refresh()
     } catch (error) {
       console.error(error)
-      toast.error("Failed to transfer device")
+      toast.error(t('toast.updateFailed'))
     } finally {
       setLoading(false)
     }
@@ -99,19 +102,19 @@ export function TransferDeviceDialog({
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Transfer Device Location</DialogTitle>
+            <DialogTitle>{t('transfer.title')}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="text-sm bg-muted p-3 rounded-md">
-              <p><strong>Device:</strong> {deviceName}</p>
-              <p><strong>Current:</strong> {currentHospital} - {currentDepartment} {currentLocation ? `(${currentLocation})` : ""}</p>
+              <p><strong>{t('form.name')}:</strong> {deviceName}</p>
+              <p><strong>{t('detail.overview')}:</strong> {currentHospital} - {currentDepartment} {currentLocation ? `(${currentLocation})` : ""}</p>
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="hospital">Destination Hospital *</Label>
+              <Label htmlFor="hospital">{t('form.department')} *</Label>
               <Select value={hospitalId} onValueChange={setHospitalId} required>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select hospital" />
+                  <SelectValue placeholder="اختر المستشفى / Hospital" />
                 </SelectTrigger>
                 <SelectContent>
                   {hospitals.map(h => (
@@ -122,10 +125,10 @@ export function TransferDeviceDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="department">Destination Department *</Label>
+              <Label htmlFor="department">{t('transfer.toDepartment')} *</Label>
               <Select value={departmentId} onValueChange={setDepartmentId} disabled={!hospitalId} required>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select department" />
+                  <SelectValue placeholder={t('form.selectDepartment')} />
                 </SelectTrigger>
                 <SelectContent>
                   {departments.map(d => (
@@ -136,7 +139,7 @@ export function TransferDeviceDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="location">Location Description</Label>
+              <Label htmlFor="location">{t('form.location')}</Label>
               <Input
                 id="location"
                 placeholder="e.g. Room 101, Bed 3"
@@ -146,40 +149,40 @@ export function TransferDeviceDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="reason">Transfer Reason *</Label>
+              <Label htmlFor="reason">{t('transfer.reason')} *</Label>
               <Select value={reason} onValueChange={setReason} required>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select reason" />
+                  <SelectValue placeholder={t('transfer.reason')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="relocation">Relocation</SelectItem>
-                  <SelectItem value="temporary_loan">Temporary Loan</SelectItem>
-                  <SelectItem value="department_change">Department Change</SelectItem>
-                  <SelectItem value="correction">Correction</SelectItem>
-                  <SelectItem value="replacement">Replacement</SelectItem>
-                  <SelectItem value="workshop">Workshop</SelectItem>
-                  <SelectItem value="storage">Storage</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="relocation">نقل موقع (Relocation)</SelectItem>
+                  <SelectItem value="temporary_loan">إعارة مؤقتة (Temporary Loan)</SelectItem>
+                  <SelectItem value="department_change">تغيير القسم (Department Change)</SelectItem>
+                  <SelectItem value="correction">تصحيح بيانات (Correction)</SelectItem>
+                  <SelectItem value="replacement">استبدال بديل (Replacement)</SelectItem>
+                  <SelectItem value="workshop">ورشة الصيانة (Workshop)</SelectItem>
+                  <SelectItem value="storage">المستودع (Storage)</SelectItem>
+                  <SelectItem value="other">{tCommon('labels.other')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes">{t('form.notes')}</Label>
               <Textarea
                 id="notes"
-                placeholder="Additional details about the transfer"
+                placeholder={t('form.notes')}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {tCommon('buttons.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Transferring..." : "Transfer Device"}
+              {loading ? t('transfer.transferring') : t('transfer.confirm')}
             </Button>
           </DialogFooter>
         </form>
@@ -187,4 +190,3 @@ export function TransferDeviceDialog({
     </Dialog>
   )
 }
-

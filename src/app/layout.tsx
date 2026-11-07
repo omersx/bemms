@@ -1,13 +1,24 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Cairo } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'sonner'
 import AuthProvider from '@/components/providers/session-provider'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { ServiceWorkerRegister } from '@/components/pwa/sw-register'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
+import { localeDirection, type Locale } from '@/i18n/config'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+})
+
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
+  variable: '--font-cairo',
+})
 
 export const metadata: Metadata = {
   title: 'BEMMS',
@@ -32,26 +43,32 @@ export const viewport: Viewport = {
   themeColor: '#2563eb',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocale() as Locale
+  const messages = await getMessages()
+  const dir = localeDirection[locale]
+
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <body className={`${inter.variable} ${cairo.variable} ${locale === 'ar' ? 'font-cairo' : 'font-inter'}`} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            {children}
-            <Toaster richColors closeButton />
-            <ServiceWorkerRegister />
-            <InstallPrompt />
-          </AuthProvider>
+          <NextIntlClientProvider messages={messages}>
+            <AuthProvider>
+              {children}
+              <Toaster richColors closeButton position={dir === 'rtl' ? 'top-left' : 'top-right'} />
+              <ServiceWorkerRegister />
+              <InstallPrompt />
+            </AuthProvider>
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

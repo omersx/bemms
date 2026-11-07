@@ -19,10 +19,12 @@ import {
   ArrowRight,
 } from "lucide-react"
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 
 export default async function MaintenanceDashboardPage() {
   const result = await listMaintenanceTasks({ page: 1, pageSize: 50 })
   const tasks = result?.success && Array.isArray(result.data) ? result.data : []
+  const t = await getTranslations("maintenance")
 
   // Calculate KPI metrics from maintenance tasks
   const inProgressCount = tasks.filter(
@@ -133,8 +135,8 @@ export default async function MaintenanceDashboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Maintenance"
-        description="Manage maintenance tasks, PM schedules, and work orders"
+        title={t("title")}
+        description={t("subtitle")}
       />
 
       <MaintenanceNav />
@@ -143,14 +145,14 @@ export default async function MaintenanceDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Tasks In Progress
+              {t("dashboard.tasksInProgress")}
             </CardTitle>
             <Activity className="h-4 w-4 text-indigo-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{inProgressCount}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Active maintenance work
+              {t("dashboard.tasksInProgressDesc")}
             </p>
           </CardContent>
         </Card>
@@ -158,14 +160,14 @@ export default async function MaintenanceDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Awaiting Review
+              {t("dashboard.awaitingReview")}
             </CardTitle>
             <Clock className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{awaitingReviewCount}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Pending review / sign-off
+              {t("dashboard.awaitingReviewDesc")}
             </p>
           </CardContent>
         </Card>
@@ -173,14 +175,14 @@ export default async function MaintenanceDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Due Soon / Overdue
+              {t("dashboard.dueSoon")}
             </CardTitle>
             <AlertTriangle className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{dueSoonOrOverdueCount}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Due within 7 days or past due
+              {t("dashboard.dueSoonDesc")}
             </p>
           </CardContent>
         </Card>
@@ -188,14 +190,14 @@ export default async function MaintenanceDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Closed This Month
+              {t("dashboard.closedThisMonth")}
             </CardTitle>
             <CheckCircle2 className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{closedThisMonthCount}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Completed work orders
+              {t("dashboard.closedThisMonthDesc")}
             </p>
           </CardContent>
         </Card>
@@ -204,15 +206,15 @@ export default async function MaintenanceDashboardPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight">Recent Tasks</h2>
+            <h2 className="text-lg font-semibold tracking-tight">{t("dashboard.recentTasks")}</h2>
             <p className="text-sm text-muted-foreground">
-              Latest maintenance requests and scheduled work
+              {t("dashboard.recentTasksDesc")}
             </p>
           </div>
           <Link href="/maintenance/tasks">
             <Button variant="ghost" size="sm">
-              View All Tasks
-              <ArrowRight className="w-4 h-4 ml-1" />
+              {t("dashboard.viewAll")}
+              <ArrowRight className="w-4 h-4 ms-1 rtl:rotate-180" />
             </Button>
           </Link>
         </div>

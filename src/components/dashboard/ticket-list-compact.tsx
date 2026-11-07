@@ -1,9 +1,12 @@
+'use client';
+
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TicketPriorityBadge } from "@/components/tickets/ticket-badges";
 import { Ticket } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useLocale } from "next-intl";
+import { getDateLocale } from "@/lib/utils/date-locale";
 
 interface TicketItem {
   id: string;
@@ -22,11 +25,14 @@ interface TicketListCompactProps {
 }
 
 export function TicketListCompact({ tickets, title, emptyMessage }: TicketListCompactProps) {
+  const locale = useLocale();
+  const dateLocale = getDateLocale(locale);
+
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center">
-          <Ticket className="w-5 h-5 mr-2" />
+          <Ticket className="w-5 h-5 me-2" />
           {title}
         </CardTitle>
       </CardHeader>
@@ -52,7 +58,7 @@ export function TicketListCompact({ tickets, title, emptyMessage }: TicketListCo
                       )}
                     </div>
                     <div className="text-xs text-muted-foreground whitespace-nowrap self-start sm:self-auto shrink-0">
-                      {formatDistanceToNow(new Date(ticket.reportedAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(ticket.reportedAt), { addSuffix: true, locale: dateLocale })}
                     </div>
                   </div>
                 </Link>
@@ -64,4 +70,3 @@ export function TicketListCompact({ tickets, title, emptyMessage }: TicketListCo
     </Card>
   );
 }
-

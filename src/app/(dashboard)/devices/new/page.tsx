@@ -16,9 +16,14 @@ import { QuickAddCategoryDialog } from "@/components/devices/quick-add-category-
 import { QuickAddManufacturerDialog } from "@/components/devices/quick-add-manufacturer-dialog"
 import { toast } from "sonner"
 import { Loader2, ChevronDown, ChevronUp, Sparkles } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
 
 export default function NewDevicePage() {
   const router = useRouter()
+  const t = useTranslations("devices")
+  const tc = useTranslations("common")
+  const locale = useLocale()
+  const isArabic = locale === "ar"
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [deviceName, setDeviceName] = useState("")
@@ -146,8 +151,8 @@ export default function NewDevicePage() {
   return (
     <div className="space-y-6 max-w-5xl">
       <PageHeader
-        title="Add New Device"
-        description="Register a new medical device in the hospital inventory"
+        title={t("addDevice")}
+        description={isArabic ? "تسجيل جهاز طبي جديد في المستشفى وسجل الأصول" : "Register a new medical device in the hospital inventory"}
       />
 
       {error && <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm">{error}</div>}
@@ -158,31 +163,31 @@ export default function NewDevicePage() {
         <div className="grid gap-6 md:grid-cols-2">
           {/* ── Card 1: Device Info ─────────────────────────────────── */}
           <Card>
-            <CardHeader><CardTitle>Device Information</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{isArabic ? "بيانات الجهاز الأساسية" : "Device Information"}</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="name">Device Name *</Label>
+                <Label htmlFor="name">{t("form.name")} *</Label>
                 <Input
                   id="name"
                   name="name"
                   value={deviceName}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="e.g. Infusion Pump 1, Defibrillator A..."
+                  placeholder={isArabic ? "مثال: جهاز مراقبة العلامات الحيوية، مضخة محاليل..." : "e.g. Infusion Pump 1, Defibrillator A..."}
                   required
                 />
                 {detectedCategoryName && (
                   <p className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 font-medium">
                     <Sparkles className="w-3.5 h-3.5" />
-                    Auto-detected type: {detectedCategoryName}
+                    {isArabic ? `النوع المكتشف تلقائياً: ${detectedCategoryName}` : `Auto-detected type: ${detectedCategoryName}`}
                   </p>
                 )}
               </div>
               <div>
-                <Label htmlFor="assetNumber">Asset Number *</Label>
+                <Label htmlFor="assetNumber">{t("columns.assetNumber")} *</Label>
                 <Input id="assetNumber" name="assetNumber" placeholder="e.g. AST-2026-001" required />
               </div>
               <div>
-                <Label htmlFor="serialNumber">Serial Number (Optional)</Label>
+                <Label htmlFor="serialNumber">{t("form.serialNumber")} ({tc("buttons.cancel") ? (isArabic ? "اختياري" : "Optional") : "Optional"})</Label>
                 <Input id="serialNumber" name="serialNumber" placeholder="Manufacturer serial #" />
               </div>
             </CardContent>
@@ -366,12 +371,12 @@ export default function NewDevicePage() {
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
-          <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => router.back()}>{tc("buttons.cancel")}</Button>
           <Button type="submit" disabled={loading} className="min-h-[44px] px-6">
             {loading ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Registering...</>
+              <><Loader2 className="w-4 h-4 me-2 animate-spin" /> {t("form.creating")}</>
             ) : (
-              "Register Device"
+              t("form.save")
             )}
           </Button>
         </div>

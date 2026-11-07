@@ -6,27 +6,12 @@ import { TicketCheck, Inbox, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useNavCounts } from "@/components/providers/nav-counts-provider"
+import { useTranslations } from "next-intl"
 
 interface TicketsNavProps {
   className?: string
   showCreateButton?: boolean
 }
-
-const TABS = [
-  {
-    href: "/tickets",
-    label: "All Tickets",
-    icon: TicketCheck,
-    exact: true,
-  },
-  {
-    href: "/tickets/triage",
-    label: "Triage Queue",
-    icon: Inbox,
-    exact: false,
-    hasBadge: true,
-  },
-]
 
 export function TicketsNav({
   className,
@@ -34,6 +19,23 @@ export function TicketsNav({
 }: TicketsNavProps) {
   const pathname = usePathname()
   const { counts } = useNavCounts()
+  const t = useTranslations("tickets")
+
+  const tabs = [
+    {
+      href: "/tickets",
+      label: t("nav.allTickets"),
+      icon: TicketCheck,
+      exact: true,
+    },
+    {
+      href: "/tickets/triage",
+      label: t("nav.triageQueue"),
+      icon: Inbox,
+      exact: false,
+      hasBadge: true,
+    },
+  ]
 
   const isTabActive = (href: string, exact: boolean) => {
     if (exact) {
@@ -56,7 +58,7 @@ export function TicketsNav({
         aria-label="Helpdesk navigation"
         className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5"
       >
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const active = isTabActive(tab.href, tab.exact)
           const Icon = tab.icon
           const showBadge = tab.hasBadge && triageCount > 0
@@ -77,7 +79,7 @@ export function TicketsNav({
               {showBadge && (
                 <span
                   className={cn(
-                    "ml-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full leading-none",
+                    "ms-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full leading-none",
                     active
                       ? "bg-primary-foreground text-primary"
                       : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
@@ -97,8 +99,8 @@ export function TicketsNav({
           <Link href="/tickets/create">
             <Button size="sm" className="gap-1 sm:gap-1.5 h-8 sm:h-9 text-xs shadow-sm px-2.5 sm:px-3">
               <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Report Problem</span>
-              <span className="sm:hidden">Report</span>
+              <span className="hidden sm:inline">{t("reportProblem")}</span>
+              <span className="sm:hidden">{t("actions.addComment") ? t("reportProblem").slice(0, 10) : "Report"}</span>
             </Button>
           </Link>
         </div>

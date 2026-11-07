@@ -65,16 +65,16 @@ export function SignatureHistory({ events, className }: SignatureHistoryProps) {
   }
 
   return (
-    <div className={cn("relative space-y-0 ml-3 sm:ml-4 border-l-2 border-muted", className)}>
+    <div className={cn("relative space-y-0 ms-3 sm:ms-4 border-s-2 border-muted", className)}>
       {sortedEvents.map((event, idx) => {
         const isLast = idx === sortedEvents.length - 1
         const eventTypeClass = EVENT_COLORS[event.eventType.toLowerCase()] || 
           "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
           
         return (
-          <div key={event.id} className="relative pl-6 sm:pl-8 pb-8 last:pb-0 group">
+          <div key={event.id} className="relative ps-6 sm:ps-8 pb-8 last:pb-0 group">
             {/* Timeline Dot */}
-            <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-border ring-4 ring-background group-hover:bg-primary transition-colors" />
+            <div className="absolute start-[-5px] top-1 h-2 w-2 rounded-full bg-border ring-4 ring-background group-hover:bg-primary transition-colors" />
             
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -89,7 +89,7 @@ export function SignatureHistory({ events, className }: SignatureHistoryProps) {
               {event.previousStatus && event.newStatus && (
                 <div className="flex items-center gap-2 text-sm text-foreground/80">
                   <span className="capitalize">{event.previousStatus}</span>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                  <ArrowRight className="h-3 w-3 text-muted-foreground rtl:rotate-180" />
                   <span className="capitalize font-medium text-foreground">{event.newStatus}</span>
                 </div>
               )}

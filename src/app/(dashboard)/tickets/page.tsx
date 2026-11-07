@@ -8,9 +8,7 @@ import { TicketCardsView } from "@/components/tickets/ticket-cards-view";
 import { StaffTicketsView } from "@/components/tickets/staff-tickets-view";
 import { TicketListAutoRefresh } from "@/components/tickets/ticket-list-auto-refresh";
 import { TicketsNav } from "@/components/tickets/tickets-nav";
-import { Button } from "@/components/ui/button";
-import { Plus, Filter } from "lucide-react";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +16,7 @@ export default async function TicketsPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
+  const t = await getTranslations('tickets');
   const user = session.user as { id: string; roles: string[] };
   const roles = user.roles || [];
   const isBiomed = hasRole(roles, 'BIOMED_ENG', 'BIOMED_TECH', 'BIOMED_MGR');
@@ -43,8 +42,8 @@ export default async function TicketsPage() {
     <div className="space-y-6">
       <TicketListAutoRefresh />
       <PageHeader
-        title="Helpdesk Tickets"
-        description="Track device problems, service requests, and maintenance progress"
+        title={t('title')}
+        description={t('subtitle')}
       />
 
       <TicketsNav />

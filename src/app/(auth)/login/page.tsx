@@ -8,9 +8,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { useTranslations } from 'next-intl'
 
 export default function LoginPage() {
   const router = useRouter()
+  const t = useTranslations('auth')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -25,7 +27,7 @@ export default function LoginPage() {
     const cleanEmail = email.trim()
 
     if (!cleanEmail || !password) {
-      setError('Please provide both username/email and password.')
+      setError(t('errors.emptyFields'))
       setLoading(false)
       return
     }
@@ -38,15 +40,15 @@ export default function LoginPage() {
       })
       if (res?.error) {
         if (res.error.includes('DATABASE_CONNECTION_ERROR')) {
-          setError('Database connection error. Please verify the database service is running.')
+          setError(t('errors.databaseConnection'))
         } else {
-          setError('Invalid username, email, or password. Please verify your credentials.')
+          setError(t('errors.invalidCredentials'))
         }
       } else {
         router.push('/dashboard')
       }
     } catch {
-      setError('An error occurred. Please try again.')
+      setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -55,9 +57,9 @@ export default function LoginPage() {
   return (
     <Card className="w-full shadow-lg border-border/40" suppressHydrationWarning>
       <CardHeader className="space-y-1 text-center" suppressHydrationWarning>
-        <CardTitle className="text-2xl">Sign In</CardTitle>
+        <CardTitle className="text-2xl">{t('signIn')}</CardTitle>
         <CardDescription>
-          Enter your username or email and password to access your account
+          {t('signInDescription')}
         </CardDescription>
       </CardHeader>
 
@@ -69,7 +71,7 @@ export default function LoginPage() {
             </div>
           )}
           <div className="space-y-2" suppressHydrationWarning>
-            <Label htmlFor="email">Username or Email</Label>
+            <Label htmlFor="email">{t('usernameOrEmail')}</Label>
             <Input
               id="email"
               name="email"
@@ -77,7 +79,7 @@ export default function LoginPage() {
               autoComplete="username"
               autoCapitalize="none"
               autoCorrect="off"
-              placeholder="admin or email@hospital.org"
+              placeholder={t('usernamePlaceholder')}
               data-lpignore="true"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -86,7 +88,7 @@ export default function LoginPage() {
             />
           </div>
           <div className="space-y-2" suppressHydrationWarning>
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('password')}</Label>
             <div className="relative" suppressHydrationWarning>
               <Input
                 id="password"
@@ -103,7 +105,7 @@ export default function LoginPage() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                className="absolute end-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
               >
@@ -112,7 +114,7 @@ export default function LoginPage() {
                 ) : (
                   <Eye className="h-4 w-4 text-muted-foreground" />
                 )}
-                <span className="sr-only">Toggle password visibility</span>
+                <span className="sr-only">{t('togglePasswordVisibility')}</span>
               </Button>
             </div>
           </div>
@@ -121,11 +123,11 @@ export default function LoginPage() {
           <Button className="w-full" type="submit" disabled={loading}>
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                {t('signingIn')}
               </>
             ) : (
-              'Sign In'
+              t('signIn')
             )}
           </Button>
         </CardFooter>

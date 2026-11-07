@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { TicketPriorityBadge, TicketStatusBadge } from "./ticket-badges"
 import { WaitingForEngineerBanner } from "./ticket-dispatch-status"
 import { Monitor, MapPin, User, Calendar, Package } from "lucide-react"
+import { useTranslations, useLocale } from "next-intl"
 
 export interface TicketItem {
   id: string
@@ -48,7 +49,7 @@ export function getTicketStatusStyle(statusCode: string) {
     case "acknowledged":
     case "in_triage":
       return {
-        rail: "border-l-rose-500",
+        rail: "border-s-rose-500",
         bg: "bg-rose-50/35 dark:bg-rose-950/20 hover:bg-rose-50/70 dark:hover:bg-rose-950/30",
         border: "border-rose-200/80 dark:border-rose-900/40",
         label: "Attention Needed",
@@ -56,7 +57,7 @@ export function getTicketStatusStyle(statusCode: string) {
       }
     case "in_progress":
       return {
-        rail: "border-l-amber-500",
+        rail: "border-s-amber-500",
         bg: "bg-amber-50/35 dark:bg-amber-950/20 hover:bg-amber-50/70 dark:hover:bg-amber-950/30",
         border: "border-amber-200/80 dark:border-amber-900/40",
         label: "In Progress",
@@ -65,7 +66,7 @@ export function getTicketStatusStyle(statusCode: string) {
     case "waiting_parts_vendor":
     case "waiting_requester":
       return {
-        rail: "border-l-orange-500",
+        rail: "border-s-orange-500",
         bg: "bg-orange-50/35 dark:bg-orange-950/20 hover:bg-orange-50/70 dark:hover:bg-orange-950/30",
         border: "border-orange-200/80 dark:border-orange-900/40",
         label: "Waiting for Parts",
@@ -73,7 +74,7 @@ export function getTicketStatusStyle(statusCode: string) {
       }
     case "resolved":
       return {
-        rail: "border-l-emerald-500",
+        rail: "border-s-emerald-500",
         bg: "bg-emerald-50/35 dark:bg-emerald-950/20 hover:bg-emerald-50/70 dark:hover:bg-emerald-950/30",
         border: "border-emerald-200/80 dark:border-emerald-900/40",
         label: "Resolved",
@@ -81,7 +82,7 @@ export function getTicketStatusStyle(statusCode: string) {
       }
     case "closed":
       return {
-        rail: "border-l-slate-400 dark:border-l-slate-600",
+        rail: "border-s-slate-400 dark:border-s-slate-600",
         bg: "bg-slate-50/50 dark:bg-slate-900/20 hover:bg-slate-100/50 dark:hover:bg-slate-900/40",
         border: "border-slate-200/80 dark:border-slate-800/40",
         label: "Closed",
@@ -90,7 +91,7 @@ export function getTicketStatusStyle(statusCode: string) {
     case "cancelled":
     default:
       return {
-        rail: "border-l-zinc-300 dark:border-l-zinc-700",
+        rail: "border-s-zinc-300 dark:border-s-zinc-700",
         bg: "bg-zinc-50/30 dark:bg-zinc-900/10 hover:bg-zinc-100/40 dark:hover:bg-zinc-900/30",
         border: "border-zinc-200/80 dark:border-zinc-800/40",
         label: "Cancelled",
@@ -100,13 +101,15 @@ export function getTicketStatusStyle(statusCode: string) {
 }
 
 export function TicketCard({ ticket }: { ticket: TicketItem }) {
+  const t = useTranslations('tickets')
+  const locale = useLocale()
   const style = getTicketStatusStyle(ticket.statusCode)
 
   return (
     <Link
       href={`/tickets/${ticket.id}`}
       className={cn(
-        "group relative flex flex-col justify-between rounded-lg border border-l-4 transition-all duration-200 p-4 shadow-sm hover:shadow-md",
+        "group relative flex flex-col justify-between rounded-lg border border-s-4 transition-all duration-200 p-4 shadow-sm hover:shadow-md",
         style.rail,
         style.bg,
         style.border
@@ -134,7 +137,7 @@ export function TicketCard({ ticket }: { ticket: TicketItem }) {
           <div className="flex items-center gap-1.5 truncate">
             <Monitor className="w-3.5 h-3.5 shrink-0 text-slate-500" />
             <span className="font-medium text-foreground truncate">
-              {ticket.device?.name || "No linked device"}
+              {ticket.device?.name || t('detail.noLinkedDevice')}
             </span>
             {ticket.device?.assetNumber && (
               <span className="font-mono text-[11px] text-muted-foreground shrink-0">
@@ -148,7 +151,7 @@ export function TicketCard({ ticket }: { ticket: TicketItem }) {
               <MapPin className="w-3.5 h-3.5 shrink-0 text-slate-500" />
               <span className="truncate">
                 {ticket.hospital?.name ? `${ticket.hospital.name} / ` : ""}
-                {ticket.department?.name || "Unassigned Dept"}
+                {ticket.department?.name || t('status.unassigned')}
               </span>
             </div>
           )}
@@ -158,7 +161,7 @@ export function TicketCard({ ticket }: { ticket: TicketItem }) {
         {ticket.statusCode === "waiting_parts_vendor" && ticket.waitingReason && (
           <div className="mb-3 rounded bg-orange-100/80 dark:bg-orange-950/60 px-2.5 py-1.5 text-xs text-orange-950 dark:text-orange-200 border border-orange-200 dark:border-orange-800/60 flex items-center gap-1.5">
             <Package className="w-3.5 h-3.5 shrink-0 text-orange-600 dark:text-orange-400" />
-            <span className="truncate font-medium">On Order: {ticket.waitingReason}</span>
+            <span className="truncate font-medium">{t('status.waitingForParts')}: {ticket.waitingReason}</span>
           </div>
         )}
       </div>
@@ -180,7 +183,7 @@ export function TicketCard({ ticket }: { ticket: TicketItem }) {
               />
             ) : (
               <span className="text-rose-600 dark:text-rose-400 font-semibold">
-                Unassigned
+                {t('status.unassigned')}
               </span>
             )}
           </span>
@@ -188,7 +191,7 @@ export function TicketCard({ ticket }: { ticket: TicketItem }) {
         <div className="flex items-center gap-1 text-[11px] shrink-0">
           <Calendar className="w-3 h-3 text-slate-400" />
           <span>
-            {new Date(ticket.reportedAt || ticket.createdAt || Date.now()).toLocaleDateString()}
+            {new Date(ticket.reportedAt || ticket.createdAt || Date.now()).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
           </span>
         </div>
       </div>

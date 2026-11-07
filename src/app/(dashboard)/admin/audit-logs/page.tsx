@@ -11,12 +11,16 @@ import { AuditLogFilters } from '@/components/admin/audit-log-filters';
 import { AuditLogTable } from '@/components/admin/audit-log-table';
 import { AuditLogExport } from '@/components/admin/audit-log-export';
 import { Activity, Clock, AlertTriangle, Database } from 'lucide-react';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 interface AuditLogsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps) {
+  const t = await getTranslations('admin');
+  const locale = await getLocale();
+  const isArabic = locale === 'ar';
   const params = await searchParams;
 
   const search = typeof params.search === 'string' ? params.search : undefined;
@@ -66,8 +70,8 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Audit Logs"
-        description="Comprehensive audit trail and security event logs across system modules"
+        title={t("auditLogs.title")}
+        description={isArabic ? "سجلات الامتثال والتدقيق الشاملة وأحداث الأمان عبر جميع وحدات النظام" : "Comprehensive audit trail and security event logs across system modules"}
       >
         <AuditLogExport filters={filters} />
       </PageHeader>
@@ -78,13 +82,13 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
         <Card className="border shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Logs
+              {isArabic ? "إجمالي السجلات" : "Total Logs"}
             </CardTitle>
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">All recorded events</p>
+            <p className="text-xs text-muted-foreground mt-1">{isArabic ? "جميع الأحداث المسجلة" : "All recorded events"}</p>
           </CardContent>
         </Card>
 
@@ -92,13 +96,13 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
         <Card className="border shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Last 24 Hours
+              {isArabic ? "آخر 24 ساعة" : "Last 24 Hours"}
             </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.last24h.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Recent system activities</p>
+            <p className="text-xs text-muted-foreground mt-1">{isArabic ? "أنشطة النظام الحديثة" : "Recent system activities"}</p>
           </CardContent>
         </Card>
 
@@ -106,13 +110,13 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
         <Card className="border shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Last 7 Days
+              {isArabic ? "آخر 7 أيام" : "Last 7 Days"}
             </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.last7d.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Weekly event volume</p>
+            <p className="text-xs text-muted-foreground mt-1">{isArabic ? "سجلات الأسبوع الحالي" : "Weekly event volume"}</p>
           </CardContent>
         </Card>
 
@@ -130,7 +134,7 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
                 hasFailedLogins ? 'text-red-700 dark:text-red-400' : 'text-muted-foreground'
               }`}
             >
-              Failed Logins (24h)
+              {isArabic ? "محاولات الدخول الفاشلة (24 ساعة)" : "Failed Logins (24h)"}
             </CardTitle>
             <AlertTriangle
               className={`h-4 w-4 ${

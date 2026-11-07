@@ -8,6 +8,7 @@ import { playNotificationSound } from "@/lib/utils/sound";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Send,
   Lock,
@@ -51,11 +52,18 @@ interface ParsedAttachment {
   type?: string;
 }
 
-const QUICK_CHAT_TEMPLATES = [
+const QUICK_CHAT_TEMPLATES_EN = [
   "When is this expected to be ready for patient care?",
   "Device is in Room / Bed ready for inspection.",
   "Please call our nurse station extension when arriving.",
   "Thank you, device is verified and working properly.",
+];
+
+const QUICK_CHAT_TEMPLATES_AR = [
+  "متى يُتوقع جاهزية الجهاز لاستئناف رعاية المرضى؟",
+  "الجهاز موجود في الغرفة / السرير وهو جاهز للفحص والمعاينة.",
+  "يرجى الاتصال بمحطة التمريض عند وصولكم إلى القسم.",
+  "شكراً لكم، تم التحقق من الجهاز وهو يعمل بكفاءة الآن.",
 ];
 
 function formatFileSize(bytes?: number): string {
@@ -148,6 +156,11 @@ export function TicketCommentSection({
   contactAvailability?: ContactAvailability;
 }) {
   const router = useRouter();
+  const t = useTranslations('tickets');
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
+  const quickTemplates = isArabic ? QUICK_CHAT_TEMPLATES_AR : QUICK_CHAT_TEMPLATES_EN;
+
   const [body, setBody] = useState("");
   const [visibility, setVisibility] = useState<"public" | "internal">("public");
   const [loading, setLoading] = useState(false);
@@ -475,10 +488,10 @@ export function TicketCommentSection({
             </div>
             <div className="space-y-1">
               <p className="text-xs sm:text-sm font-semibold text-foreground tracking-tight">
-                No messages yet in this ticket
+                {isArabic ? "لا توجد رسائل بعد في هذا البلاغ" : "No messages yet in this ticket"}
               </p>
               <p className="text-[11px] sm:text-xs text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
-                Send a message or select a suggestion below to coordinate with{" "}
+                {isArabic ? "أرسل رسالة أو اختر أحد الاقتراحات السريعة للتنسيق مع " : "Send a message or select a suggestion below to coordinate with "}
                 <span className="text-foreground/90 font-medium">{contactName}</span>.
               </p>
             </div>
@@ -488,6 +501,7 @@ export function TicketCommentSection({
             <ChatBubble
               key={c.id}
               comment={c}
+              isArabic={isArabic}
               isCurrentUser={Boolean(
                 currentUserId &&
                   (c.authorUserId === currentUserId ||
@@ -505,8 +519,8 @@ export function TicketCommentSection({
 
       {/* ── 3. Quick Reply Suggestions (Horizontally Scrollable, Above Composer) ── */}
       <div className="px-3 py-2 bg-background/80 backdrop-blur-xs border-t border-border/40 overflow-x-auto flex items-center gap-2 no-scrollbar scrollbar-none touch-pan-x overscroll-x-contain shrink-0">
-        <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 ml-0.5" />
-        {QUICK_CHAT_TEMPLATES.map((tmpl) => (
+        <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 ms-0.5" />
+        {quickTemplates.map((tmpl) => (
           <button
             key={tmpl}
             type="button"
@@ -538,7 +552,7 @@ export function TicketCommentSection({
                 )}
               >
                 <Globe className="w-3 h-3" />
-                <span>Public Reply</span>
+                <span>{isArabic ? "رد عام للقسم" : "Public Reply"}</span>
               </button>
               <button
                 type="button"
@@ -551,12 +565,12 @@ export function TicketCommentSection({
                 )}
               >
                 <Lock className="w-3 h-3" />
-                <span>Internal Note</span>
+                <span>{isArabic ? "ملاحظة هندسية داخلية" : "Internal Note"}</span>
               </button>
             </div>
 
             <span className="text-[10px] text-muted-foreground truncate hidden xs:inline">
-              {visibility === "internal" ? "🔒 Biomed only" : "🌐 Visible to ward"}
+              {visibility === "internal" ? (isArabic ? "🔒 للمهندسين فقط" : "🔒 Biomed only") : (isArabic ? "🌐 ظاهر لطاقم القسم" : "🌐 Visible to ward")}
             </span>
           </div>
         )}
@@ -567,7 +581,7 @@ export function TicketCommentSection({
             {pendingFiles.map((p) => (
               <div
                 key={p.id}
-                className="relative flex items-center gap-1.5 bg-background border rounded-md p-1 pr-2 text-xs shadow-2xs group"
+                className="relative flex items-center gap-1.5 bg-background border rounded-md p-1 pe-2 text-xs shadow-2xs group"
               >
                 {p.isImage && p.previewUrl ? (
                   <img
@@ -588,7 +602,7 @@ export function TicketCommentSection({
                   type="button"
                   onClick={() => removePendingFile(p.id)}
                   aria-label={`Remove attachment ${p.file.name}`}
-                  className="ml-0.5 text-muted-foreground hover:text-destructive p-0.5 rounded-full hover:bg-muted"
+                  className="ms-0.5 text-muted-foreground hover:text-destructive p-0.5 rounded-full hover:bg-muted"
                   title="Remove file"
                 >
                   <X className="w-3 h-3" />
@@ -616,8 +630,8 @@ export function TicketCommentSection({
             aria-label="Message text"
             placeholder={
               visibility === "internal"
-                ? "Type an internal engineering note (hidden from ward staff)..."
-                : "Type a message to clinical ward staff..."
+                ? (isArabic ? "اكتب ملاحظة هندسية داخلية (مخفية عن طاقم القسم)..." : "Type an internal engineering note (hidden from ward staff)...")
+                : (isArabic ? "اكتب رسالة إلى طاقم القسم السريري..." : "Type a message to clinical ward staff...")
             }
             rows={1}
             className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[38px] max-h-[120px] text-xs sm:text-sm p-2 sm:p-2.5 leading-relaxed placeholder:text-muted-foreground/60 overflow-y-auto"
@@ -638,7 +652,7 @@ export function TicketCommentSection({
                 title="Attach file (PDF, manual, report)"
               >
                 <Paperclip className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline text-[11px]">File</span>
+                <span className="hidden sm:inline text-[11px]">{isArabic ? "ملف" : "File"}</span>
               </Button>
 
               <Button
@@ -652,14 +666,14 @@ export function TicketCommentSection({
                 title="Attach photo or screenshot"
               >
                 <ImageIcon className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline text-[11px]">Photo</span>
+                <span className="hidden sm:inline text-[11px]">{isArabic ? "صورة" : "Photo"}</span>
               </Button>
             </div>
 
             {/* Send Button */}
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] text-muted-foreground hidden md:inline">
-                <kbd className="font-mono bg-muted px-1 py-0.5 rounded text-[9px] border">Enter</kbd> send
+                <kbd className="font-mono bg-muted px-1 py-0.5 rounded text-[9px] border">Enter</kbd> {isArabic ? "إرسال" : "send"}
               </span>
 
               <Button
@@ -677,12 +691,12 @@ export function TicketCommentSection({
                 {loading ? (
                   <>
                     <Loader2 className="w-3 h-3 animate-spin" />
-                    <span>Sending</span>
+                    <span>{isArabic ? "جاري الإرسال" : "Sending"}</span>
                   </>
                 ) : (
                   <>
-                    <Send className="w-3 h-3" />
-                    <span>Send</span>
+                    <Send className="w-3 h-3 rtl:rotate-180" />
+                    <span>{isArabic ? "إرسال" : "Send"}</span>
                   </>
                 )}
               </Button>
@@ -698,10 +712,12 @@ function ChatBubble({
   comment,
   isCurrentUser,
   isAssignedEngineer,
+  isArabic = false,
 }: {
   comment: Comment;
   isCurrentUser: boolean;
   isAssignedEngineer: boolean;
+  isArabic?: boolean;
 }) {
   const isInternal = comment.visibility === "internal";
 
@@ -718,7 +734,7 @@ function ChatBubble({
     <div
       className={cn(
         "flex gap-2 sm:gap-2.5 max-w-[90%] sm:max-w-[80%]",
-        isCurrentUser ? "ml-auto flex-row-reverse" : "mr-auto"
+        isCurrentUser ? "ms-auto flex-row-reverse" : "me-auto"
       )}
     >
       {/* Avatar */}
@@ -749,12 +765,12 @@ function ChatBubble({
           )}
         >
           <span className="font-semibold text-foreground truncate">
-            {isCurrentUser ? "You" : comment.author?.fullName || "Staff"}
+            {isCurrentUser ? (isArabic ? "أنت" : "You") : comment.author?.fullName || (isArabic ? "طاقم القسم" : "Staff")}
           </span>
 
           {isAssignedEngineer && !isCurrentUser ? (
             <span className="bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-1 py-0.2 rounded font-medium text-[9px] sm:text-[10px] flex items-center gap-0.5">
-              <Wrench className="w-2.5 h-2.5" /> Engineer
+              <Wrench className="w-2.5 h-2.5" /> {isArabic ? "مهندس" : "Engineer"}
             </span>
           ) : !isCurrentUser && (comment.author as any)?.jobTitle ? (
             <span className="bg-muted text-muted-foreground px-1 py-0.2 rounded font-medium text-[9px] sm:text-[10px] flex items-center gap-0.5">
@@ -765,11 +781,11 @@ function ChatBubble({
 
           {isInternal && (
             <span className="bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1 py-0.2 rounded font-medium text-[9px] flex items-center gap-0.5">
-              <Lock className="w-2 h-2" /> Internal
+              <Lock className="w-2 h-2" /> {isArabic ? "داخلي" : "Internal"}
             </span>
           )}
 
-          <span className="text-[10px] text-muted-foreground ml-0.5">
+          <span className="text-[10px] text-muted-foreground ms-0.5">
             {formattedTime}
           </span>
         </div>

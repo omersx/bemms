@@ -1,0 +1,57 @@
+{
+  "title": "Engineering Team",
+  "subtitle": "Biomedical engineers available to support your department",
+  "dutySchedule": "Duty Schedule & Coverage",
+  "addEngineer": "Add Engineer",
+  "editEngineer": "Edit Engineer",
+  "engineerDetails": "Engineer Details",
+  "noEngineers": "No engineers found",
+  "searchPlaceholder": "Search engineers...",
+  "stats": {
+    "totalEngineers": "Total Engineers",
+    "onDuty": "On Duty",
+    "offDuty": "Off Duty",
+    "onLeave": "On Leave",
+    "available": "Available",
+    "avgWorkload": "Avg Workload"
+  },
+  "card": {
+    "specialization": "Specialization",
+    "department": "Department",
+    "activeTasks": "Active Tasks",
+    "completedTasks": "Completed Tasks",
+    "phone": "Phone",
+    "email": "Email",
+    "viewDetails": "View Details",
+    "assignedDepartments": "Assigned Departments"
+  },
+  "details": {
+    "profile": "Profile",
+    "workload": "Workload",
+    "schedule": "Schedule",
+    "performance": "Performance",
+    "certifications": "Certifications",
+    "skills": "Skills"
+  },
+  "schedule": {
+    "title": "Schedule",
+    "shift": "Shift",
+    "morning": "Morning",
+    "evening": "Evening",
+    "night": "Night",
+    "dayOff": "Day Off",
+    "onCall": "On Call"
+  },
+  "coverage": {
+    "title": "Department Coverage",
+    "covered": "Covered",
+    "uncovered": "Uncovered",
+    "assignEngineer": "Assign Engineer"
+  },
+  "toast": {
+    "created": "Engineer added successfully",
+    "updated": "Engineer updated successfully",
+    "deleted": "Engineer removed",
+    "failed": "Operation failed"
+  }
+}
