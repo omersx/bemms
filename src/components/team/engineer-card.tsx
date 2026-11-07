@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { EngineerTeamMember } from '@/lib/actions/engineers';
 import { EngineerDutyStatus } from '@/lib/db/schema/engineer-profiles';
+import { useTranslations } from 'next-intl';
 
 interface EngineerCardProps {
   engineer: EngineerTeamMember;
@@ -22,6 +23,8 @@ interface EngineerCardProps {
 }
 
 export function EngineerCard({ engineer, onClick, onEdit }: EngineerCardProps) {
+  const t = useTranslations('team.card');
+
   const getStatusBadge = (status: EngineerDutyStatus) => {
     switch (status) {
       case 'on_duty':
@@ -31,28 +34,28 @@ export function EngineerCard({ engineer, onClick, onEdit }: EngineerCardProps) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
             </span>
-            On Duty
+            {t('onDuty')}
           </Badge>
         );
       case 'on_call':
         return (
           <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 gap-1 font-medium whitespace-nowrap text-[11px] h-5 px-1.5 shrink-0">
             <PhoneCall className="w-2.5 h-2.5 text-amber-500 animate-pulse" />
-            On Call
+            {t('onCall')}
           </Badge>
         );
       case 'in_maintenance':
         return (
           <Badge className="bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30 gap-1 font-medium whitespace-nowrap text-[11px] h-5 px-1.5 shrink-0">
             <Wrench className="w-2.5 h-2.5 text-blue-500" />
-            Maintenance
+            {t('maintenance')}
           </Badge>
         );
       case 'off_duty':
         return (
           <Badge variant="outline" className="text-muted-foreground gap-1 font-medium whitespace-nowrap text-[11px] h-5 px-1.5 shrink-0">
             <Moon className="w-2.5 h-2.5" />
-            Off Duty
+            {t('offDuty')}
           </Badge>
         );
     }
@@ -140,15 +143,15 @@ export function EngineerCard({ engineer, onClick, onEdit }: EngineerCardProps) {
         <div className="flex items-center gap-2.5">
           <span className="flex items-center gap-1" title="Assigned Devices">
             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-            <strong className="text-foreground">{engineer.assignedDevicesCount}</strong> dev
+            <strong className="text-foreground">{engineer.assignedDevicesCount}</strong> {t('dev')}
           </span>
           <span className="flex items-center gap-1" title="Active Tasks & Tickets">
             <Wrench className="w-3 h-3 text-blue-600" />
-            <strong className="text-foreground">{engineer.activeTicketsCount + engineer.activeMaintenanceCount}</strong> tasks
+            <strong className="text-foreground">{engineer.activeTicketsCount + engineer.activeMaintenanceCount}</strong> {t('tasks')}
           </span>
           {engineer.extension && (
             <span className="hidden sm:inline-flex items-center gap-0.5 font-mono text-[10px] bg-muted/60 px-1 py-0.2 rounded text-foreground font-medium">
-              Ext:{engineer.extension}
+              {t('ext')}{engineer.extension}
             </span>
           )}
         </div>
@@ -170,7 +173,7 @@ export function EngineerCard({ engineer, onClick, onEdit }: EngineerCardProps) {
           )}
 
           <span className="text-[11px] text-primary font-medium flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-            Details
+            {t('details')}
             <ChevronRight className="w-3 h-3" />
           </span>
         </div>

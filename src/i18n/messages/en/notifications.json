@@ -1,10 +1,26 @@
 {
   "title": "Notifications",
+  "subtitle": "Stay updated on your equipment, tickets, and maintenance tasks.",
   "unread": "Unread",
   "all": "All",
   "markAllRead": "Mark all as read",
   "empty": "No notifications to display",
   "noUnread": "No unread notifications",
+  "tabs": {
+    "inbox": "Inbox",
+    "preferences": "Preferences"
+  },
+  "toolbar": {
+    "all": "All Notifications",
+    "unreadOnly": "Showing Unread",
+    "unreadCount": "unread",
+    "markAllRead": "Mark all read"
+  },
+  "emptyState": {
+    "title": "No notifications",
+    "allCaughtUp": "You have caught up with all unread notifications.",
+    "noNotificationsYet": "You do not have any notifications yet."
+  },
   "bell": {
     "title": "Notifications",
     "viewAll": "View all notifications"

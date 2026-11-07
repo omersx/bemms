@@ -1,16 +1,39 @@
 {
   "title": "Engineering Team",
   "subtitle": "Biomedical engineers available to support your department",
+  "rosterTitle": "Biomedical Engineering Team & Roster",
+  "rosterSubtitle": "Clinical engineering staff directory, real-time hospital duty status, and department coverage roster.",
   "dutySchedule": "Duty Schedule & Coverage",
   "addEngineer": "Add Engineer",
   "editEngineer": "Edit Engineer",
   "engineerDetails": "Engineer Details",
   "noEngineers": "No engineers found",
   "searchPlaceholder": "Search engineers...",
+  "tabs": {
+    "directory": "Team Directory",
+    "schedule": "Duty Schedule",
+    "coverage": "Dept. Coverage"
+  },
+  "filters": {
+    "searchPlaceholder": "Search engineer by name, title, specialization, or extension...",
+    "all": "All",
+    "onDuty": "On Duty",
+    "onCall": "On Call",
+    "offDuty": "Off Duty"
+  },
   "stats": {
     "totalEngineers": "Total Engineers",
+    "totalTeam": "Total Team",
+    "biomedicalEngineers": "Biomedical Engineers",
     "onDuty": "On Duty",
+    "onDutyToday": "On Duty Today",
+    "inHospital": "In Hospital / Ready",
+    "onCallShift": "On-Call Shift",
+    "emergencyResponder": "Emergency Responder",
+    "activeWorkloads": "Active Workloads",
+    "openTasks": "Open Tasks & Tickets",
     "offDuty": "Off Duty",
+    "restPostCall": "Rest / Post-Call",
     "onLeave": "On Leave",
     "available": "Available",
     "avgWorkload": "Avg Workload"
@@ -23,7 +46,15 @@
     "phone": "Phone",
     "email": "Email",
     "viewDetails": "View Details",
-    "assignedDepartments": "Assigned Departments"
+    "assignedDepartments": "Assigned Departments",
+    "onDuty": "On Duty",
+    "onCall": "On Call",
+    "maintenance": "Maintenance",
+    "offDuty": "Off Duty",
+    "dev": "dev",
+    "tasks": "tasks",
+    "ext": "Ext:",
+    "details": "Details"
   },
   "details": {
     "profile": "Profile",

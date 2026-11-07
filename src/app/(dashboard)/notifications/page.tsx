@@ -5,10 +5,12 @@ import { NotificationPreferences } from '@/components/notifications/notification
 import { NotificationList } from './notification-list';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bell, Sliders } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
 export default async function NotificationsPage() {
+  const t = await getTranslations('notifications');
   const session = await auth();
   if (!session) redirect('/login');
 
@@ -21,9 +23,9 @@ export default async function NotificationsPage() {
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Notifications</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Stay updated on your equipment, tickets, and maintenance tasks.
+            {t('subtitle')}
           </p>
         </div>
       </div>
@@ -32,7 +34,7 @@ export default async function NotificationsPage() {
         <TabsList className="grid w-full grid-cols-2 max-w-xs">
           <TabsTrigger value="inbox" className="flex items-center gap-2">
             <Bell className="h-4 w-4" />
-            Inbox
+            {t('tabs.inbox')}
             {unreadCount > 0 && (
               <span className="ms-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary font-semibold">
                 {unreadCount}
@@ -41,7 +43,7 @@ export default async function NotificationsPage() {
           </TabsTrigger>
           <TabsTrigger value="preferences" className="flex items-center gap-2">
             <Sliders className="h-4 w-4" />
-            Preferences
+            {t('tabs.preferences')}
           </TabsTrigger>
         </TabsList>
 

@@ -1,16 +1,39 @@
 {
   "title": "فريق الهندسة الطبية",
   "subtitle": "فريق المهندسين والفنيين الطبيين المتاحين لدعم ومساندة الأقسام الطبية",
+  "rosterTitle": "فريق الهندسة الطبية والمناوبات",
+  "rosterSubtitle": "دليل كادر الهندسة الطبية، حالة المناوبات اللحظية في المستشفى، وجدول تغطية الأقسام.",
   "dutySchedule": "جدول المناوبات والتغطية الهندسية",
   "addEngineer": "إضافة مهندس جديد",
   "editEngineer": "تعديل بيانات المهندس",
   "engineerDetails": "ملف المهندس الطبي",
   "noEngineers": "لم يتم العثور على مهندسين",
   "searchPlaceholder": "بحث باسم المهندس أو التخصص...",
+  "tabs": {
+    "directory": "دليل الفريق",
+    "schedule": "جدول المناوبات",
+    "coverage": "تغطية الأقسام"
+  },
+  "filters": {
+    "searchPlaceholder": "بحث باسم المهندس، المسمى، التخصص، أو التحويلة...",
+    "all": "الكل",
+    "onDuty": "على رأس العمل",
+    "onCall": "تحت الاستدعاء",
+    "offDuty": "خارج الوردية"
+  },
   "stats": {
     "totalEngineers": "إجمالي الفريق الهندسي",
-    "onDuty": "على رأس العمل (On Duty)",
+    "totalTeam": "إجمالي الفريق",
+    "biomedicalEngineers": "مهندسو أجهزة طبية",
+    "onDuty": "على رأس العمل",
+    "onDutyToday": "على رأس العمل اليوم",
+    "inHospital": "داخل المستشفى / جاهز",
+    "onCallShift": "مناوبة استدعاء (On-Call)",
+    "emergencyResponder": "استجابة للحالات الطارئة",
+    "activeWorkloads": "أعباء العمل الجارية",
+    "openTasks": "مهام وتذاكر مفتوحة",
     "offDuty": "خارج الوردية",
+    "restPostCall": "راحة / بعد المناوبة",
     "onLeave": "في إجازة",
     "available": "متاح للاستدعاء",
     "avgWorkload": "متوسط عبء العمل"
@@ -23,7 +46,15 @@
     "phone": "رقم الهاتف",
     "email": "البريد الإلكتروني",
     "viewDetails": "عرض الملف",
-    "assignedDepartments": "الأقسام المغطاة"
+    "assignedDepartments": "الأقسام المغطاة",
+    "onDuty": "على رأس العمل",
+    "onCall": "تحت الاستدعاء",
+    "maintenance": "في صيانة",
+    "offDuty": "خارج الوردية",
+    "dev": "أجهزة",
+    "tasks": "مهام",
+    "ext": "تحويلة:",
+    "details": "التفاصيل"
   },
   "details": {
     "profile": "الملف التعريفي",

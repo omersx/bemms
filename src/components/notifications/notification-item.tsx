@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import { arSA, enUS } from 'date-fns/locale';
+import { useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import {
   TicketCheck, Wrench, Monitor, AlertTriangle,
@@ -53,10 +55,14 @@ export function NotificationItem({
   id, notificationType, title, body,
   actionUrl, readAt, createdAt, onMarkRead,
 }: NotificationItemProps) {
+  const locale = useLocale();
   const Icon = iconMap[notificationType] || Bell;
   const color = colorMap[notificationType] || 'text-muted-foreground';
   const isUnread = !readAt;
-  const timeAgo = formatDistanceToNow(new Date(createdAt), { addSuffix: true });
+  const timeAgo = formatDistanceToNow(new Date(createdAt), {
+    addSuffix: true,
+    locale: locale === 'ar' ? arSA : enUS,
+  });
 
   const content = (
     <div

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,6 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function InstallPrompt() {
+  const t = useTranslations('common.pwa');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -59,12 +61,12 @@ export function InstallPrompt() {
           <Download className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">Install BEMMS</p>
-          <p className="text-xs text-muted-foreground">Quick access from your home screen</p>
+          <p className="text-sm font-medium">{t('installTitle')}</p>
+          <p className="text-xs text-muted-foreground">{t('installSubtitle')}</p>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <Button size="sm" onClick={handleInstall} className="min-h-[36px]">
-            Install
+            {t('installButton')}
           </Button>
           <Button
             variant="ghost"

@@ -14,6 +14,7 @@ import { EditEngineerDialog } from './edit-engineer-dialog';
 import { EngineerDetailsDialog } from './engineer-details-dialog';
 import { EngineerTeamMember } from '@/lib/actions/engineers';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 interface TeamPageClientProps {
   initialMembers: EngineerTeamMember[];
@@ -36,6 +37,7 @@ interface TeamPageClientProps {
 
 export function TeamPageClient({ initialMembers, stats, coverage }: TeamPageClientProps) {
   const router = useRouter();
+  const t = useTranslations('team');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedEngineer, setSelectedEngineer] = useState<EngineerTeamMember | null>(null);
@@ -72,9 +74,9 @@ export function TeamPageClient({ initialMembers, stats, coverage }: TeamPageClie
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Biomedical Engineering Team & Roster</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('rosterTitle')}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Clinical engineering staff directory, real-time hospital duty status, and department coverage roster.
+            {t('rosterSubtitle')}
           </p>
         </div>
       </div>
@@ -88,15 +90,15 @@ export function TeamPageClient({ initialMembers, stats, coverage }: TeamPageClie
           <TabsList className="grid grid-cols-3 w-full sm:w-auto h-9">
             <TabsTrigger value="directory" className="text-xs gap-1.5 px-3">
               <Users className="w-3.5 h-3.5" />
-              Team Directory
+              {t('tabs.directory')}
             </TabsTrigger>
             <TabsTrigger value="schedule" className="text-xs gap-1.5 px-3">
               <CalendarIcon className="w-3.5 h-3.5" />
-              Duty Schedule
+              {t('tabs.schedule')}
             </TabsTrigger>
             <TabsTrigger value="coverage" className="text-xs gap-1.5 px-3">
               <Building2 className="w-3.5 h-3.5" />
-              Dept. Coverage
+              {t('tabs.coverage')}
             </TabsTrigger>
           </TabsList>
         </div>
@@ -108,7 +110,7 @@ export function TeamPageClient({ initialMembers, stats, coverage }: TeamPageClie
             <div className="relative w-full md:max-w-md">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search engineer by name, title, specialization, or extension..."
+                placeholder={t('filters.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 h-9 text-xs"
@@ -122,7 +124,7 @@ export function TeamPageClient({ initialMembers, stats, coverage }: TeamPageClie
                 onClick={() => setStatusFilter('all')}
                 className="text-xs h-8"
               >
-                All ({initialMembers.length})
+                {t('filters.all')} ({initialMembers.length})
               </Button>
               <Button
                 variant={statusFilter === 'on_duty' ? 'secondary' : 'ghost'}
@@ -131,7 +133,7 @@ export function TeamPageClient({ initialMembers, stats, coverage }: TeamPageClie
                 className="text-xs h-8 text-emerald-700 dark:text-emerald-400 gap-1.5"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                On Duty ({stats.onDutyToday})
+                {t('filters.onDuty')} ({stats.onDutyToday})
               </Button>
               <Button
                 variant={statusFilter === 'on_call' ? 'secondary' : 'ghost'}
@@ -140,7 +142,7 @@ export function TeamPageClient({ initialMembers, stats, coverage }: TeamPageClie
                 className="text-xs h-8 text-amber-700 dark:text-amber-400 gap-1.5"
               >
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
-                On Call ({stats.onCallToday})
+                {t('filters.onCall')} ({stats.onCallToday})
               </Button>
               <Button
                 variant={statusFilter === 'off_duty' ? 'secondary' : 'ghost'}
@@ -149,7 +151,7 @@ export function TeamPageClient({ initialMembers, stats, coverage }: TeamPageClie
                 className="text-xs h-8 text-muted-foreground gap-1.5"
               >
                 <span className="w-2 h-2 rounded-full bg-slate-400" />
-                Off Duty ({stats.offDutyToday})
+                {t('filters.offDuty')} ({stats.offDutyToday})
               </Button>
             </div>
           </div>

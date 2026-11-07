@@ -219,5 +219,10 @@
     "other": "Other",
     "unknown": "Unknown",
     "notApplicable": "N/A"
+  },
+  "pwa": {
+    "installTitle": "Install BEMMS",
+    "installSubtitle": "Quick access from your home screen",
+    "installButton": "Install"
   }
 }

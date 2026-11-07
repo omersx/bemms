@@ -219,5 +219,10 @@
     "other": "أخرى",
     "unknown": "غير معروف",
     "notApplicable": "لا ينطبق"
+  },
+  "pwa": {
+    "installTitle": "تثبيت تطبيق BEMMS",
+    "installSubtitle": "وصول سريع للتطبيق من شاشتك الرئيسية",
+    "installButton": "تثبيت"
   }
 }

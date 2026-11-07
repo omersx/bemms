@@ -3,19 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-const adminNav = [
-  { title: "Dashboard", href: "/admin" },
-  { title: "General", href: "/admin/general" },
-  { title: "Users", href: "/admin/users" },
-  { title: "Roles", href: "/admin/roles" },
-  { title: "System Settings", href: "/admin/settings" },
-  { title: "Export & Import", href: "/admin/data" },
-  { title: "Audit Logs", href: "/admin/audit-logs" },
-];
+import { useTranslations } from "next-intl";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const t = useTranslations("admin.nav");
+
+  const adminNav = [
+    { key: "dashboard", title: t("dashboard"), href: "/admin" },
+    { key: "general", title: t("general"), href: "/admin/general" },
+    { key: "users", title: t("users"), href: "/admin/users" },
+    { key: "roles", title: t("roles"), href: "/admin/roles" },
+    { key: "settings", title: t("settings"), href: "/admin/settings" },
+    { key: "dataManagement", title: t("dataManagement"), href: "/admin/data" },
+    { key: "auditLogs", title: t("auditLogs"), href: "/admin/audit-logs" },
+  ];
 
   return (
     <div className="flex flex-col md:flex-row min-h-[calc(100vh-4rem)] gap-6 p-4 md:p-6 lg:p-8">

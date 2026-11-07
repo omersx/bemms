@@ -1,6 +1,7 @@
 {
   "title": "إدارة النظام",
   "nav": {
+    "dashboard": "لوحة الإدارة",
     "general": "عام",
     "users": "المستخدمون",
     "roles": "الأدوار والصلاحيات",
@@ -10,7 +11,19 @@
     "devices": "إدارة الأجهزة",
     "settings": "إعدادات النظام",
     "auditLogs": "سجلات التدقيق والمراجعة",
-    "dataManagement": "إدارة البيانات"
+    "dataManagement": "استيراد وتصدير البيانات"
+  },
+  "alerts": {
+    "title": "تنبيهات إدارة النظام",
+    "usersWithoutRoles": "مستخدمون بدون أدوار",
+    "usersWithoutRolesDesc": "لا يمكن للمستخدمين الوصول للنظام حتى يتم تعيين أدوار لهم.",
+    "fix": "معالجة",
+    "pendingInvitations": "دعوات معلقة",
+    "pendingInvitationsDesc": "لم يقم المستخدمون بقبول دعواتهم بعد.",
+    "review": "مراجعة",
+    "departmentsMissingManager": "أقسام بدون مدير مسؤول",
+    "departmentsMissingManagerDesc": "بعض الأقسام تفتقر لمدير مسؤول معين.",
+    "manage": "إدارة"
   },
   "users": {
     "title": "إدارة المستخدمين",

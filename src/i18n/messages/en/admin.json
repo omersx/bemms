@@ -1,6 +1,7 @@
 {
   "title": "Administration",
   "nav": {
+    "dashboard": "Dashboard",
     "general": "General",
     "users": "Users",
     "roles": "Roles",
@@ -10,7 +11,19 @@
     "devices": "Device Admin",
     "settings": "System Settings",
     "auditLogs": "Audit Logs",
-    "dataManagement": "Data Management"
+    "dataManagement": "Export & Import"
+  },
+  "alerts": {
+    "title": "System Administration Alerts",
+    "usersWithoutRoles": "Users Without Roles",
+    "usersWithoutRolesDesc": "Users cannot access the system until roles are assigned.",
+    "fix": "Fix",
+    "pendingInvitations": "Pending Invitations",
+    "pendingInvitationsDesc": "Users have not yet accepted their invitations.",
+    "review": "Review",
+    "departmentsMissingManager": "Departments Missing Manager",
+    "departmentsMissingManagerDesc": "Some departments lack an assigned manager.",
+    "manage": "Manage"
   },
   "users": {
     "title": "User Management",
