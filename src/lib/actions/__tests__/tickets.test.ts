@@ -139,7 +139,29 @@ describe('Tickets Server Actions (Integration)', () => {
       expect(result.error).toBeDefined();
     });
 
-    it('creates a ticket with p1_critical priority when patient care is affected', async () => {
+    it('creates a ticket with p1_critical priority and SLA targets when patient care is affected', async () => {
+      let insertedPayload: any = null;
+      mockDb.transaction.mockImplementationOnce(async (callback: any) => {
+        const tx = {
+          insert: vi.fn().mockReturnValue({
+            values: vi.fn().mockImplementation((val) => {
+              if (val && val.ticketNumber) insertedPayload = val;
+              return {
+                returning: vi.fn().mockReturnValue([{ ...mockTicket, ...val }]),
+              };
+            }),
+          }),
+          update: vi.fn().mockReturnValue({
+            set: vi.fn().mockReturnValue({
+              where: vi.fn().mockReturnValue({
+                returning: vi.fn().mockReturnValue([{ ...mockTicket }]),
+              }),
+            }),
+          }),
+        };
+        return callback(tx);
+      });
+
       const payload = {
         organizationId: 'a0000000-0000-0000-0000-000000000001',
         hospitalId: 'a0000000-0000-0000-0000-000000000002',
@@ -154,7 +176,10 @@ describe('Tickets Server Actions (Integration)', () => {
       const result: any = await createTicket(payload);
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
-      expect(mockDb.transaction).toHaveBeenCalled();
+      expect(insertedPayload).toBeDefined();
+      expect(insertedPayload.priorityCode).toBe('p1_critical');
+      expect(insertedPayload.responseTargetAt).toBeInstanceOf(Date);
+      expect(insertedPayload.resolutionTargetAt).toBeInstanceOf(Date);
     });
 
     it('creates a normal priority ticket for routine issues', async () => {

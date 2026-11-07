@@ -20,6 +20,7 @@ import { eq, and, or, desc, ilike, notInArray, inArray, sql } from 'drizzle-orm'
 import { verifySignatureAuth, createSignatureEvent } from './signature-auth';
 import { getAttestationText } from '@/lib/utils/attestations';
 import { buildCanonicalSnapshot, computeSHA256 } from '@/lib/utils/crypto';
+import { calculateSlaTargets } from '@/lib/utils/sla';
 import { notifyEngineersOnNewTicket, notifyReporterOnAccept, notifyReporterOnStatusChange, notifyOnNewComment, notifyEngineerOnAssign } from '@/lib/notifications/dispatcher';
 
 // ── Ticket Creation Defaults ──────────────────────────────────────────────────
@@ -125,6 +126,8 @@ export async function createTicket(input: unknown) {
 
     const result = await db.transaction(async (tx) => {
       const ticketNumber = generateTicketNumber();
+      const initialPriority = validated.data.reportedImpact === 'patient_care_affected' ? 'p1_critical' : 'p3_normal';
+      const { responseTargetAt, resolutionTargetAt } = calculateSlaTargets(initialPriority);
 
       const [ticket] = await tx.insert(serviceTickets).values({
         ticketNumber,
@@ -144,7 +147,9 @@ export async function createTicket(input: unknown) {
         requesterContactPhone: validated.data.requesterContactPhone || null,
         reportedByUserId: session.id,
         statusCode: 'new',
-        priorityCode: validated.data.reportedImpact === 'patient_care_affected' ? 'p1_critical' : 'p3_normal',
+        priorityCode: initialPriority,
+        responseTargetAt,
+        resolutionTargetAt,
         deviceSnapshot,
         locationSnapshot,
         roundVisitId: validated.data.roundVisitId || null,
@@ -385,9 +390,16 @@ export async function triageTicket(ticketId: string, input: unknown) {
       // Otherwise, mark as in_triage (awaiting assignment)
       const newStatus = validated.data.assignedEngineerUserId ? 'in_progress' : 'in_triage';
 
+      const { responseTargetAt, resolutionTargetAt } = calculateSlaTargets(
+        validated.data.priorityCode,
+        ticket.createdAt ? new Date(ticket.createdAt) : new Date()
+      );
+
       const updateData: any = {
         priorityCode: validated.data.priorityCode,
         priorityReason: validated.data.priorityReason || null,
+        responseTargetAt,
+        resolutionTargetAt,
         selectedMaintenanceType: validated.data.selectedMaintenanceType || null,
         selectedTechnicalCategory: validated.data.selectedTechnicalCategory || null,
         internalTriageNote: validated.data.internalTriageNote || null,

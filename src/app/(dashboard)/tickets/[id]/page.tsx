@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { TicketStatusBadge, TicketPriorityBadge, TicketImpactBadge } from "@/components/tickets/ticket-badges"
+import { TicketSlaBadge, TicketSlaCard } from "@/components/tickets/ticket-sla-badge"
 import { StaffStatusLabel } from "@/components/tickets/staff-status-label"
 import { StaffTicketProgressTracker } from "@/components/tickets/staff-ticket-progress-tracker"
 import { DeviceStatusBadge } from "@/components/devices/device-badges"
@@ -499,6 +500,15 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
         </CardContent>
       </Card>
 
+      {/* SLA Target Tracking Card */}
+      <TicketSlaCard
+        responseTargetAt={ticket.responseTargetAt}
+        resolutionTargetAt={ticket.resolutionTargetAt}
+        acknowledgedAt={ticket.acceptedAt || ticket.assignedAt}
+        resolvedAt={ticket.resolvedAt}
+        priorityCode={ticket.priorityCode}
+      />
+
       {/* Assigned Engineer - prominent for staff */}
       {isStaffOnly && ticket.assignedEngineerUserId && (
         <Card className="border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20 shadow-xs">
@@ -546,6 +556,13 @@ async function TicketDetailContent({ ticketId }: { ticketId: string }) {
       >
         <div className="flex gap-1.5 sm:gap-2 items-center flex-wrap">
           <TicketPriorityBadge priority={ticket.priorityCode} />
+          {ticket.responseTargetAt && !['resolved', 'closed', 'cancelled'].includes(ticket.statusCode) && (
+            <TicketSlaBadge
+              targetAt={ticket.responseTargetAt}
+              completedAt={ticket.acceptedAt || ticket.assignedAt}
+              type="response"
+            />
+          )}
           {isStaffOnly ? (
             <StaffStatusLabel statusCode={ticket.statusCode} />
           ) : (

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { acceptTicket } from "@/lib/actions/tickets"
 import { TicketPriorityBadge, TicketStatusBadge, TicketImpactBadge } from "./ticket-badges"
+import { TicketSlaBadge } from "./ticket-sla-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +47,8 @@ export interface TriageTicketItem {
   waitingReason?: string | null
   reportedAt?: Date | string | null
   createdAt?: Date | string | null
+  responseTargetAt?: Date | string | null
+  resolutionTargetAt?: Date | string | null
   assignedEngineerUserId?: string | null
   device?: {
     id?: string
@@ -333,6 +336,9 @@ export function TriageQueueView({ tickets }: TriageQueueViewProps) {
 
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <TicketPriorityBadge priority={ticket.priorityCode} />
+                      {ticket.responseTargetAt && (
+                        <TicketSlaBadge targetAt={ticket.responseTargetAt} type="response" />
+                      )}
                       {ticket.reportedImpact && (
                         <TicketImpactBadge impact={ticket.reportedImpact} />
                       )}
@@ -436,6 +442,7 @@ export function TriageQueueView({ tickets }: TriageQueueViewProps) {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[110px]">Priority</TableHead>
+                <TableHead className="w-[120px]">SLA Target</TableHead>
                 <TableHead className="w-[130px]">Ticket #</TableHead>
                 <TableHead className="min-w-[200px]">Issue</TableHead>
                 <TableHead className="w-[150px]">Reported Impact</TableHead>
@@ -455,6 +462,13 @@ export function TriageQueueView({ tickets }: TriageQueueViewProps) {
                   <TableRow key={ticket.id} className="hover:bg-muted/40">
                     <TableCell>
                       <TicketPriorityBadge priority={ticket.priorityCode} />
+                    </TableCell>
+                    <TableCell>
+                      {ticket.responseTargetAt ? (
+                        <TicketSlaBadge targetAt={ticket.responseTargetAt} type="response" />
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Link
